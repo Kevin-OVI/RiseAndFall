@@ -5,4 +5,6 @@ module fr.butinfoalt1.riseandfall.front {
 
     opens fr.butinfoalt1.riseandfall.front to javafx.fxml;
     exports fr.butinfoalt1.riseandfall.front;
+    opens fr.butinfoalt1.riseandfall.front.description to javafx.fxml;
+    exports fr.butinfoalt1.riseandfall.front.description;
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="fr.butinfoalt1.riseandfall.front.OrdreController">
+    <Button text="Retour" onAction="#switchToHello"/>
+</VBox>
