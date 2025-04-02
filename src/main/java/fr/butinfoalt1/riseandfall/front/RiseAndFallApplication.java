@@ -8,11 +8,16 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class RiseAndFallApplication extends Application {
+    public static final int WIDTH = 800, HEIGHT = 500;
     private static Stage mainWindow;
 
+    public static void main(String[] args) {
+        launch();
+    }
 
-    public static final int WIDTH = 800, HEIGHT = 500;
-
+    public static Stage getMainWindow() {
+        return mainWindow;
+    }
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -24,13 +29,5 @@ public class RiseAndFallApplication extends Application {
         stage.show();
 
         mainWindow = stage;
-    }
-
-    public static void main(String[] args) {
-        launch();
-    }
-
-    public static Stage getMainWindow() {
-        return mainWindow;
     }
 }

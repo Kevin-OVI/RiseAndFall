@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.image.ImageView?>
-
 <?import javafx.scene.text.TextFlow?>
 <StackPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="fr.butinfoalt1.riseandfall.front.description.DescriptionController">
 
 
-      <!-- Image en arrière-plan -->
-      <ImageView fx:id="backgroundImageView" opacity="0.40"/>
+    <!-- Image en arrière-plan -->
+    <ImageView fx:id="backgroundImageView" opacity="0.40"/>
 
 
-      <!-- Texte en avant-plan -->
-      <VBox alignment="CENTER" spacing="20.0">
-            <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;" textAlignment="CENTER"/>
-      </VBox>
+    <!-- Texte en avant-plan -->
+    <VBox alignment="CENTER" spacing="20.0">
+        <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;" textAlignment="CENTER"/>
+    </VBox>
 </StackPane>

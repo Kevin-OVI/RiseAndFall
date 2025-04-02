@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="front:jar">
+  <artifact type="jar" name="RiseAndFall:front">
     <output-path>$PROJECT_DIR$/out</output-path>
     <root id="archive" name="RiseAndFall.jar">
       <element id="module-output" name="front" />

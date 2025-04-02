@@ -23,7 +23,7 @@ public class RiseAndFallController {
 
     @FXML
     public void switchToTest() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("ordre.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("order-view.fxml"));
         RiseAndFallApplication.getMainWindow().getScene().setRoot(loader.load());
     }
 }

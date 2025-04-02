@@ -18,5 +18,17 @@ public class DescriptionStage extends Stage {
         this.setScene(scene);
         DescriptionController controller = fxmlLoader.getController();
         controller.backgroundImageView.setImage(new Image(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("images/background.jpg"))));
+
+        this.heightProperty().addListener((obs, oldVal, newVal) -> {
+            controller.backgroundImageView.setFitHeight(this.getHeight());
+            controller.backgroundImageView.setFitWidth(this.getWidth());
+        });
+
+        this.widthProperty().addListener((obs, oldVal, newVal) -> {
+            controller.backgroundImageView.setFitHeight(this.getHeight());
+            controller.backgroundImageView.setFitWidth(this.getWidth());
+        });
     }
 }
+
+
