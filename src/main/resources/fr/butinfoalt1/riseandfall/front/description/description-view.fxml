@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
-<?import javafx.scene.text.Text?>
 <?import javafx.scene.image.ImageView?>
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.butinfoalt1.riseandfall.front.description.DescriptionController">
-      <ImageView opacity="50.0" fx:id="backgroundImageView" />
-      <VBox alignment="CENTER" spacing="20.0" scaleZ="Infinity" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
-            <Text strokeType="OUTSIDE" strokeWidth="0.0"   text="Rise and fall est un jeux développer par une équipe de choc " />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Le but crée un jeu tour par tour dans un monde fantasy " />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="On a presenté le projet maintenant passons au règles du jeu :" />
+
+<StackPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="fr.butinfoalt1.riseandfall.front.description.DescriptionController">
+
+
+      <!-- Image en arrière-plan -->
+      <ImageView fx:id="backgroundImageView" opacity="0.55"/>
+
+      <!-- Texte en avant-plan -->
+      <VBox alignment="CENTER" spacing="20.0">
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Rise and fall est un jeu développé par une équipe de choc" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Le but est de créer un jeu tour par tour dans un monde fantasy" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="On a présenté le projet, maintenant passons aux règles du jeu :" />
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Rise &amp; Fall est un jeu de stratégie au tour par tour où le joueur dirige une civilisation. L'objectif est de gérer son économie et son expansion en construisant des bâtiments et en recrutant des unités tout en optimisant ses ressources." />
       </VBox>
-</VBox>
+</StackPane>
+
