@@ -5,6 +5,7 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.image.ImageView?>
 
+<?import javafx.scene.text.TextFlow?>
 <StackPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="fr.butinfoalt1.riseandfall.front.description.DescriptionController">
 
@@ -12,12 +13,9 @@
       <!-- Image en arrière-plan -->
       <ImageView fx:id="backgroundImageView" opacity="0.55"/>
 
+
       <!-- Texte en avant-plan -->
       <VBox alignment="CENTER" spacing="20.0">
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Rise and fall est un jeu développé par une équipe de choc" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Le but est de créer un jeu tour par tour dans un monde fantasy" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="On a présenté le projet, maintenant passons aux règles du jeu :" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Rise &amp; Fall est un jeu de stratégie au tour par tour où le joueur dirige une civilisation. L'objectif est de gérer son économie et son expansion en construisant des bâtiments et en recrutant des unités tout en optimisant ses ressources." />
+            <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;" />
       </VBox>
 </StackPane>
-
