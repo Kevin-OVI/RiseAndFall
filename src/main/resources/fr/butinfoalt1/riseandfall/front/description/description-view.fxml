@@ -11,11 +11,11 @@
 
 
       <!-- Image en arrière-plan -->
-      <ImageView fx:id="backgroundImageView" opacity="0.55"/>
+      <ImageView fx:id="backgroundImageView" opacity="0.40"/>
 
 
       <!-- Texte en avant-plan -->
       <VBox alignment="CENTER" spacing="20.0">
-            <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;" />
+            <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;" textAlignment="CENTER"/>
       </VBox>
 </StackPane>
