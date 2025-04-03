@@ -1,4 +1,4 @@
-package fr.butinfoalt1.riseandfall.gamelogic.building;
+package fr.butinfoalt1.riseandfall.gamelogic.map;
 
 public enum BuildingType {
     HUT(5, 1, 3);
