@@ -18,6 +18,14 @@ public class Player {
         return goldAmount;
     }
 
+    public int getRemainingGoldAmount() {
+        int gold = this.goldAmount;
+        for (BaseOrder order : this.nextOrders) {
+            gold -= order.getPrice();
+        }
+        return gold;
+    }
+
     public void addGoldAmount(int goldAmount) {
         this.goldAmount += goldAmount;
     }
