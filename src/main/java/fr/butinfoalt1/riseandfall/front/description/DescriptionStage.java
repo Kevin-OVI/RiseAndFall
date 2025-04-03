@@ -23,6 +23,8 @@ public class DescriptionStage extends Stage {
 
     public DescriptionStage() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(DescriptionStage.class.getResource("description-view.fxml"));
+        this.setMinWidth(512);
+        this.setMinHeight(384);
         Scene scene = new Scene(fxmlLoader.load(), 1024, 768);
         this.setTitle("Description de Rise and fall");
         this.setScene(scene);
