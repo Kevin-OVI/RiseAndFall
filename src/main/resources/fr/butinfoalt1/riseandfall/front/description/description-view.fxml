@@ -4,16 +4,14 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.TextFlow?>
-<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:id="rootPane"
-           fx:controller="fr.butinfoalt1.riseandfall.front.description.DescriptionController">
-
-
-    <!-- Image en arrière-plan -->
-    <ImageView fx:id="backgroundImageView" opacity="0.40"/>
-
-
-    <!-- Texte en avant-plan -->
-    <VBox alignment="CENTER" spacing="20.0">
-        <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;" textAlignment="CENTER"/>
-    </VBox>
-</StackPane>
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="fr.butinfoalt1.riseandfall.front.description.DescriptionController" alignment="CENTER">
+    <StackPane xmlns:fx="http://javafx.com/fxml/1">
+        <!-- Image en arrière-plan -->
+        <ImageView fx:id="backgroundImageView" opacity="0.40"/>
+        <!-- Texte en avant-plan -->
+        <VBox alignment="CENTER" spacing="20.0">
+            <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;" textAlignment="CENTER"/>
+        </VBox>
+    </StackPane>
+</VBox>
