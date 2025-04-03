@@ -8,12 +8,11 @@ import java.util.ArrayList;
 
 public class Player {
     public static final Player SINGLE_PLAYER = new Player();
-
+    private final BuildingMap buildingMap = new BuildingMap();
+    private final ArrayList<BaseOrder> nextOrders = new ArrayList<>();
     private int goldAmount = 50;
     // TODO : Make an enum, copy BuildingType
     private int units = 0;
-    private final BuildingMap buildingMap = new BuildingMap();
-    private final ArrayList<BaseOrder> nextOrders = new ArrayList<>();
 
     public int getGoldAmount() {
         return goldAmount;

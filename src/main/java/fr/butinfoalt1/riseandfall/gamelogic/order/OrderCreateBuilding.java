@@ -1,7 +1,7 @@
 package fr.butinfoalt1.riseandfall.gamelogic.order;
 
-import fr.butinfoalt1.riseandfall.gamelogic.building.BuildingType;
 import fr.butinfoalt1.riseandfall.gamelogic.Player;
+import fr.butinfoalt1.riseandfall.gamelogic.building.BuildingType;
 
 public class OrderCreateBuilding implements BaseOrder {
     private final BuildingType buildingType;

@@ -1,7 +1,7 @@
 package fr.butinfoalt1.riseandfall.front;
 
-import fr.butinfoalt1.riseandfall.gamelogic.building.BuildingType;
 import fr.butinfoalt1.riseandfall.gamelogic.Player;
+import fr.butinfoalt1.riseandfall.gamelogic.building.BuildingType;
 import fr.butinfoalt1.riseandfall.gamelogic.order.OrderCreateBuilding;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
