@@ -3,7 +3,6 @@ package fr.butinfoalt1.riseandfall.front;
 import fr.butinfoalt1.riseandfall.front.description.DescriptionStage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 
 import java.io.IOException;
@@ -13,14 +12,13 @@ public class RiseAndFallController {
     public Button switchToOrderButton;
 
     @FXML
-    public void switchToDescriptionPage(ActionEvent actionEvent) throws IOException {
+    public void switchToDescriptionPage(ActionEvent actionEvent) {
         DescriptionStage descriptionPage = new DescriptionStage();
         descriptionPage.show();
     }
 
     @FXML
-    public void switchToTest() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("order-view.fxml"));
-        RiseAndFallApplication.getMainWindow().getScene().setRoot(loader.load());
+    public void switchToOrders() throws IOException {
+        RiseAndFallApplication.switchToView(View.ORDERS);
     }
 }

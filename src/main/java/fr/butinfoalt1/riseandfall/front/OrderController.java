@@ -4,17 +4,11 @@ import fr.butinfoalt1.riseandfall.gamelogic.Player;
 import fr.butinfoalt1.riseandfall.gamelogic.map.BuildingType;
 import fr.butinfoalt1.riseandfall.gamelogic.order.OrderCreateBuilding;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class OrderController {
     @FXML
-    private void switchToHello() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("hello-view.fxml"));
-        Stage stage = RiseAndFallApplication.getMainWindow();
-        stage.getScene().setRoot(loader.load());
+    private void switchBack() {
+        RiseAndFallApplication.switchToPreviousView();
     }
 
     @FXML
