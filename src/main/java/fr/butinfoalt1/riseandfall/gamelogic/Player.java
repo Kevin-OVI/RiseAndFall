@@ -2,6 +2,7 @@ package fr.butinfoalt1.riseandfall.gamelogic;
 
 import fr.butinfoalt1.riseandfall.gamelogic.map.BuildingType;
 import fr.butinfoalt1.riseandfall.gamelogic.map.EnumIntMap;
+import fr.butinfoalt1.riseandfall.gamelogic.map.UnitType;
 import fr.butinfoalt1.riseandfall.gamelogic.order.BaseOrder;
 
 import java.util.ArrayList;
@@ -9,10 +10,9 @@ import java.util.ArrayList;
 public class Player {
     public static final Player SINGLE_PLAYER = new Player();
     private final EnumIntMap<BuildingType> buildingMap = new EnumIntMap<>(BuildingType.values().length);
+    private final EnumIntMap<UnitType> unitMap = new EnumIntMap<>(UnitType.values().length);
     private final ArrayList<BaseOrder> nextOrders = new ArrayList<>();
     private int goldAmount = 50;
-    // TODO : Make an enum, copy BuildingType
-    private int units = 0;
 
     public int getGoldAmount() {
         return goldAmount;
@@ -46,16 +46,16 @@ public class Player {
         return buildingMap.get(type);
     }
 
-    public int getUnits() {
-        return units;
+    public void addUnits(UnitType type, int count) {
+        unitMap.add(type, count);
     }
 
-    public void addUnits(int units) {
-        this.units += units;
+    public void removeUnits(UnitType type, int count) {
+        unitMap.remove(type, count);
     }
 
-    public void removeUnits(int units) {
-        this.units -= units;
+    public int getUnits(UnitType type) {
+        return unitMap.get(type);
     }
 
     public void addOrder(BaseOrder order) {
