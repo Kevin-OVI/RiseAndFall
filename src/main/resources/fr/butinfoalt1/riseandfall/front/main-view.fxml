@@ -5,5 +5,5 @@
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
       fx:controller="fr.butinfoalt1.riseandfall.front.MainController">
     <Button text="Description" onAction="#switchToDescriptionPage"/>
-    <Button text="Order" onAction="#switchToOrders" fx:id="switchToOrderButton"/>
+    <Button text="Order" onAction="#switchToOrders"/>
 </VBox>

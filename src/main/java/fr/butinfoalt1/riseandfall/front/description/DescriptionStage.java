@@ -10,7 +10,15 @@ import javafx.stage.Stage;
 
 import java.util.Objects;
 
+/**
+ * Classe représentant la scène de description du jeu.
+ * Elle affiche une image de fond et un texte descriptif.
+ */
 public class DescriptionStage extends Stage {
+    /**
+     * Texte descriptif du jeu.
+     * Il est affiché dans la scène de description.
+     */
     private static final String text = """
             Rise and Fall est un jeu développé par une équipe de choc.
             Le but est de créer un jeu tour par tour dans un monde fantasy.
@@ -19,6 +27,10 @@ public class DescriptionStage extends Stage {
             L'objectif est de gérer son économie et son expansion en construisant des bâtiments
             et en recrutant des unités tout en optimisant ses ressources.""";
 
+    /**
+     * Constructeur de la scène de description.
+     * Il initialise la taille minimale de la fenêtre, défini le titre et la scène de contenu.
+     */
     public DescriptionStage() {
         this.setMinWidth(256);
         this.setMinHeight(192);
@@ -26,6 +38,13 @@ public class DescriptionStage extends Stage {
         this.setScene(View.DESCRIPTION.getScene(1024, 768, this::setupScene));
     }
 
+    /**
+     * Méthode pour configurer la scène de description.
+     * Elle définit l'image de fond, adapte la taille de l'image à la fenêtre,
+     * et centre le texte dans le ScrollPane.
+     *
+     * @param scene La scène à configurer.
+     */
     private void setupScene(Scene scene) {
         DescriptionController controller = View.DESCRIPTION.getController();
         scene.getStylesheets().add(Objects.requireNonNull(RiseAndFallApplication.class.getResource("description.css")).toExternalForm());

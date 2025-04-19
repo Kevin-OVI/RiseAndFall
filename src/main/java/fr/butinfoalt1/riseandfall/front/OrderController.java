@@ -5,12 +5,21 @@ import fr.butinfoalt1.riseandfall.gamelogic.map.BuildingType;
 import fr.butinfoalt1.riseandfall.gamelogic.order.OrderCreateBuilding;
 import javafx.fxml.FXML;
 
+/**
+ * Contrôleur pour la vue de gestion des ordres.
+ */
 public class OrderController {
+    /**
+     * Méthode appelée par JavaFX quand on clique sur le bouton retour.
+     */
     @FXML
     private void switchBack() {
         RiseAndFallApplication.switchToPreviousView();
     }
 
+    /**
+     * Méthode appelée par JavaFX quand on clique sur le bouton pour créer un bâtiment.
+     */
     @FXML
     private void addBuildings() {
         // TODO : Get the building type and count from the UI
