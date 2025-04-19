@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 public class Player {
     public static final Player SINGLE_PLAYER = new Player();
-    private final EnumIntMap<BuildingType> buildingMap = new EnumIntMap<>(BuildingType.values().length);
-    private final EnumIntMap<UnitType> unitMap = new EnumIntMap<>(UnitType.values().length);
+    private final EnumIntMap<BuildingType> buildingMap = new EnumIntMap<>(BuildingType.class);
+    private final EnumIntMap<UnitType> unitMap = new EnumIntMap<>(UnitType.class);
     private final ArrayList<BaseOrder> nextOrders = new ArrayList<>();
     private int goldAmount = 50;
 
