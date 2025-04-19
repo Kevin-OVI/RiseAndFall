@@ -7,7 +7,7 @@ import javafx.scene.control.Button;
 
 import java.io.IOException;
 
-public class RiseAndFallController {
+public class MainController {
     @FXML
     public Button switchToOrderButton;
 
