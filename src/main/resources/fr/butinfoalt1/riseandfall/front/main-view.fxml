@@ -7,6 +7,6 @@
     <Button text="Description" onAction="#switchToDescriptionPage"/>
     <Button text="Modifier les ordres" onAction="#switchToOrders"/>
 
-    <!-- Bouton Passer le tour -->
+    <!-- Bouton pour passer au tour suivant -->
     <Button text="Tour suivant" onAction="#handleEndTurn"/>
 </VBox>

@@ -15,36 +15,63 @@ import java.util.ArrayList;
  * Contrôleur pour la vue de gestion des ordres.
  */
 public class OrderController {
-
+    /**
+     * Champ pour le composant de la quantité d'or.
+     */
     @FXML
     private Label goldField;
 
+    // TODO : Faire des champs pour chaque type de bâtiment et d'unité, de préférence de manière dynamique en utilisant BuildingType.getDisplayName() et UnitType.getDisplayName()
+    /**
+     * Champ pour le composant de la quantité d'unités (pour l'instant Guerriers).
+     */
     @FXML
     private Label troopField;
 
+    /**
+     * Champ pour le composant de la quantité de bâtiments (pour l'instant Huttes).
+     */
     @FXML
     private Label hutField;
 
+    /**
+     * Méthode appelée par JavaFX quand on clique sur le bouton pour augmenter la quantité d'unités.
+     */
     @FXML
     private void increaseTroop() {
         updateLabel(troopField, 1);
     }
 
+    /**
+     * Méthode appelée par JavaFX quand on clique sur le bouton pour diminuer la quantité d'unités.
+     */
     @FXML
     private void decreaseTroop() {
         updateLabel(troopField, -1);
     }
 
+    /**
+     * Méthode appelée par JavaFX quand on clique sur le bouton pour augmenter la quantité de bâtiments.
+     */
     @FXML
     private void increaseHut() {
         updateLabel(hutField, 1);
     }
 
+    /**
+     * Méthode appelée par JavaFX quand on clique sur le bouton pour diminuer la quantité de bâtiments.
+     */
     @FXML
     private void decreaseHut() {
         updateLabel(hutField, -1);
     }
 
+    /**
+     * Méthode pour mettre à jour la quantité d'unités ou de bâtiments.
+     *
+     * @param label Le label à mettre à jour.
+     * @param delta  La valeur à ajouter ou soustraire.
+     */
     private void updateLabel(Label label, int delta) {
         int value = Integer.parseInt(label.getText());
         int gold = Integer.parseInt(goldField.getText());
@@ -62,6 +89,9 @@ public class OrderController {
         goldField.setText(String.valueOf(gold));
     }
 
+    /**
+     * Méthode pour rafraîchir les informations affichées dans la vue.
+     */
     public void refresh() {
         ArrayList<BaseOrder> orders = Player.SINGLE_PLAYER.getPendingOrders();
         int gold = Player.SINGLE_PLAYER.getGoldAmount();
@@ -80,11 +110,18 @@ public class OrderController {
         hutField.setText(String.valueOf(nbHuts));
     }
 
+    /**
+     * Méthode appelée par JavaFX pour revenir à la vue précédente.
+     */
     @FXML
     private void switchBack() {
         RiseAndFallApplication.switchToPreviousView();
     }
 
+    /**
+     * Méthode appelée par JavaFX pour gérer l'action de sauvegarde.
+     * Elle enregistre les ordres en attente du joueur et revient à la vue précédente.
+     */
     @FXML
     private void handleSave() {
         int nbTroops = Integer.parseInt(troopField.getText());

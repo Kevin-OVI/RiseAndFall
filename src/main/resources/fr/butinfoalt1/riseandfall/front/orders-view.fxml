@@ -36,7 +36,7 @@
         <!-- Bouton Sauvegarder -->
         <Button text="Sauvegarder" onAction="#handleSave"/>
 
-        <!-- Bouton Retour -->
+        <!-- Bouton Annuler -->
         <Button text="Annuler" onAction="#switchBack"/>
     </HBox>
 </VBox>
