@@ -153,7 +153,7 @@ public class Player {
      *
      * @param order L'ordre à ajouter.
      */
-    public void addOrder(BaseOrder order) {
+    public void addPendingOrder(BaseOrder order) {
         this.pendingOrders.add(order);
     }
 
@@ -169,7 +169,7 @@ public class Player {
     /**
      * Méthode pour supprimer les ordres en attente.
      */
-    public void clearOrders() {
+    public void clearPendingOrders() {
         this.pendingOrders.clear();
     }
 

@@ -89,9 +89,9 @@ public class OrderController {
         int nbTroops = Integer.parseInt(troopField.getText());
         int nbHuts = Integer.parseInt(hutField.getText());
 
-        Player.SINGLE_PLAYER.clearOrders();
-        Player.SINGLE_PLAYER.addOrder(new OrderCreateUnit(UnitType.WARRIOR, nbTroops));
-        Player.SINGLE_PLAYER.addOrder(new OrderCreateBuilding(BuildingType.HUT, nbHuts));
+        Player.SINGLE_PLAYER.clearPendingOrders();
+        Player.SINGLE_PLAYER.addPendingOrder(new OrderCreateUnit(UnitType.WARRIOR, nbTroops));
+        Player.SINGLE_PLAYER.addPendingOrder(new OrderCreateBuilding(BuildingType.HUT, nbHuts));
     }
 
     @FXML
