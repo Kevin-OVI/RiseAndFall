@@ -31,7 +31,7 @@ public class Player {
     /**
      * Liste des ordres à exécuter au prochain tour pour le joueur.
      */
-    private final ArrayList<BaseOrder> nextOrders = new ArrayList<>();
+    private final ArrayList<BaseOrder> pendingOrders = new ArrayList<>();
     /**
      * Quantité d'or que possède le joueur.
      * Initialisé à 50 pièces d'or au début de la partie.
@@ -64,7 +64,7 @@ public class Player {
      */
     public int getRemainingGoldAmount() {
         int gold = this.goldAmount;
-        for (BaseOrder order : this.nextOrders) {
+        for (BaseOrder order : this.pendingOrders) {
             gold -= order.getPrice();
         }
         return gold;
@@ -154,7 +154,7 @@ public class Player {
      * @param order L'ordre à ajouter.
      */
     public void addOrder(BaseOrder order) {
-        this.nextOrders.add(order);
+        this.pendingOrders.add(order);
     }
 
     /**
@@ -162,15 +162,15 @@ public class Player {
      *
      * @return La liste des ordres en attente.
      */
-    public ArrayList<BaseOrder> getOrders() {
-        return this.nextOrders;
+    public ArrayList<BaseOrder> getPendingOrders() {
+        return this.pendingOrders;
     }
 
     /**
      * Méthode pour supprimer les ordres en attente.
      */
     public void clearOrders() {
-        this.nextOrders.clear();
+        this.pendingOrders.clear();
     }
 
     /**
@@ -182,12 +182,12 @@ public class Player {
     public void executeOrders() {
         // TODO : Add goldAmount according to the buildings
 
-        for (BaseOrder order : this.nextOrders) {
+        for (BaseOrder order : this.pendingOrders) {
             if (this.goldAmount >= order.getPrice()) {
                 order.execute(this);
                 this.removeGoldAmount(order.getPrice());
             }
         }
-        this.nextOrders.clear();
+        this.pendingOrders.clear();
     }
 }

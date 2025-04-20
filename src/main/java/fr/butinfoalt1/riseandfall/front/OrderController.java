@@ -61,7 +61,7 @@ public class OrderController {
     }
 
     public void refresh() {
-        ArrayList<BaseOrder> orders = Player.SINGLE_PLAYER.getOrders();
+        ArrayList<BaseOrder> orders = Player.SINGLE_PLAYER.getPendingOrders();
         int gold = Player.SINGLE_PLAYER.getGoldAmount();
         int nbTroops = 0;
         int nbHuts = 0;
