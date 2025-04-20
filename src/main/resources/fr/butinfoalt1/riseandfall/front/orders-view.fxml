@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
       fx:controller="fr.butinfoalt1.riseandfall.front.OrderController">
 
     <VBox.margin>
-        <Insets top="20" />
+        <Insets top="20"/>
     </VBox.margin>
 
     <!-- Quantité d'or -->
     <HBox alignment="CENTER" spacing="10">
-        <Label text="🪙 Or :" />
-        <Label fx:id="goldField" text="0" />
+        <Label text="🪙 Or :"/>
+        <Label fx:id="goldField" text="0"/>
     </HBox>
 
     <!-- Champ Troupe avec boutons + et - -->
     <HBox alignment="CENTER" spacing="10">
-        <Label text="Troupe :" />
+        <Label text="Troupe :"/>
         <Button text="-" onAction="#decreaseTroop"/>
         <Label fx:id="troopField"/>
         <Button text="+" onAction="#increaseTroop"/>
@@ -29,7 +26,7 @@
 
     <!-- Champ Hut avec boutons + et - -->
     <HBox alignment="CENTER" spacing="10">
-        <Label text="Hut :" />
+        <Label text="Hut :"/>
         <Button text="-" onAction="#decreaseHut"/>
         <Label fx:id="hutField"/>
         <Button text="+" onAction="#increaseHut"/>
