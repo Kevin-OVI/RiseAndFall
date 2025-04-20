@@ -49,6 +49,15 @@ public class Player {
     }
 
     /**
+     * Méthode pour définir la quantité d'or du joueur.
+     *
+     * @param goldAmount La nouvelle quantité d'or à définir.
+     */
+    public void setGoldAmount(int goldAmount) {
+        this.goldAmount = goldAmount;
+    }
+
+    /**
      * Méthode pour obtenir la quantité d'or restante après avoir soustrait le prix des ordres en attente.
      *
      * @return La quantité d'or restante après soustraction des prix des ordres.
@@ -149,14 +158,28 @@ public class Player {
     }
 
     /**
+     * Méthode pour obtenir la liste des ordres en attente.
+     *
+     * @return La liste des ordres en attente.
+     */
+    public ArrayList<BaseOrder> getOrders() {
+        return this.nextOrders;
+    }
+
+    /**
+     * Méthode pour supprimer les ordres en attente.
+     */
+    public void clearOrders() {
+        this.nextOrders.clear();
+    }
+
+    /**
      * Méthode pour exécuter les ordres en attente.
      * On commence par ajouter l'or produit par les bâtiments (TODO).
      * Ensuite, on exécute chaque ordre en attente si le joueur a suffisamment d'or.
      * Enfin, on vide la liste des ordres en attente.
      */
     public void executeOrders() {
-        // TODO : Add goldAmount according to the buildings
-
         for (BaseOrder order : this.nextOrders) {
             if (this.goldAmount >= order.getPrice()) {
                 order.execute(this);

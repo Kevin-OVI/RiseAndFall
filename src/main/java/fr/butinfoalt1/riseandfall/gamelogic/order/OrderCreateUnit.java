@@ -1,22 +1,69 @@
 package fr.butinfoalt1.riseandfall.gamelogic.order;
 
 import fr.butinfoalt1.riseandfall.gamelogic.Player;
+import fr.butinfoalt1.riseandfall.gamelogic.map.UnitType;
 
 /**
- * Classe représentant un ordre de création d'une unité.
+ * Représente un ordre de création d'une unité.
  * Cet ordre est exécuté sur le joueur pour créer un certain nombre d'unités d'un type donné.
  */
 public class OrderCreateUnit implements BaseOrder {
-    // TODO: À implémenter
+    /**
+     * Type d'unité à créer.
+     */
+    private final UnitType unitType;
+    /**
+     * Nombre d'unités de ce type à créer.
+     */
+    private final int count;
 
-
-    @Override
-    public void execute(Player player) {
-
+    /**
+     * Constructeur de l'ordre de création d'unité.
+     *
+     * @param unitType Le type d'unité à créer.
+     * @param count    Le nombre d'unités de ce type à créer.
+     */
+    public OrderCreateUnit(UnitType unitType, int count) {
+        this.unitType = unitType;
+        this.count = count;
     }
 
+    /**
+     * Exécute l'ordre de création d'unité sur le joueur donné.
+     *
+     * @param player Le joueur sur lequel exécuter l'ordre.
+     */
+    @Override
+    public void execute(Player player) {
+        player.addUnits(this.unitType, this.count);
+    }
+
+    /**
+     * Obtient le prix de l'ordre en or.
+     * On calcule le prix total en multipliant le prix de l'unité à l'unité par le nombre d'unités à créer.
+     *
+     * @return Le prix de l'ordre en or.
+     */
     @Override
     public int getPrice() {
-        return 0;
+        return this.unitType.getPrice() * this.count;
+    }
+
+    /**
+     * Obtient le type d'unité à créer.
+     *
+     * @return Le type d'unité à créer.
+     */
+    public UnitType getUnitType() {
+        return unitType;
+    }
+
+    /**
+     * Obtient le nombre d'unités à créer.
+     *
+     * @return Le nombre d'unités à créer.
+     */
+    public int getCount() {
+        return count;
     }
 }

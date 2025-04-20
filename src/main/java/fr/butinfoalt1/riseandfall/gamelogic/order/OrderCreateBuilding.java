@@ -48,4 +48,22 @@ public class OrderCreateBuilding implements BaseOrder {
     public int getPrice() {
         return this.buildingType.getPrice() * this.count;
     }
+
+    /**
+     * Obtient le type de bâtiment à créer.
+     *
+     * @return Le type de bâtiment à créer.
+     */
+    public BuildingType getBuildingType() {
+        return buildingType;
+    }
+
+    /**
+     * Obtient le nombre de bâtiments à créer.
+     *
+     * @return Le nombre de bâtiments à créer.
+     */
+    public int getCount() {
+        return count;
+    }
 }

@@ -22,5 +22,6 @@ public class MainController {
     @FXML
     public void switchToOrders() {
         RiseAndFallApplication.switchToView(View.ORDERS);
+        ((OrderController) View.ORDERS.getController()).refresh();
     }
 }
