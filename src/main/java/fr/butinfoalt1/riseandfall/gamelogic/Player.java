@@ -180,7 +180,9 @@ public class Player {
      * Enfin, on vide la liste des ordres en attente.
      */
     public void executeOrders() {
-        // TODO : Add goldAmount according to the buildings
+        for (BuildingType buildingType : BuildingType.values()) {
+            this.addGoldAmount(buildingType.getGoldProduction() * this.getBuildings(buildingType));
+        }
 
         for (BaseOrder order : this.pendingOrders) {
             if (this.goldAmount >= order.getPrice()) {
