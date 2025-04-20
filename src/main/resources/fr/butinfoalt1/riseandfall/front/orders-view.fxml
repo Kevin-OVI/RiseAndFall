@@ -35,13 +35,11 @@
         <Button text="+" onAction="#increaseHut"/>
     </HBox>
 
-    <!-- Bouton Sauvegarder -->
-    <Button text="Sauvegarder" onAction="#handleSave"/>
+    <HBox alignment="CENTER" spacing="10">
+        <!-- Bouton Sauvegarder -->
+        <Button text="Sauvegarder" onAction="#handleSave"/>
 
-    <!-- Bouton Passer le tour -->
-    <Button text="Passer le tour" onAction="#handleEndTurn"/>
-
-    <!-- Bouton Retour -->
-    <Button text="Retour" onAction="#switchBack"/>
-
+        <!-- Bouton Retour -->
+        <Button text="Annuler" onAction="#switchBack"/>
+    </HBox>
 </VBox>

@@ -1,6 +1,7 @@
 package fr.butinfoalt1.riseandfall.front;
 
 import fr.butinfoalt1.riseandfall.front.description.DescriptionStage;
+import fr.butinfoalt1.riseandfall.gamelogic.Player;
 import javafx.fxml.FXML;
 
 /**
@@ -24,5 +25,10 @@ public class MainController {
         RiseAndFallApplication.switchToView(View.ORDERS);
         OrderController orderController = View.ORDERS.getController();
         orderController.refresh();
+    }
+
+    @FXML
+    private void handleEndTurn() {
+        Player.SINGLE_PLAYER.executeOrders();
     }
 }

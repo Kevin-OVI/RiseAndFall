@@ -92,12 +92,7 @@ public class OrderController {
         Player.SINGLE_PLAYER.clearPendingOrders();
         Player.SINGLE_PLAYER.addPendingOrder(new OrderCreateUnit(UnitType.WARRIOR, nbTroops));
         Player.SINGLE_PLAYER.addPendingOrder(new OrderCreateBuilding(BuildingType.HUT, nbHuts));
-    }
 
-    @FXML
-    private void handleEndTurn() {
-        handleSave();
-        Player.SINGLE_PLAYER.executeOrders();
-        switchBack();
+        this.switchBack();
     }
 }
