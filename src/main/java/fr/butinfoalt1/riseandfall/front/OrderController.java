@@ -52,6 +52,7 @@ public class OrderController {
         } else if (label == hutField) {
             gold -= delta * BuildingType.HUT.getPrice();
         }
+        // TODO : Vérifier par rapport à la quantité d'or et pour les unités par rapport à la capacité d'accueil des bâtiments
         if (gold < 0 || value + delta < 0 || value + delta > 5) {
             return;
         }
