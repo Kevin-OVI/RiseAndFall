@@ -15,15 +15,16 @@ public enum View {
     /**
      * Vue principale de l'application.
      */
-    MAIN("main-view.fxml"),
+    MAIN("main-view.fxml", "Rise & Fall"),
     /**
      * Vue de gestion des ordres.
      */
-    ORDERS("orders-view.fxml"),
+    ORDERS("orders-view.fxml", "Rise & Fall - Définition des ordres"),
     /**
      * Vue de la description et des règles du jeu.
      */
-    DESCRIPTION("description-view.fxml");
+    DESCRIPTION("description-view.fxml", "Rise & Fall - Description et règles du jeu"),
+    ;
 
     /**
      * Le loader FXML utilisé pour charger la vue.
@@ -31,13 +32,20 @@ public enum View {
     private final FXMLLoader fxmlLoader;
 
     /**
+     * Le titre de la fenêtre associé à la vue.
+     */
+    private final String windowTitle;
+
+    /**
      * Constructeur de l'énumération View.
      * Charge le fichier FXML correspondant à la vue.
      *
-     * @param viewName Le nom du fichier FXML associé à la vue.
+     * @param viewName    Le nom du fichier FXML associé à la vue.
+     * @param windowTitle Le titre de la fenêtre.
      */
-    View(String viewName) {
+    View(String viewName, String windowTitle) {
         this.fxmlLoader = new FXMLLoader(View.class.getResource(viewName));
+        this.windowTitle = windowTitle;
         try {
             this.fxmlLoader.load();
         } catch (IOException e) {
@@ -61,6 +69,15 @@ public enum View {
      */
     public <T> T getController() {
         return this.fxmlLoader.getController();
+    }
+
+    /**
+     * Méthode pour obtenir le titre de la fenêtre associé à la vue.
+     *
+     * @return Le titre de la fenêtre.
+     */
+    public String getWindowTitle() {
+        return this.windowTitle;
     }
 
     /**

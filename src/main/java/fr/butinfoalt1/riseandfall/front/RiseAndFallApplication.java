@@ -18,7 +18,7 @@ public class RiseAndFallApplication extends Application {
     /**
      * Pile pour gérer les vues précédentes.
      */
-    private static final Stack<Parent> STAGE_ROOT_STACK = new Stack<>();
+    private static final Stack<StageViewElement> stageViewStack = new Stack<>();
     /**
      * Fenêtre principale de l'application.
      */
@@ -50,8 +50,9 @@ public class RiseAndFallApplication extends Application {
      */
     public static void switchToView(View view) {
         Parent newRoot = view.getSceneRoot();
-        STAGE_ROOT_STACK.push(mainWindow.getScene().getRoot());
+        stageViewStack.push(new StageViewElement(mainWindow.getScene().getRoot(), mainWindow.getTitle()));
         mainWindow.getScene().setRoot(newRoot);
+        mainWindow.setTitle(view.getWindowTitle());
     }
 
     /**
@@ -59,9 +60,10 @@ public class RiseAndFallApplication extends Application {
      * On dépile la vue précédente et on la remet comme racine de la scène.
      */
     public static void switchToPreviousView() {
-        if (!STAGE_ROOT_STACK.isEmpty()) {
-            Parent previousRoot = STAGE_ROOT_STACK.pop();
-            mainWindow.getScene().setRoot(previousRoot);
+        if (!stageViewStack.isEmpty()) {
+            StageViewElement previousViewElement = stageViewStack.pop();
+            mainWindow.getScene().setRoot(previousViewElement.root());
+            mainWindow.setTitle(previousViewElement.title());
         }
     }
 
@@ -73,11 +75,20 @@ public class RiseAndFallApplication extends Application {
     @Override
     public void start(Stage stage) {
         Scene scene = new Scene(View.MAIN.getSceneRoot(), WIDTH, HEIGHT);
-        stage.setTitle("Rise & Fall");
+        stage.setTitle(View.MAIN.getWindowTitle());
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
 
         mainWindow = stage;
+    }
+
+    /**
+     * Représente un élément de la vue avec sa racine et son titre.
+     *
+     * @param root La racine de la scène à enregistrer.
+     * @param title Le titre de la fenêtre à enregistrer.
+     */
+    private record StageViewElement(Parent root, String title) {
     }
 }
