@@ -24,7 +24,7 @@ public class MainController {
     public void switchToOrders() {
         RiseAndFallApplication.switchToView(View.ORDERS);
         OrderController orderController = View.ORDERS.getController();
-        orderController.refresh();
+        orderController.loadPendingOrders();
     }
 
     @FXML

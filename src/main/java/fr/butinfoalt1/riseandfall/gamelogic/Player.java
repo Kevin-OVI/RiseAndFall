@@ -2,6 +2,7 @@ package fr.butinfoalt1.riseandfall.gamelogic;
 
 import fr.butinfoalt1.riseandfall.gamelogic.map.BuildingType;
 import fr.butinfoalt1.riseandfall.gamelogic.map.EnumIntMap;
+import fr.butinfoalt1.riseandfall.gamelogic.map.EnumIntMap.Entry;
 import fr.butinfoalt1.riseandfall.gamelogic.map.UnitType;
 import fr.butinfoalt1.riseandfall.gamelogic.order.BaseOrder;
 
@@ -58,16 +59,17 @@ public class Player {
     }
 
     /**
-     * Méthode pour obtenir la quantité d'or restante après avoir soustrait le prix des ordres en attente.
+     * Méthode pour obtenir le nombre maximum d'unités que le joueur peut avoir.
+     * On additionne le nombre maximum d'unités de chaque type d'unité multiplié par le nombre d'unités de ce type.
      *
-     * @return La quantité d'or restante après soustraction des prix des ordres.
+     * @return Le nombre maximum d'unités que le joueur peut avoir.
      */
-    public int getRemainingGoldAmount() {
-        int gold = this.goldAmount;
-        for (BaseOrder order : this.pendingOrders) {
-            gold -= order.getPrice();
+    public int getAllowedUnitCount() {
+        int allowedCount = 0;
+        for (Entry<BuildingType> entry : this.buildingMap) {
+            allowedCount += entry.getValue() * entry.getKey().getMaxUnits();
         }
-        return gold;
+        return allowedCount;
     }
 
     /**
@@ -95,7 +97,7 @@ public class Player {
      * @param count Le nombre de bâtiments de ce type à ajouter.
      */
     public void addBuildings(BuildingType type, int count) {
-        buildingMap.add(type, count);
+        buildingMap.increment(type, count);
     }
 
     /**
@@ -105,7 +107,7 @@ public class Player {
      * @param count Le nombre de bâtiments de ce type à retirer.
      */
     public void removeBuildings(BuildingType type, int count) {
-        buildingMap.remove(type, count);
+        buildingMap.decrement(type, count);
     }
 
     /**
@@ -125,7 +127,7 @@ public class Player {
      * @param count Le nombre d'unités de ce type à ajouter.
      */
     public void addUnits(UnitType type, int count) {
-        unitMap.add(type, count);
+        unitMap.increment(type, count);
     }
 
     /**
@@ -135,7 +137,7 @@ public class Player {
      * @param count Le nombre d'unités de ce type à retirer.
      */
     public void removeUnits(UnitType type, int count) {
-        unitMap.remove(type, count);
+        unitMap.decrement(type, count);
     }
 
     /**
@@ -175,13 +177,13 @@ public class Player {
 
     /**
      * Méthode pour exécuter les ordres en attente.
-     * On commence par ajouter l'or produit par les bâtiments (TODO).
+     * On commence par ajouter l'or produit par les bâtiments.
      * Ensuite, on exécute chaque ordre en attente si le joueur a suffisamment d'or.
      * Enfin, on vide la liste des ordres en attente.
      */
     public void executeOrders() {
-        for (BuildingType buildingType : BuildingType.values()) {
-            this.addGoldAmount(buildingType.getGoldProduction() * this.getBuildings(buildingType));
+        for (Entry<BuildingType> entry : this.buildingMap) {
+            this.addGoldAmount(entry.getValue() * entry.getKey().getGoldProduction());
         }
 
         for (BaseOrder order : this.pendingOrders) {

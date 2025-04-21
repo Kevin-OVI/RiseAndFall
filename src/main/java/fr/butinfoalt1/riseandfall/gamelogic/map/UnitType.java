@@ -4,7 +4,7 @@ package fr.butinfoalt1.riseandfall.gamelogic.map;
  * Enum représentant les types d'unités disponibles dans le jeu.
  * Chaque type d'unité a un nom d'affichage et un prix.
  */
-public enum UnitType {
+public enum UnitType implements PurchasableItem {
     /**
      * Type d'unité représentant un guerrier, qui coûte 10 pièces d'or.
      */
@@ -35,6 +35,7 @@ public enum UnitType {
      *
      * @return Le nom d'affichage du type d'unité.
      */
+    @Override
     public String getDisplayName() {
         return this.displayName;
     }
@@ -44,6 +45,7 @@ public enum UnitType {
      *
      * @return Le prix de l'unité en pièces d'or.
      */
+    @Override
     public int getPrice() {
         return this.price;
     }

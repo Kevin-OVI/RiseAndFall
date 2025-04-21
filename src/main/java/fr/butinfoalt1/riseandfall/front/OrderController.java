@@ -1,38 +1,43 @@
 package fr.butinfoalt1.riseandfall.front;
 
+import fr.butinfoalt1.riseandfall.front.components.PurchasableItemAmountSelector;
 import fr.butinfoalt1.riseandfall.gamelogic.Player;
+import fr.butinfoalt1.riseandfall.gamelogic.counter.Counter;
+import fr.butinfoalt1.riseandfall.gamelogic.counter.Modifier;
 import fr.butinfoalt1.riseandfall.gamelogic.map.BuildingType;
+import fr.butinfoalt1.riseandfall.gamelogic.map.EnumIntMap;
 import fr.butinfoalt1.riseandfall.gamelogic.map.UnitType;
 import fr.butinfoalt1.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt1.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt1.riseandfall.gamelogic.order.OrderCreateUnit;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-
-import java.util.ArrayList;
+import javafx.scene.layout.VBox;
 
 /**
  * Contrôleur pour la vue de gestion des ordres.
  */
 public class OrderController {
+    private EnumIntMap<UnitType> pendingUnits;
+    private EnumIntMap<BuildingType> pendingBuildings;
+
     /**
      * Champ pour le composant de la quantité d'or.
      */
     @FXML
     private Label goldField;
 
-    // TODO : Faire des champs pour chaque type de bâtiment et d'unité, de préférence de manière dynamique en utilisant BuildingType.getDisplayName() et UnitType.getDisplayName()
     /**
-     * Champ pour le composant de la quantité d'unités (pour l'instant Guerriers).
+     * Champ pour le composant contenant les unités.
      */
     @FXML
-    private Label troopField;
+    private VBox unitVBox;
 
     /**
-     * Champ pour le composant de la quantité de bâtiments (pour l'instant Huttes).
+     * Champ pour le composant contenant les bâtiments.
      */
     @FXML
-    private Label hutField;
+    private VBox buildingsVBox;
 
     /**
      * Champ pour le composant de la quantité totale d'unités.
@@ -47,79 +52,38 @@ public class OrderController {
     private Label totalBuildingsField;
 
     /**
-     * Méthode appelée par JavaFX quand on clique sur le bouton pour augmenter la quantité d'unités.
+     * Méthode pour charger les ordres en attente du joueur dans l'interface.
      */
-    @FXML
-    private void increaseTroop() {
-        updateLabel(troopField, 1);
-    }
+    public void loadPendingOrders() {
+        this.pendingUnits = new EnumIntMap<>(UnitType.class);
+        this.pendingBuildings = new EnumIntMap<>(BuildingType.class);
 
-    /**
-     * Méthode appelée par JavaFX quand on clique sur le bouton pour diminuer la quantité d'unités.
-     */
-    @FXML
-    private void decreaseTroop() {
-        updateLabel(troopField, -1);
-    }
-
-    /**
-     * Méthode appelée par JavaFX quand on clique sur le bouton pour augmenter la quantité de bâtiments.
-     */
-    @FXML
-    private void increaseHut() {
-        updateLabel(hutField, 1);
-    }
-
-    /**
-     * Méthode appelée par JavaFX quand on clique sur le bouton pour diminuer la quantité de bâtiments.
-     */
-    @FXML
-    private void decreaseHut() {
-        updateLabel(hutField, -1);
-    }
-
-    /**
-     * Méthode pour mettre à jour la quantité d'unités ou de bâtiments.
-     *
-     * @param label Le label à mettre à jour.
-     * @param delta La valeur à ajouter ou soustraire.
-     */
-    private void updateLabel(Label label, int delta) {
-        int value = Integer.parseInt(label.getText());
-        int gold = Integer.parseInt(goldField.getText());
-        if (label == troopField) {
-            gold -= delta * UnitType.WARRIOR.getPrice();
-        } else if (label == hutField) {
-            gold -= delta * BuildingType.HUT.getPrice();
-        }
-        // TODO : Vérifier par rapport à la quantité d'or et pour les unités par rapport à la capacité d'accueil des bâtiments
-        if (gold < 0 || value + delta < 0 || value + delta > 5) {
-            return;
-        }
-        int newValue = value + delta;
-        label.setText(String.valueOf(newValue));
-        goldField.setText(String.valueOf(gold));
-    }
-
-    /**
-     * Méthode pour rafraîchir les informations affichées dans la vue.
-     */
-    public void refresh() {
-        ArrayList<BaseOrder> orders = Player.SINGLE_PLAYER.getPendingOrders();
-        int gold = Player.SINGLE_PLAYER.getGoldAmount();
-        int nbTroops = 0;
-        int nbHuts = 0;
-        for (BaseOrder order : orders) {
-            gold -= order.getPrice();
-            if (order instanceof OrderCreateBuilding) {
-                nbHuts += ((OrderCreateBuilding) order).getCount();
-            } else if (order instanceof OrderCreateUnit) {
-                nbTroops += ((OrderCreateUnit) order).getCount();
+        for (BaseOrder order : Player.SINGLE_PLAYER.getPendingOrders()) {
+            if (order instanceof OrderCreateUnit orderCreateUnit) {
+                pendingUnits.increment(orderCreateUnit.getUnitType(), orderCreateUnit.getCount());
+            } else if (order instanceof OrderCreateBuilding orderCreateBuilding) {
+                pendingBuildings.increment(orderCreateBuilding.getBuildingType(), orderCreateBuilding.getCount());
             }
         }
-        goldField.setText(String.valueOf(gold));
-        troopField.setText(String.valueOf(nbTroops));
-        hutField.setText(String.valueOf(nbHuts));
+
+        Counter goldCounter = new Counter(Player.SINGLE_PLAYER.getGoldAmount());
+        goldCounter.addChangeListener(goldAmount -> this.goldField.setText(String.valueOf(goldAmount)));
+        Counter allowedUnitsCounter = new Counter(Player.SINGLE_PLAYER.getAllowedUnitCount());
+
+        this.unitVBox.getChildren().clear();
+        for (EnumIntMap.Entry<UnitType> entry : pendingUnits) {
+            Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
+            this.unitVBox.getChildren().add(new PurchasableItemAmountSelector<>(entry, goldCounter,
+                    (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0));
+        }
+
+        this.buildingsVBox.getChildren().clear();
+        for (EnumIntMap.Entry<BuildingType> entry : pendingBuildings) {
+            this.buildingsVBox.getChildren().add(new PurchasableItemAmountSelector<>(entry, goldCounter));
+        }
+
+        goldCounter.setDispatchChanges(true);
+
         int totalUnits = Player.SINGLE_PLAYER.getUnits(UnitType.WARRIOR);
         int totalBuildings = Player.SINGLE_PLAYER.getBuildings(BuildingType.HUT);
 
@@ -141,12 +105,19 @@ public class OrderController {
      */
     @FXML
     private void handleSave() {
-        int nbTroops = Integer.parseInt(troopField.getText());
-        int nbHuts = Integer.parseInt(hutField.getText());
-
         Player.SINGLE_PLAYER.clearPendingOrders();
-        Player.SINGLE_PLAYER.addPendingOrder(new OrderCreateUnit(UnitType.WARRIOR, nbTroops));
-        Player.SINGLE_PLAYER.addPendingOrder(new OrderCreateBuilding(BuildingType.HUT, nbHuts));
+        for (EnumIntMap.Entry<UnitType> entry : this.pendingUnits) {
+            int nbTroops = entry.getValue();
+            if (nbTroops > 0) {
+                Player.SINGLE_PLAYER.addPendingOrder(new OrderCreateUnit(entry.getKey(), nbTroops));
+            }
+        }
+        for (EnumIntMap.Entry<BuildingType> entry : this.pendingBuildings) {
+            int nbHuts = entry.getValue();
+            if (nbHuts > 0) {
+                Player.SINGLE_PLAYER.addPendingOrder(new OrderCreateBuilding(entry.getKey(), nbHuts));
+            }
+        }
 
         this.switchBack();
     }

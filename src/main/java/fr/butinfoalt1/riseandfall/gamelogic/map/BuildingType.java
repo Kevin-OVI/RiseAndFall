@@ -4,7 +4,7 @@ package fr.butinfoalt1.riseandfall.gamelogic.map;
  * Enum représentant les types de bâtiments disponibles dans le jeu.
  * Chaque type de bâtiment a un nom d'affichage, un prix, une production d'or et un nombre maximum d'unités.
  */
-public enum BuildingType {
+public enum BuildingType implements PurchasableItem {
     /**
      * Type de bâtiment représentant une hutte, qui coûte 5 pièces d'or, produit 1 pièce d'or et un maximum de 3 unités par tour.
      */
@@ -47,6 +47,7 @@ public enum BuildingType {
      *
      * @return Le nom d'affichage du type de bâtiment.
      */
+    @Override
     public String getDisplayName() {
         return this.displayName;
     }
@@ -56,6 +57,7 @@ public enum BuildingType {
      *
      * @return Le prix du bâtiment en pièces d'or.
      */
+    @Override
     public int getPrice() {
         return this.price;
     }
