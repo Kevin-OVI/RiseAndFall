@@ -39,4 +39,6 @@
         <!-- Bouton Annuler -->
         <Button text="Annuler" onAction="#switchBack"/>
     </HBox>
+    <Label fx:id="totalUnitsField" text="Unités totales : 0"/>
+    <Label fx:id="totalBuildingsField" text="Bâtiments totaux : 0"/>
 </VBox>

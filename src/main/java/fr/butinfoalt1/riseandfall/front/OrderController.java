@@ -72,6 +72,8 @@ public class OrderController {
      * @param label Le label à mettre à jour.
      * @param delta  La valeur à ajouter ou soustraire.
      */
+    @FXML private Label totalUnitsField;
+    @FXML private Label totalBuildingsField;
     private void updateLabel(Label label, int delta) {
         int value = Integer.parseInt(label.getText());
         int gold = Integer.parseInt(goldField.getText());
@@ -108,6 +110,11 @@ public class OrderController {
         goldField.setText(String.valueOf(gold));
         troopField.setText(String.valueOf(nbTroops));
         hutField.setText(String.valueOf(nbHuts));
+        int totalUnits = Player.SINGLE_PLAYER.getUnits(UnitType.WARRIOR);
+        int totalBuildings = Player.SINGLE_PLAYER.getBuildings(BuildingType.HUT);
+
+        totalUnitsField.setText("Unités totales : " + totalUnits);
+        totalBuildingsField.setText("Bâtiments totaux : " + totalBuildings);
     }
 
     /**
