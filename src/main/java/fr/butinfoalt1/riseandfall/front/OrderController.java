@@ -35,6 +35,18 @@ public class OrderController {
     private Label hutField;
 
     /**
+     * Champ pour le composant de la quantité totale d'unités.
+     */
+    @FXML
+    private Label totalUnitsField;
+
+    /**
+     * Champ pour le composant de la quantité totale de bâtiments.
+     */
+    @FXML
+    private Label totalBuildingsField;
+
+    /**
      * Méthode appelée par JavaFX quand on clique sur le bouton pour augmenter la quantité d'unités.
      */
     @FXML
@@ -70,10 +82,8 @@ public class OrderController {
      * Méthode pour mettre à jour la quantité d'unités ou de bâtiments.
      *
      * @param label Le label à mettre à jour.
-     * @param delta  La valeur à ajouter ou soustraire.
+     * @param delta La valeur à ajouter ou soustraire.
      */
-    @FXML private Label totalUnitsField;
-    @FXML private Label totalBuildingsField;
     private void updateLabel(Label label, int delta) {
         int value = Integer.parseInt(label.getText());
         int gold = Integer.parseInt(goldField.getText());
