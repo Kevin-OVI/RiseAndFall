@@ -34,7 +34,7 @@ public class DescriptionStage extends Stage {
     public DescriptionStage() {
         this.setMinWidth(256);
         this.setMinHeight(192);
-        this.setTitle("Description de Rise and fall");
+        this.setTitle("Description de Rise & fall");
         this.setScene(View.DESCRIPTION.getScene(1024, 768, this::setupScene));
     }
 

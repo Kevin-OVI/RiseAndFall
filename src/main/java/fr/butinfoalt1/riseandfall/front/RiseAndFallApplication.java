@@ -73,7 +73,7 @@ public class RiseAndFallApplication extends Application {
     @Override
     public void start(Stage stage) {
         Scene scene = new Scene(View.MAIN.getSceneRoot(), WIDTH, HEIGHT);
-        stage.setTitle("Hello!");
+        stage.setTitle("Rise & Fall");
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
