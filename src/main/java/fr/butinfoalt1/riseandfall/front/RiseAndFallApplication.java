@@ -86,7 +86,7 @@ public class RiseAndFallApplication extends Application {
     /**
      * Représente un élément de la vue avec sa racine et son titre.
      *
-     * @param root La racine de la scène à enregistrer.
+     * @param root  La racine de la scène à enregistrer.
      * @param title Le titre de la fenêtre à enregistrer.
      */
     private record StageViewElement(Parent root, String title) {

@@ -29,6 +29,7 @@ public class Modifier {
 
     /**
      * Récupère le compteur associé à ce modificateur.
+     *
      * @return Le compteur associé à ce modificateur.
      */
     public Counter getCounter() {
@@ -37,6 +38,7 @@ public class Modifier {
 
     /**
      * Récupère la valeur delta du modificateur.
+     *
      * @return La valeur delta du modificateur.
      */
     public int getDelta() {

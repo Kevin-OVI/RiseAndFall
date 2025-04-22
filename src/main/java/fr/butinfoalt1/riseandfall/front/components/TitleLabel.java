@@ -33,7 +33,7 @@ public class TitleLabel extends Label {
      * Constructeur de la classe TitleLabel.
      * Initialise le label avec une chaîne de caractères, un nœud parent et une taille de police augmentée.
      *
-     * @param s   La chaîne de caractères à afficher dans le label.
+     * @param s    La chaîne de caractères à afficher dans le label.
      * @param node Le nœud parent du label.
      */
     public TitleLabel(String s, Node node) {
