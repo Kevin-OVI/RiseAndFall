@@ -1,5 +1,7 @@
 package fr.butinfoalt1.riseandfall.gamelogic;
 
+import fr.butinfoalt1.riseandfall.front.MainController;
+import fr.butinfoalt1.riseandfall.front.View;
 import fr.butinfoalt1.riseandfall.gamelogic.map.BuildingType;
 import fr.butinfoalt1.riseandfall.gamelogic.map.EnumIntMap;
 import fr.butinfoalt1.riseandfall.gamelogic.map.EnumIntMap.Entry;
@@ -156,5 +158,7 @@ public class Player {
             }
         }
         this.pendingOrders.clear();
+        MainController mainController = View.MAIN.getController();
+        mainController.updateFields();
     }
 }
