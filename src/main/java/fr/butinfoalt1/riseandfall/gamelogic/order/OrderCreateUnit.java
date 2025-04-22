@@ -35,7 +35,7 @@ public class OrderCreateUnit implements BaseOrder {
      */
     @Override
     public void execute(Player player) {
-        player.addUnits(this.unitType, this.count);
+        player.getUnitMap().increment(this.unitType, this.count);
     }
 
     /**

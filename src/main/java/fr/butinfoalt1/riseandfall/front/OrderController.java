@@ -34,10 +34,10 @@ public class OrderController {
     private Label goldField;
 
     /**
-     * Champ pour le composant de la quantité d'or.
+     * Champ pour le composant contenant la quantité d'unités pouvant être produites.
      */
     @FXML
-    private Label IntelligenceField;
+    private Label unitsField;
 
     /**
      * Champ pour le composant contenant les unités.
@@ -50,18 +50,6 @@ public class OrderController {
      */
     @FXML
     private VBox buildingsVBox;
-
-    /**
-     * Champ pour le composant de la quantité totale d'unités.
-     */
-    @FXML
-    private Label totalUnitsField;
-
-    /**
-     * Champ pour le composant de la quantité totale de bâtiments.
-     */
-    @FXML
-    private Label totalBuildingsField;
 
     /**
      * Méthode pour charger les ordres en attente du joueur dans l'interface.
@@ -82,15 +70,18 @@ public class OrderController {
         }
 
         Counter goldCounter = new Counter(Player.SINGLE_PLAYER.getGoldAmount());
-        goldCounter.addListener(goldAmount -> this.goldField.setText(String.valueOf(goldAmount)));
+        goldCounter.addListener(goldAmount -> this.goldField.setText("Or restant : " + goldAmount));
         Counter allowedUnitsCounter = new Counter(Player.SINGLE_PLAYER.getAllowedUnitCount());
+        allowedUnitsCounter.addListener(allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
         Counter allowedBuildingsCounter = new Counter(5);
 
         this.unitVBox.getChildren().clear();
         for (EnumIntMap.Entry<UnitType> entry : pendingUnits) {
             Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
-            this.unitVBox.getChildren().add(new PurchasableItemAmountSelector<>(entry, goldCounter,
-                    (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0));
+            PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
+                    (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
+            selector.addListener(amount -> unitsModifier.setDelta(-amount));
+            this.unitVBox.getChildren().add(selector);
         }
 
         this.buildingsVBox.getChildren().clear();
@@ -105,13 +96,7 @@ public class OrderController {
 
         goldCounter.setDispatchChanges(true);
         allowedBuildingsCounter.setDispatchChanges(true);
-
-        int totalUnits = Player.SINGLE_PLAYER.getUnitsCount();
-        int totalBuildings = Player.SINGLE_PLAYER.getBuildingsCount();
-
-        totalUnitsField.setText("Unités totales : " + totalUnits);
-        totalBuildingsField.setText("Bâtiments totaux : " + totalBuildings);
-        IntelligenceField.setText(String.valueOf(Player.SINGLE_PLAYER.getIntelligence()));
+        allowedUnitsCounter.setDispatchChanges(true);
     }
 
     /**

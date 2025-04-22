@@ -1,5 +1,7 @@
 package fr.butinfoalt1.riseandfall.gamelogic;
 
+import fr.butinfoalt1.riseandfall.front.MainController;
+import fr.butinfoalt1.riseandfall.front.View;
 import fr.butinfoalt1.riseandfall.gamelogic.map.BuildingType;
 import fr.butinfoalt1.riseandfall.gamelogic.map.EnumIntMap;
 import fr.butinfoalt1.riseandfall.gamelogic.map.EnumIntMap.Entry;
@@ -119,91 +121,21 @@ public class Player {
     }
 
     /**
-     * Méthode pour ajouter un bâtiment au joueur.
+     * Méthode pour obtenir la liste des bâtiments du joueur.
      *
-     * @param type  Le type de bâtiment à ajouter.
-     * @param count Le nombre de bâtiments de ce type à ajouter.
+     * @return La liste des bâtiments du joueur.
      */
-    public void addBuildings(BuildingType type, int count) {
-        buildingMap.increment(type, count);
+    public EnumIntMap<BuildingType> getBuildingMap() {
+        return buildingMap;
     }
 
     /**
-     * Méthode pour retirer un bâtiment du joueur.
+     * Méthode pour obtenir la liste des unités du joueur.
      *
-     * @param type  Le type de bâtiment à retirer.
-     * @param count Le nombre de bâtiments de ce type à retirer.
+     * @return La liste des unités du joueur.
      */
-    public void removeBuildings(BuildingType type, int count) {
-        buildingMap.decrement(type, count);
-    }
-
-    /**
-     * Méthode pour obtenir le nombre de bâtiments d'un type donné.
-     *
-     * @param type Le type de bâtiment à obtenir.
-     * @return Le nombre de bâtiments de ce type.
-     */
-    public int getBuildings(BuildingType type) {
-        return buildingMap.get(type);
-    }
-
-    /**
-     * Méthode pour obtenir le nombre total de bâtiments du joueur.
-     * On additionne le nombre de bâtiments de chaque type.
-     *
-     * @return Le nombre total de bâtiments du joueur.
-     */
-    public int getBuildingsCount() {
-        int count = 0;
-        for (Entry<BuildingType> entry : this.buildingMap) {
-            count += entry.getValue();
-        }
-        return count;
-    }
-
-    /**
-     * Méthode pour ajouter une unité au joueur.
-     *
-     * @param type  Le type d'unité à ajouter.
-     * @param count Le nombre d'unités de ce type à ajouter.
-     */
-    public void addUnits(UnitType type, int count) {
-        unitMap.increment(type, count);
-    }
-
-    /**
-     * Méthode pour retirer une unité du joueur.
-     *
-     * @param type  Le type d'unité à retirer.
-     * @param count Le nombre d'unités de ce type à retirer.
-     */
-    public void removeUnits(UnitType type, int count) {
-        unitMap.decrement(type, count);
-    }
-
-    /**
-     * Méthode pour obtenir le nombre d'unités d'un type donné.
-     *
-     * @param type Le type d'unité à obtenir.
-     * @return Le nombre d'unités de ce type.
-     */
-    public int getUnits(UnitType type) {
-        return unitMap.get(type);
-    }
-
-    /**
-     * Méthode pour obtenir le nombre total d'unités du joueur.
-     * On additionne le nombre d'unités de chaque type.
-     *
-     * @return Le nombre total d'unités du joueur.
-     */
-    public int getUnitsCount() {
-        int count = 0;
-        for (Entry<UnitType> entry : this.unitMap) {
-            count += entry.getValue();
-        }
-        return count;
+    public EnumIntMap<UnitType> getUnitMap() {
+        return unitMap;
     }
 
     /**
@@ -250,5 +182,7 @@ public class Player {
             }
         }
         this.pendingOrders.clear();
+        MainController mainController = View.MAIN.getController();
+        mainController.updateFields();
     }
 }

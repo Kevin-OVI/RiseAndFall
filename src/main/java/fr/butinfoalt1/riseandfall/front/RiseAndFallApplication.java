@@ -81,6 +81,9 @@ public class RiseAndFallApplication extends Application {
         stage.show();
 
         mainWindow = stage;
+
+        MainController mainController = View.MAIN.getController();
+        mainController.updateFields();
     }
 
     /**
