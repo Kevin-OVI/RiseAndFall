@@ -39,6 +39,11 @@ public class Player {
      */
     private int goldAmount = 50;
 
+    public Player() {
+        for (Entry<BuildingType> entry : this.buildingMap) {
+            entry.setValue(entry.getKey().getInitialAmount());
+        }
+    }
 
     /**
      * Méthode pour obtenir la quantité d'or actuelle du joueur.
@@ -121,6 +126,20 @@ public class Player {
     }
 
     /**
+     * Méthode pour obtenir le nombre total de bâtiments du joueur.
+     * On additionne le nombre de bâtiments de chaque type.
+     *
+     * @return Le nombre total de bâtiments du joueur.
+     */
+    public int getBuildingsCount() {
+        int count = 0;
+        for (Entry<BuildingType> entry : this.buildingMap) {
+            count += entry.getValue();
+        }
+        return count;
+    }
+
+    /**
      * Méthode pour ajouter une unité au joueur.
      *
      * @param type  Le type d'unité à ajouter.
@@ -148,6 +167,20 @@ public class Player {
      */
     public int getUnits(UnitType type) {
         return unitMap.get(type);
+    }
+
+    /**
+     * Méthode pour obtenir le nombre total d'unités du joueur.
+     * On additionne le nombre d'unités de chaque type.
+     *
+     * @return Le nombre total d'unités du joueur.
+     */
+    public int getUnitsCount() {
+        int count = 0;
+        for (Entry<UnitType> entry : this.unitMap) {
+            count += entry.getValue();
+        }
+        return count;
     }
 
     /**

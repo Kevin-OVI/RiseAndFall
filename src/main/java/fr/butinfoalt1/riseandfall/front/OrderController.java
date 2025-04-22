@@ -76,8 +76,9 @@ public class OrderController {
         }
 
         Counter goldCounter = new Counter(Player.SINGLE_PLAYER.getGoldAmount());
-        goldCounter.addChangeListener(goldAmount -> this.goldField.setText(String.valueOf(goldAmount)));
+        goldCounter.addListener(goldAmount -> this.goldField.setText(String.valueOf(goldAmount)));
         Counter allowedUnitsCounter = new Counter(Player.SINGLE_PLAYER.getAllowedUnitCount());
+        Counter allowedBuildingsCounter = new Counter(5);
 
         this.unitVBox.getChildren().clear();
         for (EnumIntMap.Entry<UnitType> entry : pendingUnits) {
@@ -88,14 +89,19 @@ public class OrderController {
 
         this.buildingsVBox.getChildren().clear();
         for (EnumIntMap.Entry<BuildingType> entry : pendingBuildings) {
-            this.buildingsVBox.getChildren().add(new PurchasableItemAmountSelector<>(entry, goldCounter,
-                    (amount) -> amount <= 5));
+            Modifier buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
+            PurchasableItemAmountSelector<BuildingType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
+                    (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
+            selector.addListener(amount -> buildingModifier.setDelta(-amount));
+            allowedBuildingsCounter.addListener(value -> selector.updateButtonsState());
+            this.buildingsVBox.getChildren().add(selector);
         }
 
         goldCounter.setDispatchChanges(true);
+        allowedBuildingsCounter.setDispatchChanges(true);
 
-        int totalUnits = Player.SINGLE_PLAYER.getUnits(UnitType.WARRIOR);
-        int totalBuildings = Player.SINGLE_PLAYER.getBuildings(BuildingType.HUT);
+        int totalUnits = Player.SINGLE_PLAYER.getUnitsCount();
+        int totalBuildings = Player.SINGLE_PLAYER.getBuildingsCount();
 
         totalUnitsField.setText("Unités totales : " + totalUnits);
         totalBuildingsField.setText("Bâtiments totaux : " + totalBuildings);

@@ -1,5 +1,7 @@
 package fr.butinfoalt1.riseandfall.gamelogic.counter;
 
+import fr.butinfoalt1.riseandfall.gamelogic.Dispatcher;
+
 import java.util.HashSet;
 import java.util.function.Consumer;
 
@@ -22,12 +24,7 @@ public class Counter {
     /**
      * Ensemble d'écouteurs de changement de valeur du compteur.
      */
-    private final HashSet<Consumer<Integer>> changeListeners = new HashSet<>();
-
-    /**
-     * Indique si les changements doivent être dispatchés aux écouteurs.
-     */
-    private boolean dispatchChanges = false;
+    private final Dispatcher<Integer> dispatcher = new Dispatcher<>(false);
 
     /**
      * Valeur actuelle du compteur.
@@ -55,8 +52,7 @@ public class Counter {
     public Modifier addModifier(int delta) {
         Modifier modifier = new Modifier(this, delta);
         this.modifiers.add(modifier);
-        this.currentValue += delta;
-        this.callChangeListeners();
+        this.dispatcher.dispatch(this.currentValue += delta);
         return modifier;
     }
 
@@ -78,8 +74,7 @@ public class Counter {
      */
     public void removeModifier(Modifier modifier) {
         if (this.modifiers.remove(modifier)) {
-            this.currentValue -= modifier.getDelta();
-            this.callChangeListeners();
+            this.dispatcher.dispatch(this.currentValue -= modifier.getDelta());
         }
     }
 
@@ -91,45 +86,6 @@ public class Counter {
      */
     public boolean hasModifier(Modifier modifier) {
         return this.modifiers.contains(modifier);
-    }
-
-    /**
-     * Ajoute un écouteur de changement de valeur du compteur.
-     *
-     * @param listener L'écouteur à ajouter.
-     */
-    public void addChangeListener(Consumer<Integer> listener) {
-        this.changeListeners.add(listener);
-    }
-
-    /**
-     * Supprime un écouteur de changement de valeur du compteur.
-     *
-     * @param listener L'écouteur à supprimer.
-     */
-    public void removeChangeListener(Consumer<Integer> listener) {
-        this.changeListeners.remove(listener);
-    }
-
-    /**
-     * Vérifie si les changements doivent être dispatchés aux écouteurs.
-     *
-     * @return true si les changements doivent être dispatchés, false sinon.
-     */
-    public boolean isDispatchChanges() {
-        return this.dispatchChanges;
-    }
-
-    /**
-     * Définit si les changements doivent être dispatchés aux écouteurs.
-     *
-     * @param dispatchChanges true pour dispatcher les changements, false sinon.
-     */
-    public void setDispatchChanges(boolean dispatchChanges) {
-        this.dispatchChanges = dispatchChanges;
-        if (dispatchChanges) {
-            this.callChangeListeners();
-        }
     }
 
     /**
@@ -157,19 +113,46 @@ public class Counter {
      * @param newDelta      Le nouveau delta
      */
     void updateCurrentValue(int previousDelta, int newDelta) {
-        this.currentValue += newDelta - previousDelta;
-        this.callChangeListeners();
+        this.dispatcher.dispatch(this.currentValue += newDelta - previousDelta);
     }
 
     /**
-     * Appelle les écouteurs de changement de valeur du compteur.
-     * Si le dispatch des changements est activé, chaque écouteur est informé de la nouvelle valeur.
+     * Ajoute un écouteur de changement de valeur du compteur.
+     *
+     * @param listener L'écouteur à ajouter.
      */
-    private void callChangeListeners() {
-        if (this.dispatchChanges) {
-            for (Consumer<Integer> listener : this.changeListeners) {
-                listener.accept(this.currentValue);
-            }
+    public void addListener(Consumer<Integer> listener) {
+        this.dispatcher.addListener(listener);
+    }
+
+    /**
+     * Supprime un écouteur de changement de valeur du compteur.
+     *
+     * @param listener L'écouteur à supprimer.
+     */
+    public void removeListener(Consumer<Integer> listener) {
+        this.dispatcher.removeListener(listener);
+    }
+
+    /**
+     * Vérifie si la distribution des changements est activée.
+     *
+     * @return true si la distribution des changements est activée, false sinon.
+     */
+    public boolean isDispatchChanges() {
+        return this.dispatcher.isDispatchChanges();
+    }
+
+    /**
+     * Définit si la distribution des changements est activée ou non.
+     * Si true, la valeur actuelle sera distribuée immédiatement.
+     *
+     * @param dispatchChanges true pour activer la distribution des changements, false sinon.
+     */
+    public void setDispatchChanges(boolean dispatchChanges) {
+        this.dispatcher.setDispatchChanges(dispatchChanges);
+        if (dispatchChanges) {
+            this.dispatcher.dispatch(this.currentValue);
         }
     }
 }

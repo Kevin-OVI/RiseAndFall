@@ -1,5 +1,6 @@
 package fr.butinfoalt1.riseandfall.front.components;
 
+import fr.butinfoalt1.riseandfall.gamelogic.Dispatcher;
 import fr.butinfoalt1.riseandfall.gamelogic.counter.Counter;
 import fr.butinfoalt1.riseandfall.gamelogic.counter.Modifier;
 import fr.butinfoalt1.riseandfall.gamelogic.map.EnumIntMap;
@@ -12,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -30,6 +32,12 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
      * Si null, aucune validation supplémentaire n'est effectuée.
      */
     private final Function<Integer, Boolean> amountValidator;
+
+    /**
+     * Le dispatcher pour la quantité de l'élément.
+     * Il est utilisé pour notifier les changements de quantité.
+     */
+    private final Dispatcher<Integer> changeDispatcher = new Dispatcher<>(true);
 
     /**
      * Le modificateur d'or associé à cet élément.
@@ -76,7 +84,7 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
         this.increaseButton.setOnAction(this::onIncreaseButtonClicked);
 
         this.updateDecreaseButtonState();
-        goldCounter.addChangeListener(goldAmount -> increaseButton.setDisable(goldAmount < entry.getKey().getPrice() || this.isAmountInvalid(entry.getValue() + 1)));
+        goldCounter.addListener(goldAmount -> this.updateIncreaseButtonState());
 
         children.add(nameLabel);
         children.add(this.decreaseButton);
@@ -105,8 +113,9 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
             entry.setValue(--count);
             countLabel.setText(String.valueOf(count));
             this.goldModifier.setDelta(-entry.getKey().getPrice() * count);
+            this.changeDispatcher.dispatch(count);
         }
-        this.updateDecreaseButtonState();
+        this.updateButtonsState();
     }
 
     /**
@@ -120,8 +129,9 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
             entry.setValue(++count);
             countLabel.setText(String.valueOf(count));
             this.goldModifier.setDelta(-entry.getKey().getPrice() * count);
+            this.changeDispatcher.dispatch(count);
         }
-        this.updateDecreaseButtonState();
+        this.updateButtonsState();
     }
 
     /**
@@ -129,7 +139,12 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
      */
     private void updateDecreaseButtonState() {
         int count = entry.getValue();
-        decreaseButton.setDisable(count <= 0 || this.isAmountInvalid(count - 1));
+        decreaseButton.setDisable(count <= 0 || !this.isAmountValid(count - 1));
+    }
+
+    private void updateIncreaseButtonState() {
+        int count = entry.getValue();
+        increaseButton.setDisable(this.goldModifier.getCounter().getCurrentValue() < entry.getKey().getPrice() || !this.isAmountValid(count + 1));
     }
 
     /**
@@ -138,10 +153,55 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
      * @param amount La quantité à valider.
      * @return true si la quantité est invalide, false sinon.
      */
-    private boolean isAmountInvalid(int amount) {
+    private boolean isAmountValid(int amount) {
         if (this.amountValidator != null) {
-            return !this.amountValidator.apply(amount);
+            return this.amountValidator.apply(amount);
         }
         return false;
+    }
+
+    /**
+     * Ajoute un écouteur pour les changements de quantité.
+     *
+     * @param listener L'écouteur à ajouter.
+     */
+    public void addListener(Consumer<Integer> listener) {
+        this.changeDispatcher.addListener(listener);
+    }
+
+    /**
+     * Supprime un écouteur pour les changements de quantité.
+     *
+     * @param listener L'écouteur à supprimer.
+     */
+    public void removeListener(Consumer<Integer> listener) {
+        this.changeDispatcher.removeListener(listener);
+    }
+
+    /**
+     * Vérifie si les changements doivent être dispatchés.
+     *
+     * @return true si les changements doivent être dispatchés, false sinon.
+     */
+    public boolean isDispatchChanges() {
+        return this.changeDispatcher.isDispatchChanges();
+    }
+
+    /**
+     * Définit si les changements doivent être dispatchés.
+     * Si true, la valeur actuelle sera distribuée immédiatement.
+     *
+     * @param dispatchChanges true pour activer le dispatching des changements, false sinon.
+     */
+    public void setDispatchChanges(boolean dispatchChanges) {
+        this.changeDispatcher.setDispatchChanges(dispatchChanges);
+        if (dispatchChanges) {
+            this.changeDispatcher.dispatch(this.entry.getValue());
+        }
+    }
+
+    public void updateButtonsState() {
+        this.updateDecreaseButtonState();
+        this.updateIncreaseButtonState();
     }
 }

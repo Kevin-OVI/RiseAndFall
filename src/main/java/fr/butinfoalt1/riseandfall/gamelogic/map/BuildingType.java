@@ -6,9 +6,15 @@ package fr.butinfoalt1.riseandfall.gamelogic.map;
  */
 public enum BuildingType implements PurchasableItem {
     /**
-     * Type de bâtiment représentant une hutte, qui coûte 5 pièces d'or, produit 1 pièce d'or et un maximum de 3 unités par tour.
+     * Type de bâtiment représentant une carrière, qui coûte 5 pièces d'or, produit 1 pièce d'or par tour.
      */
-    HUT("Hutte", 5, 1, 3);
+    QUARRY("Carrière", 5, 1, 0, 4),
+    /**
+     * Type de bâtiment représentant une caserne, qui coûte 10 pièces d'or, peut produire 3 unités par tour.
+     */
+    BARRACKS("Caserne", 10, 0, 3, 1),
+    ;
+
 
     /**
      * Nom d'affichage du type de bâtiment.
@@ -26,6 +32,10 @@ public enum BuildingType implements PurchasableItem {
      * Nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      */
     private final int maxUnits;
+    /**
+     * Nombre initial de bâtiments de ce type.
+     */
+    private final int initialAmount;
 
     /**
      * Constructeur de l'énumération BuildingType.
@@ -36,10 +46,24 @@ public enum BuildingType implements PurchasableItem {
      * @param maxUnits       Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      */
     BuildingType(String displayName, int price, int goldProduction, int maxUnits) {
+        this(displayName, price, goldProduction, maxUnits, 0);
+    }
+
+    /**
+     * Constructeur de l'énumération BuildingType.
+     *
+     * @param displayName    Le nom d'affichage du type de bâtiment.
+     * @param price          Le prix du bâtiment en pièces d'or.
+     * @param goldProduction La production d'or du bâtiment par tour.
+     * @param maxUnits       Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
+     * @param initialAmount  Le nombre initial de bâtiments de ce type.
+     */
+    BuildingType(String displayName, int price, int goldProduction, int maxUnits, int initialAmount) {
         this.displayName = displayName;
         this.price = price;
         this.goldProduction = goldProduction;
         this.maxUnits = maxUnits;
+        this.initialAmount = initialAmount;
     }
 
     /**
@@ -78,5 +102,14 @@ public enum BuildingType implements PurchasableItem {
      */
     public int getMaxUnits() {
         return this.maxUnits;
+    }
+
+    /**
+     * Méthode pour obtenir le nombre initial de bâtiments de ce type.
+     *
+     * @return Le nombre initial de bâtiments de ce type.
+     */
+    public int getInitialAmount() {
+        return this.initialAmount;
     }
 }
