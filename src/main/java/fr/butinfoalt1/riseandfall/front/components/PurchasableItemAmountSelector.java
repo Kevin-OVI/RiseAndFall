@@ -140,7 +140,7 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
      */
     private boolean isAmountInvalid(int amount) {
         if (this.amountValidator != null) {
-            return this.amountValidator.apply(amount);
+            return !this.amountValidator.apply(amount);
         }
         return false;
     }
