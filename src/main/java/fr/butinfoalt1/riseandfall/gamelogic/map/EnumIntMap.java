@@ -90,6 +90,14 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
     }
 
     /**
+     * Permet d'obtenir le nombre total de valeurs associées dans l'association.
+     * @return Le nombre total de valeurs associées dans l'association.
+     */
+    public int getTotal() {
+        return Arrays.stream(this.map).sum();
+    }
+
+    /**
      * Permet d'obtenir un itérateur sur les entrées de l'association.
      * Nécessaire pour l'implémentation de l'interface Iterable.
      *

@@ -35,7 +35,7 @@ public class OrderCreateBuilding implements BaseOrder {
      */
     @Override
     public void execute(Player player) {
-        player.addBuildings(this.buildingType, this.count);
+        player.getBuildingMap().increment(this.buildingType, this.count);
     }
 
     /**

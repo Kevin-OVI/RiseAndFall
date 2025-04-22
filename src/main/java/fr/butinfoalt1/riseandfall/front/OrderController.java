@@ -100,8 +100,8 @@ public class OrderController {
         goldCounter.setDispatchChanges(true);
         allowedBuildingsCounter.setDispatchChanges(true);
 
-        int totalUnits = Player.SINGLE_PLAYER.getUnitsCount();
-        int totalBuildings = Player.SINGLE_PLAYER.getBuildingsCount();
+        int totalUnits = Player.SINGLE_PLAYER.getUnitMap().getTotal();
+        int totalBuildings = Player.SINGLE_PLAYER.getBuildingMap().getTotal();
 
         totalUnitsField.setText("Unités totales : " + totalUnits);
         totalBuildingsField.setText("Bâtiments totaux : " + totalBuildings);
