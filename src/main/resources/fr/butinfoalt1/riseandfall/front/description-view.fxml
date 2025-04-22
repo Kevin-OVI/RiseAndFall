@@ -10,7 +10,7 @@
       fx:controller="fr.butinfoalt1.riseandfall.front.description.DescriptionController" alignment="CENTER">
     <StackPane xmlns:fx="http://javafx.com/fxml/1" VBox.vgrow="ALWAYS">
         <!-- Image en arrière-plan -->
-        <ImageView fx:id="backgroundImageView" opacity="0.6" managed="false"/>
+        <ImageView fx:id="backgroundImageView" opacity="0.2" managed="false"/>
         <!-- Texte en avant-plan -->
         <ScrollPane fitToWidth="true" styleClass="text-scroll-pane" fx:id="textScrollPane">
             <padding>
