@@ -240,6 +240,7 @@ public class Player {
     public void executeOrders() {
         for (Entry<BuildingType> entry : this.buildingMap) {
             this.addGoldAmount(entry.getValue() * entry.getKey().getGoldProduction());
+            this.addIntelligence(entry.getValue() * entry.getKey().getIntelligenceProduction());
         }
 
         for (BaseOrder order : this.pendingOrders) {
