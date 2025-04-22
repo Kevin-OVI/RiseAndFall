@@ -3,11 +3,12 @@ package fr.butinfoalt1.riseandfall.front;
 import fr.butinfoalt1.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt1.riseandfall.gamelogic.Player;
 import javafx.fxml.FXML;
+import javafx.stage.Stage;
 
 /**
  * Contrôleur pour la vue principale de l'application.
  */
-public class MainController {
+public class MainController extends Stage {
     /**
      * Méthode appelée par JavaFX quand on clique sur le bouton pour ouvrir la page de description.
      */

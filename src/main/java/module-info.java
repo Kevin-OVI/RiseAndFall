@@ -1,6 +1,7 @@
 module fr.butinfoalt1.riseandfall.front {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.desktop;
 
 
     opens fr.butinfoalt1.riseandfall.front to javafx.fxml;
