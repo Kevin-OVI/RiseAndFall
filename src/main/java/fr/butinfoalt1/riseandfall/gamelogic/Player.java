@@ -40,6 +40,7 @@ public class Player {
      * Initialisé à 50 pièces d'or au début de la partie.
      */
     private int goldAmount = 50;
+    private int intelligence = 50;
 
     public Player() {
         for (Entry<BuildingType> entry : this.buildingMap) {
@@ -63,6 +64,28 @@ public class Player {
      */
     public void setGoldAmount(int goldAmount) {
         this.goldAmount = goldAmount;
+    }
+
+    /**
+     * Méthode pour obtenir la quantité d'intelligence actuelle du joueur.
+     *
+     * @return La quantité d'intelligence actuelle du joueur.
+     */
+    public int getIntelligence() {
+        return intelligence;
+    }
+
+    /**
+     * Méthode pour définir la quantité d'intelligence du joueur.
+     *
+     * @param intelligence La nouvelle quantité d'intelligence à définir.
+     */
+    public void setIntelligence(int intelligence) {
+        this.intelligence = intelligence;
+    }
+
+    public void addIntelligence(int valeur) {
+        this.intelligence += valeur;
     }
 
     /**
