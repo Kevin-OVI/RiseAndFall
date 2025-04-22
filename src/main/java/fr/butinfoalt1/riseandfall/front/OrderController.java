@@ -18,7 +18,13 @@ import javafx.scene.layout.VBox;
  * Contrôleur pour la vue de gestion des ordres.
  */
 public class OrderController {
+    /**
+     * Liste des unités en attente de création.
+     */
     private EnumIntMap<UnitType> pendingUnits;
+    /**
+     * Liste des bâtiments en attente de création.
+     */
     private EnumIntMap<BuildingType> pendingBuildings;
 
     /**
@@ -53,6 +59,9 @@ public class OrderController {
 
     /**
      * Méthode pour charger les ordres en attente du joueur dans l'interface.
+     * Elle met à jour les composants de l'interface utilisateur
+     * pour afficher les unités et bâtiments en attente de création,
+     * ainsi que la quantité d'or disponible.
      */
     public void loadPendingOrders() {
         this.pendingUnits = new EnumIntMap<>(UnitType.class);

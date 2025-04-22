@@ -27,6 +27,9 @@ public class MainController {
         orderController.loadPendingOrders();
     }
 
+    /**
+     * Méthode appelée par JavaFX quand on clique sur le bouton pour passer au tour suivant.
+     */
     @FXML
     private void handleEndTurn() {
         Player.SINGLE_PLAYER.executeOrders();
