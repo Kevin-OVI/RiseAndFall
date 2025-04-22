@@ -15,6 +15,8 @@ import java.util.Objects;
  * Elle affiche une image de fond et un texte descriptif.
  */
 public class DescriptionStage extends Stage {
+    public static final DescriptionStage INSTANCE = new DescriptionStage();
+
     /**
      * Texte descriptif du jeu.
      * Il est affiché dans la scène de description.
@@ -31,7 +33,7 @@ public class DescriptionStage extends Stage {
      * Constructeur de la scène de description.
      * Il initialise la taille minimale de la fenêtre, défini le titre et la scène de contenu.
      */
-    public DescriptionStage() {
+    private DescriptionStage() {
         this.setMinWidth(256);
         this.setMinHeight(192);
         this.setTitle("Description de Rise & fall");

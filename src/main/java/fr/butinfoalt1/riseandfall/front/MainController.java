@@ -13,8 +13,8 @@ public class MainController {
      */
     @FXML
     public void switchToDescriptionPage() {
-        DescriptionStage descriptionPage = new DescriptionStage();
-        descriptionPage.show();
+        DescriptionStage.INSTANCE.show();
+        DescriptionStage.INSTANCE.toFront();
     }
 
     /**
