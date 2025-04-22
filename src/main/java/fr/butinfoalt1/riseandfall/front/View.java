@@ -13,6 +13,10 @@ import java.util.function.Consumer;
  */
 public enum View {
     /**
+     *
+     */
+    WELCOME("welcome-view.fxml", "Rise & Fall - Bienvenue"),
+    /**
      * Vue principale de l'application.
      */
     MAIN("main-view.fxml", "Rise & Fall"),
