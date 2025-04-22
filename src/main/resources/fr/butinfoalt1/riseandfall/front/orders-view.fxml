@@ -13,11 +13,7 @@
 
     <VBox alignment="CENTER" spacing="10">
         <TitleLabel>Vos ressources :</TitleLabel>
-        <!-- Quantité d'or -->
-        <HBox alignment="CENTER" spacing="10">
-            <Label text="🪙 Or :"/>
-            <Label fx:id="goldField" text="0"/>
-        </HBox>
+        <Label fx:id="goldField"/>
         <Label fx:id="unitsField" text="0"/>
     </VBox>
 

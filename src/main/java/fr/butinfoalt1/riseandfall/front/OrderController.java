@@ -70,7 +70,7 @@ public class OrderController {
         }
 
         Counter goldCounter = new Counter(Player.SINGLE_PLAYER.getGoldAmount());
-        goldCounter.addListener(goldAmount -> this.goldField.setText(String.valueOf(goldAmount)));
+        goldCounter.addListener(goldAmount -> this.goldField.setText("Or restant : " + goldAmount));
         Counter allowedUnitsCounter = new Counter(Player.SINGLE_PLAYER.getAllowedUnitCount());
         allowedUnitsCounter.addListener(allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
         Counter allowedBuildingsCounter = new Counter(5);
