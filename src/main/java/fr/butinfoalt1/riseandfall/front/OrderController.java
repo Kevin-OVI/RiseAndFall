@@ -34,6 +34,12 @@ public class OrderController {
     private Label goldField;
 
     /**
+     * Champ pour le composant de la quantité d'or.
+     */
+    @FXML
+    private Label IntelligenceField;
+
+    /**
      * Champ pour le composant contenant les unités.
      */
     @FXML
@@ -105,6 +111,7 @@ public class OrderController {
 
         totalUnitsField.setText("Unités totales : " + totalUnits);
         totalBuildingsField.setText("Bâtiments totaux : " + totalBuildings);
+        IntelligenceField.setText(String.valueOf(Player.SINGLE_PLAYER.getIntelligence()));
     }
 
     /**
