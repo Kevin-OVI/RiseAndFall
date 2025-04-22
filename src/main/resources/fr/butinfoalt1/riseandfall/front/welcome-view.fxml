@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
 <?import fr.butinfoalt1.riseandfall.front.components.TitleLabel?>
 <?import javafx.geometry.Insets?>
-<VBox xmlns="http://javafx.com/javafx" alignment="CENTER" spacing="20.0"
-      xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx" alignment="CENTER"
+      spacing="20.0"
       fx:controller="fr.butinfoalt1.riseandfall.front.WelcomeView"
       prefHeight="400.0" prefWidth="600.0">
     <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
         Bienvenue sur Rise &amp; Fall futur empereur.
     </TitleLabel>
     <VBox.margin>
-        <Insets bottom="40" />
+        <Insets bottom="40"/>
     </VBox.margin>
     <Button text="Jouer" onAction="#play"/>
 </VBox>

@@ -51,11 +51,11 @@ public enum BuildingType implements PurchasableItem {
     /**
      * Constructeur de l'énumération BuildingType.
      *
-     * @param displayName    Le nom d'affichage du type de bâtiment.
-     * @param price          Le prix du bâtiment en pièces d'or.
-     * @param goldProduction La production d'or du bâtiment par tour.
-     * @param intelligenceProduction  La production d'intelligence du bâtiment par tour.
-     * @param maxUnits       Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
+     * @param displayName            Le nom d'affichage du type de bâtiment.
+     * @param price                  Le prix du bâtiment en pièces d'or.
+     * @param goldProduction         La production d'or du bâtiment par tour.
+     * @param intelligenceProduction La production d'intelligence du bâtiment par tour.
+     * @param maxUnits               Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      */
     BuildingType(String displayName, int price, int goldProduction, int maxUnits, int intelligenceProduction) {
         this(displayName, price, goldProduction, intelligenceProduction, maxUnits, 0);
