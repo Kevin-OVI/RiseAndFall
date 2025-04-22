@@ -8,10 +8,9 @@
       fx:controller="fr.butinfoalt1.riseandfall.front.MainController">
     <VBox alignment="CENTER" spacing="10">
         <TitleLabel>Vos ressources :</TitleLabel>
-        <HBox alignment="CENTER" spacing="10">
-            <Label text="🪙 Or :"/>
-            <Label fx:id="goldField" text="0"/>
-        </HBox>
+
+        <Label fx:id="goldField"/>
+        <Label fx:id="intelligenceField"/>
 
         <VBox alignment="CENTER" spacing="10">
             <TitleLabel>Vos unités :</TitleLabel>

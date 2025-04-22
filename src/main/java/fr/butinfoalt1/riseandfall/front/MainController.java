@@ -17,6 +17,11 @@ public class MainController {
     public Label goldField;
 
     /**
+     * Champ pour le composant de l'intelligence.
+     */
+    public Label intelligenceField;
+
+    /**
      * Champ pour le composant contenant les unités.
      */
     @FXML
@@ -59,7 +64,9 @@ public class MainController {
      * Méthode pour mettre à jour l'affichage des ressources du joueur.
      */
     public void updateFields() {
-        this.goldField.setText(String.valueOf(Player.SINGLE_PLAYER.getGoldAmount()));
+        this.goldField.setText("Or : " + Player.SINGLE_PLAYER.getGoldAmount());
+        this.intelligenceField.setText("Intelligence : " + Player.SINGLE_PLAYER.getIntelligence());
+
         this.unitVBox.getChildren().clear();
         this.buildingsVBox.getChildren().clear();
         for (var entry : Player.SINGLE_PLAYER.getUnitMap()) {
