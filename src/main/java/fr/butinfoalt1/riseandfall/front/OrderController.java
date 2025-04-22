@@ -79,7 +79,8 @@ public class OrderController {
 
         this.buildingsVBox.getChildren().clear();
         for (EnumIntMap.Entry<BuildingType> entry : pendingBuildings) {
-            this.buildingsVBox.getChildren().add(new PurchasableItemAmountSelector<>(entry, goldCounter));
+            this.buildingsVBox.getChildren().add(new PurchasableItemAmountSelector<>(entry, goldCounter,
+                    (amount) -> amount <= 5));
         }
 
         goldCounter.setDispatchChanges(true);
