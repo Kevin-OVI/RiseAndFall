@@ -18,8 +18,7 @@
             <Label text="🪙 Or :"/>
             <Label fx:id="goldField" text="0"/>
         </HBox>
-        <Label fx:id="totalUnitsField" text="Unités totales : 0"/>
-        <Label fx:id="totalBuildingsField" text="Bâtiments totaux : 0"/>
+        <Label fx:id="unitsField" text="0"/>
     </VBox>
 
     <VBox alignment="CENTER" spacing="10">
