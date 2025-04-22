@@ -11,5 +11,8 @@ public class WelcomeView {
     @FXML
     public void play(ActionEvent actionEvent) {
         RiseAndFallApplication.switchToView(View.MAIN);
+
+        MainController mainController = View.MAIN.getController();
+        mainController.updateFields();
     }
 }
