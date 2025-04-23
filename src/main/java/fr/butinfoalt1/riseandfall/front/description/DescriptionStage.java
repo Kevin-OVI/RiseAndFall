@@ -6,6 +6,7 @@ import javafx.beans.InvalidationListener;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.util.Objects;
@@ -24,7 +25,7 @@ public class DescriptionStage extends Stage {
     private DescriptionStage() {
         this.setMinWidth(256);
         this.setMinHeight(192);
-        this.setTitle("Description de Rise & Fall");
+        this.setTitle(View.DESCRIPTION.getWindowTitle());
         this.setScene(View.DESCRIPTION.getScene(1024, 768, this::setupScene));
     }
 
@@ -55,6 +56,10 @@ public class DescriptionStage extends Stage {
         scene.heightProperty().addListener(adaptImageSize);
         adaptImageSize.invalidated(null); // Appel initial pour adapter l'image à la taille de la fenêtre
 
+        Text mainTitle = new Text("Rise and Fall\n");
+        mainTitle.setTextAlignment(TextAlignment.CENTER);
+        mainTitle.setStyle("-fx-font-size: 36px; -fx-font-weight: bold;");
+
         // Texte formaté avec des titres en gras
         Text intro1 = new Text("Rise and Fall est un jeu développé par une équipe de choc.\n");
         Text intro2 = new Text("Le but est de créer un jeu tour par tour dans un monde fantasy.\n");
@@ -64,32 +69,41 @@ public class DescriptionStage extends Stage {
         objectifTitre.setStyle("-fx-font-weight: bold");
 
         Text objectifTexte = new Text(
-                "Dans Rise & Fall, chaque joueur incarne une civilisation dans un monde fantasy. "
-                        + "Le but est de faire prospérer sa civilisation en gérant ses ressources, en développant son économie, "
-                        + "et en étendant son territoire tout en survivant jusqu’à la fin de la partie.\n\n");
+                """
+                        Dans Rise & Fall, chaque joueur incarne une civilisation dans un monde fantasy. \
+                        Le but est de faire prospérer sa civilisation en gérant ses ressources, en développant son économie, \
+                        et en étendant son territoire tout en survivant jusqu’à la fin de la partie.
+
+                        """);
 
         Text toursTitre = new Text("Déroulement des tours :\n");
         toursTitre.setStyle("-fx-font-weight: bold");
 
         Text toursTexte = new Text(
-                "• Le jeu se joue au tour par tour.\n"
-                        + "• À chaque tour, un joueur peut :\n"
-                        + "  + Collecter des ressources\n"
-                        + "  + Construire des bâtiments\n"
-                        + "  + Recruter des unités\n"
-                        + "  + Déplacer ses unités\n"
-                        + "  + Attaquer ou interagir avec d’autres joueurs ou entités du monde\n\n");
+                """
+                        • Le jeu se joue au tour par tour.
+                        • À chaque tour, un joueur peut :
+                          + Collecter des ressources
+                          + Construire des bâtiments
+                          + Recruter des unités
+                          + Déplacer ses unités
+                          + Attaquer ou interagir avec d’autres joueurs ou entités du monde
+
+                        """);
 
         Text finTitre = new Text("Fin de partie\n");
         finTitre.setStyle("-fx-font-weight: bold");
 
         Text finTexte = new Text(
-                "• La partie se termine lorsqu’il ne reste plus qu’un nombre limité de civilisations en jeu (par exemple : 2 ou 3 joueurs survivants, selon le nombre initial).\n"
-                        + "• L’objectif est donc de faire partie des derniers survivants en éliminant ou surpassant ses adversaires.\n"
-                        + "• La stratégie de survie est aussi importante que l’agression ou la croissance.\n");
+                """
+                        • La partie se termine lorsqu’il ne reste plus qu’un nombre limité de civilisations en jeu (par exemple : 2 ou 3 joueurs survivants, selon le nombre initial).
+                        • L’objectif est donc de faire partie des derniers survivants en éliminant ou surpassant ses adversaires.
+                        • La stratégie de survie est aussi importante que l’agression ou la croissance.
+                        """);
 
         // Ajouter les morceaux de texte dans le TextFlow
         controller.textFlow.getChildren().addAll(
+                mainTitle,
                 intro1, intro2, intro3,
                 objectifTitre, objectifTexte,
                 toursTitre, toursTexte,

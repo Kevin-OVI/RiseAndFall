@@ -12,13 +12,12 @@
         <!-- Image en arrière-plan -->
         <ImageView fx:id="backgroundImageView" opacity="0.2" managed="false"/>
         <!-- Texte en avant-plan -->
-        <ScrollPane fitToWidth="true" styleClass="text-scroll-pane" fx:id="textScrollPane">
+        <ScrollPane fitToWidth="true" styleClass="text-scroll-pane" fx:id="textScrollPane" maxWidth="1000">
             <padding>
                 <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
             <VBox alignment="CENTER">
-                <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;" textAlignment="CENTER">
-                </TextFlow>
+                <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;"/>
             </VBox>
         </ScrollPane>
     </StackPane>
