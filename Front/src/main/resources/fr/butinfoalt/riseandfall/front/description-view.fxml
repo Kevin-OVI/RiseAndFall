@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.TextFlow?>
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="fr.butinfoalt.riseandfall.front.description.DescriptionController" alignment="CENTER">
+    <StackPane xmlns:fx="http://javafx.com/fxml/1" VBox.vgrow="ALWAYS">
+        <!-- Image en arrière-plan -->
+        <ImageView fx:id="backgroundImageView" opacity="0.2" managed="false"/>
+        <!-- Texte en avant-plan -->
+        <ScrollPane fitToWidth="true" styleClass="text-scroll-pane" fx:id="textScrollPane" maxWidth="1000">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <VBox alignment="CENTER">
+                <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;"/>
+            </VBox>
+        </ScrollPane>
+    </StackPane>
+</VBox>
