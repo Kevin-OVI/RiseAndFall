@@ -30,6 +30,11 @@
         <VBox fx:id="buildingsVBox" alignment="CENTER" spacing="10"/>
     </VBox>
 
+    <VBox alignment="CENTER" spacing="10">
+        <TitleLabel>Résumé :</TitleLabel>
+        <Label fx:id="totalPrice"/>
+    </VBox>
+
     <HBox alignment="CENTER" spacing="10">
         <!-- Bouton Sauvegarder -->
         <Button text="Sauvegarder" onAction="#handleSave"/>

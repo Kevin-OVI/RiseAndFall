@@ -13,8 +13,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Composant pour sélectionner la quantité d'un élément achetable.
@@ -25,7 +28,7 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
     /**
      * L'entrée de l'élément achetable
      */
-    private final EnumIntMap.Entry<T> entry;
+    protected final EnumIntMap.Entry<T> entry;
 
     /**
      * Fonction de validation supplémentaire de la quantité en plus de celle du prix.
@@ -80,6 +83,11 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
         this.countLabel = new Label(String.valueOf(entry.getValue()));
         this.increaseButton = new Button("+");
 
+        String detailsText = this.getDetails().entrySet().stream()
+                .map(stringStringEntry -> stringStringEntry.getKey() + " : " + stringStringEntry.getValue())
+                .collect(Collectors.joining(", "));
+        Label detailsLabel = new Label(detailsText);
+
         this.decreaseButton.setOnAction(this::onDecreaseButtonClicked);
         this.increaseButton.setOnAction(this::onIncreaseButtonClicked);
 
@@ -90,6 +98,7 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
         children.add(this.decreaseButton);
         children.add(this.countLabel);
         children.add(this.increaseButton);
+        children.add(detailsLabel);
     }
 
     /**
@@ -203,5 +212,11 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
     public void updateButtonsState() {
         this.updateDecreaseButtonState();
         this.updateIncreaseButtonState();
+    }
+
+    public Map<String, String> getDetails() {
+        return new HashMap<>(Map.of(
+                "Prix", String.valueOf(entry.getKey().getPrice())
+        ));
     }
 }

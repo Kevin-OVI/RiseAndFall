@@ -1,6 +1,8 @@
 package fr.butinfoalt.riseandfall.front;
 
+import fr.butinfoalt.riseandfall.front.components.BuildingAmountSelector;
 import fr.butinfoalt.riseandfall.front.components.PurchasableItemAmountSelector;
+import fr.butinfoalt.riseandfall.front.components.UnitItemSelector;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Modifier;
@@ -52,6 +54,12 @@ public class OrderController {
     private VBox buildingsVBox;
 
     /**
+     * Champ pour le composant contenant le prix total.
+     */
+    @FXML
+    public Label totalPrice;
+
+    /**
      * Méthode pour charger les ordres en attente du joueur dans l'interface.
      * Elle met à jour les composants de l'interface utilisateur
      * pour afficher les unités et bâtiments en attente de création,
@@ -70,7 +78,10 @@ public class OrderController {
         }
 
         Counter goldCounter = new Counter(ClientPlayer.SINGLE_PLAYER.getGoldAmount());
-        goldCounter.addListener(goldAmount -> this.goldField.setText("Or restant : " + goldAmount));
+        goldCounter.addListener(goldAmount -> {
+            this.goldField.setText("Or retant : " + goldAmount);
+            this.totalPrice.setText("Prix total : " + (goldCounter.getInitialValue() - goldAmount));
+        });
         Counter allowedUnitsCounter = new Counter(ClientPlayer.SINGLE_PLAYER.getAllowedUnitCount());
         allowedUnitsCounter.addListener(allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
         Counter allowedBuildingsCounter = new Counter(5);
@@ -78,7 +89,7 @@ public class OrderController {
         this.unitVBox.getChildren().clear();
         for (EnumIntMap.Entry<UnitType> entry : pendingUnits) {
             Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
-            PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
+            UnitItemSelector selector = new UnitItemSelector(entry, goldCounter,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
             this.unitVBox.getChildren().add(selector);
@@ -87,7 +98,7 @@ public class OrderController {
         this.buildingsVBox.getChildren().clear();
         for (EnumIntMap.Entry<BuildingType> entry : pendingBuildings) {
             Modifier buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
-            PurchasableItemAmountSelector<BuildingType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
+            BuildingAmountSelector selector = new BuildingAmountSelector(entry, goldCounter,
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> buildingModifier.setDelta(-amount));
             allowedBuildingsCounter.addListener(value -> selector.updateButtonsState());
