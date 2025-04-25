@@ -77,4 +77,9 @@ public class Dispatcher<T> {
     public void setDispatchChanges(boolean dispatchChanges) {
         this.dispatchChanges = dispatchChanges;
     }
+
+    @Override
+    public String toString() {
+        return "Dispatcher{listeners=%s, dispatchChanges=%s}".formatted(this.listeners, this.dispatchChanges);
+    }
 }

@@ -155,4 +155,9 @@ public class Counter {
             this.dispatcher.dispatch(this.currentValue);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Counter{initialValue=%d, modifiers=%s, dispatcher=%s, currentValue=%d}".formatted(this.initialValue, this.modifiers, this.dispatcher, this.currentValue);
+    }
 }

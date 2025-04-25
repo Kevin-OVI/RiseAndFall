@@ -66,4 +66,9 @@ public class OrderCreateUnit implements BaseOrder {
     public int getCount() {
         return count;
     }
+
+    @Override
+    public String toString() {
+        return "OrderCreateUnit{unitType=%s, count=%d}".formatted(this.unitType, this.count);
+    }
 }

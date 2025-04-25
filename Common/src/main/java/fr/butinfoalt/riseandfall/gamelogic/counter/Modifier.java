@@ -76,4 +76,10 @@ public class Modifier {
     public int computeWithAlternativeDelta(int alternativeDelta) {
         return this.counter.getCurrentValue() - this.delta + alternativeDelta;
     }
+
+    @Override
+    public String toString() {
+        // On n'affiche pas le compteur pour éviter les boucles infinies
+        return "Modifier{delta=%d}".formatted(this.delta);
+    }
 }
