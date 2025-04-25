@@ -6,14 +6,14 @@ package fr.butinfoalt.riseandfall.gamelogic;
  */
 public enum Race {
     /**
-     * Race humaine, équilibrée et polyvalente.
+     * Race humaine, équilibrée avec des compétences militaires et économiques.
      */
-    HUMAIN("Humain", "Race équilibrée avec des compétences militaires et économiques"),
+    HUMAN("Humain", "Race équilibrée avec des compétences militaires et économiques"),
 
     /**
-     * Race des morts-vivants, spécialisée dans la résilience et les attaques magiques.
+     * Race des morts-vivants, focalisée sur la magie noire et la résurrection.
      */
-    MORT_VIVANT("Mort-vivant", "Race focalisée sur la magie noire et la résurrection");
+    UNDEAD("Mort-vivant", "Race focalisée sur la magie noire et la résurrection");
 
     private final String displayName;
     private final String description;

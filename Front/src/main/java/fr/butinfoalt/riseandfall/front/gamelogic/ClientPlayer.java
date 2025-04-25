@@ -3,6 +3,7 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 import fr.butinfoalt.riseandfall.front.MainController;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
+import fr.butinfoalt.riseandfall.gamelogic.Race;
 
 /**
  * Représente un joueur dans le jeu du coté client.
@@ -14,7 +15,12 @@ public class ClientPlayer extends Player {
      * Utilisé pour représenter un joueur unique dans le jeu.
      * Ce champ sera retiré lors de l'implémentation du mode multijoueur.
      */
-    public static final ClientPlayer SINGLE_PLAYER = new ClientPlayer();
+    // TODO : Rendre la race sélectionnable par un menu
+    public static final ClientPlayer SINGLE_PLAYER = new ClientPlayer(Race.HUMAN);
+
+    public ClientPlayer(Race race) {
+        super(race);
+    }
 
     @Override
     public void executeOrders() {

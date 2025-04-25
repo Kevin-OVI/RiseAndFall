@@ -1,5 +1,5 @@
 package fr.butinfoalt.riseandfall.gamelogic;
-// Modifications à Player.java
+
 import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap;
 import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap.Entry;
@@ -11,11 +11,10 @@ import java.util.ArrayList;
 
 /**
  * Représente un joueur dans le jeu.
- * Chaque joueur a une race, une quantité d'or, des bâtiments et des unités.
+ * Chaque joueur a une race, une quantité d'or, une quantité d'intelligence, des bâtiments et des unités.
  * Il peut également donner des ordres pour créer des bâtiments ou des unités.
  */
 public class Player {
-
     /**
      * Association entre les types de bâtiments et le nombre de bâtiments de chaque type.
      */
@@ -33,26 +32,24 @@ public class Player {
      * Initialisé à 50 pièces d'or au début de la partie.
      */
     private int goldAmount = 50;
+
+    /**
+     * Quantité d'intelligence que possède le joueur.
+     */
     private int intelligence = 50;
 
     /**
      * Race du joueur
      */
-    private Race race;
+    private final Race race;
 
-    public Player() {
-        this(Race.HUMAIN); // Par défaut, le joueur est humain
-    }
-
+    /**
+     * Constructeur de la classe Player.
+     *
+     * @param race La race choisie par le joueur.
+     */
     public Player(Race race) {
         this.race = race;
-
-        // Application des bonus/malus de départ selon la race
-        if (race == Race.MORT_VIVANT) {
-            // Les morts-vivants ont plus d'intelligence mais moins d'or
-            this.intelligence = 70;
-            this.goldAmount = 40;
-        }
 
         for (Entry<BuildingType> entry : this.buildingMap) {
             entry.setValue(entry.getKey().getInitialAmount());
@@ -66,15 +63,6 @@ public class Player {
      */
     public Race getRace() {
         return race;
-    }
-
-    /**
-     * Méthode pour changer la race du joueur.
-     *
-     * @param race La nouvelle race du joueur.
-     */
-    public void setRace(Race race) {
-        this.race = race;
     }
 
     /**
@@ -127,11 +115,6 @@ public class Player {
         int allowedCount = 0;
         for (Entry<BuildingType> entry : this.buildingMap) {
             allowedCount += entry.getValue() * entry.getKey().getMaxUnits();
-        }
-
-        // Bonus de population pour les humains
-        if (race == Race.HUMAIN) {
-            allowedCount = (int)(allowedCount * 1.2); // +20% de population pour les humains
         }
 
         return allowedCount;
