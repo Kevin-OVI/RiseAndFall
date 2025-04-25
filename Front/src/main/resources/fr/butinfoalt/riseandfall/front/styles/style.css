@@ -1,0 +1,8 @@
+.root {
+    -fx-font-family: "IM FELL ENGLISH SC", Times, serif;
+    -fx-font-size: 12pt;
+}
+
+.title-label {
+    -fx-font-size: 120%;
+}

@@ -38,7 +38,7 @@ public class DescriptionStage extends Stage {
      */
     private void setupScene(Scene scene) {
         DescriptionController controller = View.DESCRIPTION.getController();
-        scene.getStylesheets().add(Objects.requireNonNull(RiseAndFallApplication.class.getResource("description.css")).toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/description.css")).toExternalForm());
 
         // Définir l'image de fond
         Image image = new Image(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("images/background.jpg")));

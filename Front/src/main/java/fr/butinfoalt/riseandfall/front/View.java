@@ -1,10 +1,12 @@
 package fr.butinfoalt.riseandfall.front;
 
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -29,6 +31,9 @@ public enum View {
      */
     DESCRIPTION("description-view.fxml", "Rise & Fall - Description et règles du jeu"),
     ;
+
+
+    private static final String GENERAL_STYLESHEET = Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/style.css")).toExternalForm();
 
     /**
      * Le loader FXML utilisé pour charger la vue.
@@ -63,7 +68,12 @@ public enum View {
      * @return La racine de la scène de la vue.
      */
     public Parent getSceneRoot() {
-        return this.fxmlLoader.getRoot();
+        Parent root = this.fxmlLoader.getRoot();
+        ObservableList<String> styleSheets = root.getStylesheets();
+        if (!styleSheets.contains(GENERAL_STYLESHEET)) {
+            styleSheets.add(GENERAL_STYLESHEET);
+        }
+        return root;
     }
 
     /**
