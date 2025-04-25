@@ -66,4 +66,9 @@ public class OrderCreateBuilding implements BaseOrder {
     public int getCount() {
         return count;
     }
+
+    @Override
+    public String toString() {
+        return "OrderCreateBuilding{buildingType=%s, count=%d}".formatted(this.buildingType, this.count);
+    }
 }

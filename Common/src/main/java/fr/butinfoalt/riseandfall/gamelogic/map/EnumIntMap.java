@@ -134,7 +134,19 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
 
     @Override
     public String toString() {
-        return "EnumIntMap{enumClass=%s, map=%s}".formatted(this.enumClass, Arrays.toString(this.map));
+        StringBuilder sb = new StringBuilder("EnumIntMap{enumClass=");
+        sb.append(this.enumClass);
+        sb.append(", map={");
+        boolean removeLastComma = false;
+        for (Entry<T> entry : this) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
+            removeLastComma = true;
+        }
+        if (removeLastComma) {
+            sb.setLength(sb.length() - 2); // Remove the last comma and space
+        }
+        sb.append("}}");
+        return sb.toString();
     }
 
     /**

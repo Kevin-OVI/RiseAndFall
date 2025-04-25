@@ -174,4 +174,9 @@ public class Player {
         }
         this.pendingOrders.clear();
     }
+
+    @Override
+    public String toString() {
+        return "Player{buildingMap=%s, unitMap=%s, pendingOrders=%s, goldAmount=%d, intelligence=%d}".formatted(this.buildingMap, this.unitMap, this.pendingOrders, this.goldAmount, this.intelligence);
+    }
 }
