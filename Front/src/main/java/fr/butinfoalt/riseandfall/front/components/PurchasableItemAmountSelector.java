@@ -84,8 +84,9 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
         this.increaseButton = new Button("+");
 
         String detailsText = this.getDetails().entrySet().stream()
-                .map(stringStringEntry -> stringStringEntry.getKey() + " : " + stringStringEntry.getValue())
-                .collect(Collectors.joining(", "));
+                .sorted(Map.Entry.comparingByKey()) // Trier les entrées par clé dans l'ordre alphabétique
+                .map(stringStringEntry -> stringStringEntry.getKey() + " : " + stringStringEntry.getValue()) // Formater chaque entrée
+                .collect(Collectors.joining(", ")); // Joindre les entrées avec une virgule
         Label detailsLabel = new Label(detailsText);
 
         this.decreaseButton.setOnAction(this::onDecreaseButtonClicked);
