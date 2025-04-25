@@ -117,7 +117,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      */
     @Override
     public Spliterator<Entry<T>> spliterator() {
-        return Spliterators.spliterator(this.iterator(), map.length, Spliterator.ORDERED);
+        return Spliterators.spliterator(this.iterator(), this.map.length, Spliterator.ORDERED);
     }
 
     @Override

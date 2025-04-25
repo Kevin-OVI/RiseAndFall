@@ -62,7 +62,7 @@ public class Player {
      * @return La race du joueur.
      */
     public Race getRace() {
-        return race;
+        return this.race;
     }
 
     /**
@@ -71,7 +71,7 @@ public class Player {
      * @return La quantité d'or actuelle du joueur.
      */
     public int getGoldAmount() {
-        return goldAmount;
+        return this.goldAmount;
     }
 
     /**
@@ -89,7 +89,7 @@ public class Player {
      * @return La quantité d'intelligence actuelle du joueur.
      */
     public int getIntelligence() {
-        return intelligence;
+        return this.intelligence;
     }
 
     /**
@@ -144,7 +144,7 @@ public class Player {
      * @return La liste des bâtiments du joueur.
      */
     public EnumIntMap<BuildingType> getBuildingMap() {
-        return buildingMap;
+        return this.buildingMap;
     }
 
     /**
@@ -153,7 +153,7 @@ public class Player {
      * @return La liste des unités du joueur.
      */
     public EnumIntMap<UnitType> getUnitMap() {
-        return unitMap;
+        return this.unitMap;
     }
 
     /**

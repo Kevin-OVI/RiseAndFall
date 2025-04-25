@@ -55,7 +55,7 @@ public class OrderCreateBuilding implements BaseOrder {
      * @return Le type de bâtiment à créer.
      */
     public BuildingType getBuildingType() {
-        return buildingType;
+        return this.buildingType;
     }
 
     /**
@@ -64,7 +64,7 @@ public class OrderCreateBuilding implements BaseOrder {
      * @return Le nombre de bâtiments à créer.
      */
     public int getCount() {
-        return count;
+        return this.count;
     }
 
     @Override

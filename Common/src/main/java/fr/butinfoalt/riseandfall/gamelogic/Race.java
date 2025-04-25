@@ -29,7 +29,7 @@ public enum Race {
      * @return Le nom d'affichage de la race.
      */
     public String getDisplayName() {
-        return displayName;
+        return this.displayName;
     }
 
     /**
@@ -38,6 +38,6 @@ public enum Race {
      * @return La description de la race.
      */
     public String getDescription() {
-        return description;
+        return this.description;
     }
 }

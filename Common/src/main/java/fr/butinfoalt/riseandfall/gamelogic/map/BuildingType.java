@@ -57,7 +57,7 @@ public enum BuildingType implements PurchasableItem {
      * @param intelligenceProduction La production d'intelligence du bâtiment par tour.
      * @param maxUnits               Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      */
-    BuildingType(String displayName, int price, int goldProduction, int maxUnits, int intelligenceProduction) {
+    BuildingType(String displayName, int price, int goldProduction, int intelligenceProduction, int maxUnits) {
         this(displayName, price, goldProduction, intelligenceProduction, maxUnits, 0);
     }
 
