@@ -56,12 +56,12 @@ public class DescriptionStage extends Stage {
         scene.heightProperty().addListener(adaptImageSize);
         adaptImageSize.invalidated(null); // Appel initial pour adapter l'image à la taille de la fenêtre
 
-        Text mainTitle = new Text("Rise and Fall\n");
+        Text mainTitle = new Text("Rise & Fall\n");
         mainTitle.setTextAlignment(TextAlignment.CENTER);
         mainTitle.setStyle("-fx-font-size: 36px; -fx-font-weight: bold;");
 
         // Texte formaté avec des titres en gras
-        Text intro1 = new Text("Rise and Fall est un jeu développé par une équipe de choc.\n");
+        Text intro1 = new Text("Rise & Fall est un jeu développé par une équipe de choc.\n");
         Text intro2 = new Text("Le but est de créer un jeu tour par tour dans un monde fantasy.\n");
         Text intro3 = new Text("On a présenté le projet, maintenant passons aux règles du jeu :\n\n");
 

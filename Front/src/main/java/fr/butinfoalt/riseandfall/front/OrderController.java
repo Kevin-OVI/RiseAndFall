@@ -1,7 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
 import fr.butinfoalt.riseandfall.front.components.BuildingAmountSelector;
-import fr.butinfoalt.riseandfall.front.components.PurchasableItemAmountSelector;
 import fr.butinfoalt.riseandfall.front.components.UnitItemSelector;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
@@ -79,7 +78,7 @@ public class OrderController {
 
         Counter goldCounter = new Counter(ClientPlayer.SINGLE_PLAYER.getGoldAmount());
         goldCounter.addListener(goldAmount -> {
-            this.goldField.setText("Or retant : " + goldAmount);
+            this.goldField.setText("Or restant : " + goldAmount);
             this.totalPrice.setText("Prix total : " + (goldCounter.getInitialValue() - goldAmount));
         });
         Counter allowedUnitsCounter = new Counter(ClientPlayer.SINGLE_PLAYER.getAllowedUnitCount());
