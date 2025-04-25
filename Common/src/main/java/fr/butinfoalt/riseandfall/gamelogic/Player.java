@@ -28,20 +28,18 @@ public class Player {
      */
     private final ArrayList<BaseOrder> pendingOrders = new ArrayList<>();
     /**
+     * Race du joueur
+     */
+    private final Race race;
+    /**
      * Quantité d'or que possède le joueur.
      * Initialisé à 50 pièces d'or au début de la partie.
      */
     private int goldAmount = 50;
-
     /**
      * Quantité d'intelligence que possède le joueur.
      */
     private int intelligence = 50;
-
-    /**
-     * Race du joueur
-     */
-    private final Race race;
 
     /**
      * Constructeur de la classe Player.
