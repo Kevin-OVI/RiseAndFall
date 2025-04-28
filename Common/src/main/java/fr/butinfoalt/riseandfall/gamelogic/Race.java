@@ -4,7 +4,7 @@ package fr.butinfoalt.riseandfall.gamelogic;
  * Représente les différentes races disponibles dans le jeu.
  * Chaque race possède des caractéristiques et avantages spécifiques.
  */
-public enum Race {
+public enum Race implements NamedItem {
     /**
      * Race humaine, équilibrée avec des compétences militaires et économiques.
      */

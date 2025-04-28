@@ -3,6 +3,7 @@ package fr.butinfoalt.riseandfall.front;
 import fr.butinfoalt.riseandfall.front.components.BuildingAmountSelector;
 import fr.butinfoalt.riseandfall.front.components.UnitItemSelector;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
+import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Modifier;
 import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
@@ -27,25 +28,21 @@ public class OrderController {
      * Liste des bâtiments en attente de création.
      */
     private EnumIntMap<BuildingType> pendingBuildings;
-
     /**
      * Champ pour le composant de la quantité d'or.
      */
     @FXML
     private Label goldField;
-
     /**
      * Champ pour le composant contenant la quantité d'unités pouvant être produites.
      */
     @FXML
     private Label unitsField;
-
     /**
      * Champ pour le composant contenant les unités.
      */
     @FXML
     private VBox unitVBox;
-
     /**
      * Champ pour le composant contenant les bâtiments.
      */
@@ -65,10 +62,11 @@ public class OrderController {
      * ainsi que la quantité d'or disponible.
      */
     public void loadPendingOrders() {
+        ClientPlayer player = RiseAndFall.getPlayer();
         this.pendingUnits = new EnumIntMap<>(UnitType.class);
         this.pendingBuildings = new EnumIntMap<>(BuildingType.class);
 
-        for (BaseOrder order : ClientPlayer.SINGLE_PLAYER.getPendingOrders()) {
+        for (BaseOrder order : player.getPendingOrders()) {
             if (order instanceof OrderCreateUnit orderCreateUnit) {
                 pendingUnits.increment(orderCreateUnit.getUnitType(), orderCreateUnit.getCount());
             } else if (order instanceof OrderCreateBuilding orderCreateBuilding) {
@@ -76,12 +74,12 @@ public class OrderController {
             }
         }
 
-        Counter goldCounter = new Counter(ClientPlayer.SINGLE_PLAYER.getGoldAmount());
+        Counter goldCounter = new Counter(player.getGoldAmount());
         goldCounter.addListener(goldAmount -> {
             this.goldField.setText("Or restant : " + goldAmount);
             this.totalPrice.setText("Prix total : " + (goldCounter.getInitialValue() - goldAmount));
         });
-        Counter allowedUnitsCounter = new Counter(ClientPlayer.SINGLE_PLAYER.getAllowedUnitCount());
+        Counter allowedUnitsCounter = new Counter(player.getAllowedUnitCount());
         allowedUnitsCounter.addListener(allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
         Counter allowedBuildingsCounter = new Counter(5);
 
@@ -123,17 +121,18 @@ public class OrderController {
      */
     @FXML
     private void handleSave() {
-        ClientPlayer.SINGLE_PLAYER.clearPendingOrders();
+        ClientPlayer player = RiseAndFall.getPlayer();
+        player.clearPendingOrders();
         for (EnumIntMap.Entry<UnitType> entry : this.pendingUnits) {
             int nbTroops = entry.getValue();
             if (nbTroops > 0) {
-                ClientPlayer.SINGLE_PLAYER.addPendingOrder(new OrderCreateUnit(entry.getKey(), nbTroops));
+                player.addPendingOrder(new OrderCreateUnit(entry.getKey(), nbTroops));
             }
         }
         for (EnumIntMap.Entry<BuildingType> entry : this.pendingBuildings) {
             int nbHuts = entry.getValue();
             if (nbHuts > 0) {
-                ClientPlayer.SINGLE_PLAYER.addPendingOrder(new OrderCreateBuilding(entry.getKey(), nbHuts));
+                player.addPendingOrder(new OrderCreateBuilding(entry.getKey(), nbHuts));
             }
         }
 

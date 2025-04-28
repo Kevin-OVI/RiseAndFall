@@ -10,6 +10,7 @@
 
         <Label fx:id="goldField"/>
         <Label fx:id="intelligenceField"/>
+        <Label fx:id="raceField"/>
 
         <VBox alignment="CENTER" spacing="10">
             <TitleLabel>Vos unités :</TitleLabel>
@@ -29,5 +30,7 @@
 
         <!-- Bouton pour passer au tour suivant -->
         <Button text="Tour suivant" onAction="#handleEndTurn"/>
+
+        <Button text="Quitter la partie" onAction="#handleQuitGame"/>
     </HBox>
 </VBox>

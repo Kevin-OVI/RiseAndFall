@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front;
 
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
+import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -20,6 +21,12 @@ public class MainController {
      * Champ pour le composant de l'intelligence.
      */
     public Label intelligenceField;
+
+    /**
+     * Champ pour le composant de la race.
+     */
+    @FXML
+    public Label raceField;
 
     /**
      * Champ pour le composant contenant les unités.
@@ -57,23 +64,34 @@ public class MainController {
      */
     @FXML
     private void handleEndTurn() {
-        ClientPlayer.SINGLE_PLAYER.executeOrders();
+        RiseAndFall.getPlayer().executeOrders();
+    }
+
+    /**
+     * Méthode appelée par JavaFX quand on clique sur le bouton pour quitter le jeu.
+     */
+    @FXML
+    public void handleQuitGame() {
+        RiseAndFall.resetPlayer();
+        RiseAndFallApplication.switchToPreviousView();
     }
 
     /**
      * Méthode pour mettre à jour l'affichage des ressources du joueur.
      */
     public void updateFields() {
-        this.goldField.setText("Or : " + ClientPlayer.SINGLE_PLAYER.getGoldAmount());
-        this.intelligenceField.setText("Intelligence : " + ClientPlayer.SINGLE_PLAYER.getIntelligence());
+        ClientPlayer player = RiseAndFall.getPlayer();
+        this.goldField.setText("Or : " + player.getGoldAmount());
+        this.intelligenceField.setText("Intelligence : " + player.getIntelligence());
+        this.raceField.setText("Race : " + player.getRace().getDisplayName());
 
         this.unitVBox.getChildren().clear();
         this.buildingsVBox.getChildren().clear();
-        for (var entry : ClientPlayer.SINGLE_PLAYER.getUnitMap()) {
+        for (var entry : player.getUnitMap()) {
             Label label = new Label(entry.getKey().getDisplayName() + " : " + entry.getValue());
             this.unitVBox.getChildren().add(label);
         }
-        for (var entry : ClientPlayer.SINGLE_PLAYER.getBuildingMap()) {
+        for (var entry : player.getBuildingMap()) {
             Label label = new Label(entry.getKey().getDisplayName() + " : " + entry.getValue());
             this.buildingsVBox.getChildren().add(label);
         }
