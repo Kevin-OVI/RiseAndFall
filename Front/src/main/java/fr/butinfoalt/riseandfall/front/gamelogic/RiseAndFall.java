@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
+import fr.butinfoalt.riseandfall.front.util.JavaFXScheduler;
 import fr.butinfoalt.riseandfall.gamelogic.Race;
 
 /**
@@ -7,6 +8,12 @@ import fr.butinfoalt.riseandfall.gamelogic.Race;
  * Stocke le joueur actuel et les opérations avec lui.
  */
 public class RiseAndFall {
+    /**
+     * Instance du planificateur JavaFX.
+     * Utilisé pour exécuter des tâches délayées sur le thread JavaFX.
+     */
+    public static final JavaFXScheduler SCHEDULER = new JavaFXScheduler();
+
     /**
      * Instance du joueur actuel.
      * Il n'y a qu'un seul joueur dans le jeu.

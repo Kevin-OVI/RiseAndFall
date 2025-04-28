@@ -19,4 +19,6 @@ module fr.butinfoalt.riseandfall.front {
     opens fr.butinfoalt.riseandfall.front.orders.table to javafx.fxml;
     exports fr.butinfoalt.riseandfall.front.orders.amountselector;
     opens fr.butinfoalt.riseandfall.front.orders.amountselector to javafx.fxml;
+    opens fr.butinfoalt.riseandfall.front.util to javafx.fxml;
+    exports fr.butinfoalt.riseandfall.front.util;
 }
