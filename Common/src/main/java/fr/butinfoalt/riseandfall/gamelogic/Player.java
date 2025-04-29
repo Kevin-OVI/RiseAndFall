@@ -200,6 +200,13 @@ public class Player {
         this.pendingOrders.clear();
     }
 
+    public BuildingType[] getAccessibleBuildings() {
+        return Arrays.stream(BuildingType.values())
+                .filter(buildingType -> buildingType.getAccessibleBy() == null || buildingType.getAccessibleBy() == this.race)
+                .toArray(BuildingType[]::new);
+    }
+
+
     @Override
     public String toString() {
         return "Player{buildingMap=%s, unitMap=%s, pendingOrders=%s, goldAmount=%d, intelligence=%d}".formatted(this.buildingMap, this.unitMap, this.pendingOrders, this.goldAmount, this.intelligence);
