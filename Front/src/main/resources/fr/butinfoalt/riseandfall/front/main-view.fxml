@@ -3,8 +3,10 @@
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
       fx:controller="fr.butinfoalt.riseandfall.front.MainController">
+    <ImageView fx:id="backgroundImageView" opacity="0.2" managed="false"/>
     <VBox alignment="CENTER" spacing="10">
         <TitleLabel>Vos ressources :</TitleLabel>
 

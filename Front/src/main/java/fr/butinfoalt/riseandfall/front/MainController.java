@@ -3,9 +3,15 @@ package fr.butinfoalt.riseandfall.front;
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+
+import java.util.Objects;
 
 /**
  * Contrôleur pour la vue principale de l'application.
@@ -39,6 +45,8 @@ public class MainController {
      */
     @FXML
     public VBox buildingsVBox;
+    @FXML
+    public ImageView backgroundImageView;
 
     /**
      * Méthode appelée par JavaFX quand on clique sur le bouton pour ouvrir la page de description.
@@ -95,5 +103,26 @@ public class MainController {
             Label label = new Label(entry.getKey().getDisplayName() + " : " + entry.getValue());
             this.buildingsVBox.getChildren().add(label);
         }
+    }
+
+    @FXML
+    public void initialize() {
+        Scene scene = RiseAndFallApplication.getMainWindow().getScene();
+        // Définir l'image de fond
+        Image image = new Image(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("images/background1.png")));
+        this.backgroundImageView.setImage(image);
+
+        // Adapter la taille de l'image de fond à la taille de la fenêtre.
+        // On recadre l'image de manière à ce qu'elle recouvre tout l'écran sans être déformée.
+        InvalidationListener adaptImageSize = (observable) -> {
+            this.backgroundImageView.setFitWidth(Math.max(scene.getWidth(), scene.getHeight() * image.getWidth() / image.getHeight()));
+            this.backgroundImageView.setFitHeight(Math.max(scene.getHeight(), scene.getWidth() * image.getHeight() / image.getWidth()));
+            this.backgroundImageView.setX((scene.getWidth() - this.backgroundImageView.getFitWidth()) / 2);
+            this.backgroundImageView.setY((scene.getHeight() - this.backgroundImageView.getFitHeight()) / 2);
+        };
+
+        scene.widthProperty().addListener(adaptImageSize);
+        scene.heightProperty().addListener(adaptImageSize);
+        adaptImageSize.invalidated(null); // Appel initial pour adapter l'image à la taille de la fenêtre
     }
 }

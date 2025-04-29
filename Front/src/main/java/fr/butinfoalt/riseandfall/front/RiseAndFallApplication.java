@@ -77,13 +77,13 @@ public class RiseAndFallApplication extends Application {
      */
     @Override
     public void start(Stage stage) {
+        mainWindow = stage;
+
         Scene scene = new Scene(View.WELCOME.getSceneRoot(), WIDTH, HEIGHT);
         stage.setTitle(View.WELCOME.getWindowTitle());
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
-
-        mainWindow = stage;
     }
 
     /**
