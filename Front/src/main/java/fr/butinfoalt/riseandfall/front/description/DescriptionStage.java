@@ -112,6 +112,13 @@ public class DescriptionStage extends Stage {
 
         // Centrer le texte dans le ScrollPane si sa hauteur est inférieure à celle du ScrollPane
         InvalidationListener adaptTextPosition = (observable) -> {
+            double viewportWidth = controller.textScrollPane.getViewportBounds().getWidth();
+            if (controller.textFlow.getWidth() < viewportWidth) {
+                controller.textFlow.setTranslateX((viewportWidth - controller.textFlow.getWidth()) / 2);
+            } else {
+                controller.textFlow.setTranslateX(0);
+            }
+
             double viewportHeight = controller.textScrollPane.getViewportBounds().getHeight();
             if (controller.textFlow.getHeight() < viewportHeight) {
                 controller.textFlow.setTranslateY((viewportHeight - controller.textFlow.getHeight()) / 2);
@@ -121,6 +128,7 @@ public class DescriptionStage extends Stage {
         };
 
         controller.textScrollPane.viewportBoundsProperty().addListener(adaptTextPosition);
+        controller.textFlow.widthProperty().addListener(adaptTextPosition);
         controller.textFlow.heightProperty().addListener(adaptTextPosition);
     }
 }
