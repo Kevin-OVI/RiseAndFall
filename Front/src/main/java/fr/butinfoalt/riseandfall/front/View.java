@@ -18,6 +18,7 @@ public enum View {
      *
      */
     WELCOME("welcome-view.fxml", "Rise & Fall - Bienvenue"),
+
     /**
      * Vue principale de l'application.
      */

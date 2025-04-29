@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front.description;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
+import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import javafx.beans.InvalidationListener;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -40,22 +41,7 @@ public class DescriptionStage extends Stage {
         DescriptionController controller = View.DESCRIPTION.getController();
         scene.getStylesheets().add(Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/description.css")).toExternalForm());
 
-        // Définir l'image de fond
-        Image image = new Image(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("images/background.jpg")));
-        controller.backgroundImageView.setImage(image);
-
-        // Adapter la taille de l'image de fond à la taille de la fenêtre.
-        // On recadre l'image de manière à ce qu'elle recouvre tout l'écran sans être déformée.
-        InvalidationListener adaptImageSize = (observable) -> {
-            controller.backgroundImageView.setFitWidth(Math.max(scene.getWidth(), scene.getHeight() * image.getWidth() / image.getHeight()));
-            controller.backgroundImageView.setFitHeight(Math.max(scene.getHeight(), scene.getWidth() * image.getHeight() / image.getWidth()));
-            controller.backgroundImageView.setX((scene.getWidth() - controller.backgroundImageView.getFitWidth()) / 2);
-            controller.backgroundImageView.setY((scene.getHeight() - controller.backgroundImageView.getFitHeight()) / 2);
-        };
-        scene.widthProperty().addListener(adaptImageSize);
-        scene.heightProperty().addListener(adaptImageSize);
-        adaptImageSize.invalidated(null); // Appel initial pour adapter l'image à la taille de la fenêtre
-
+        UIUtils.setBackgroundImage("images/background.jpg", scene, controller.backgroundImageView);
         Text mainTitle = new Text("Rise & Fall\n");
         mainTitle.setTextAlignment(TextAlignment.CENTER);
         mainTitle.setStyle("-fx-font-size: 36px; -fx-font-weight: bold;");

@@ -3,6 +3,7 @@ package fr.butinfoalt.riseandfall.front;
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -45,6 +46,9 @@ public class MainController {
      */
     @FXML
     public VBox buildingsVBox;
+    /**
+     * Champ pour le composant de l'image de fond.
+     */
     @FXML
     public ImageView backgroundImageView;
 
@@ -108,21 +112,6 @@ public class MainController {
     @FXML
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
-        // Définir l'image de fond
-        Image image = new Image(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("images/background1.png")));
-        this.backgroundImageView.setImage(image);
-
-        // Adapter la taille de l'image de fond à la taille de la fenêtre.
-        // On recadre l'image de manière à ce qu'elle recouvre tout l'écran sans être déformée.
-        InvalidationListener adaptImageSize = (observable) -> {
-            this.backgroundImageView.setFitWidth(Math.max(scene.getWidth(), scene.getHeight() * image.getWidth() / image.getHeight()));
-            this.backgroundImageView.setFitHeight(Math.max(scene.getHeight(), scene.getWidth() * image.getHeight() / image.getWidth()));
-            this.backgroundImageView.setX((scene.getWidth() - this.backgroundImageView.getFitWidth()) / 2);
-            this.backgroundImageView.setY((scene.getHeight() - this.backgroundImageView.getFitHeight()) / 2);
-        };
-
-        scene.widthProperty().addListener(adaptImageSize);
-        scene.heightProperty().addListener(adaptImageSize);
-        adaptImageSize.invalidated(null); // Appel initial pour adapter l'image à la taille de la fenêtre
+        UIUtils.setBackgroundImage("images/background1.png", scene, this.backgroundImageView);
     }
 }

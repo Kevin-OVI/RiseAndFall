@@ -2,14 +2,21 @@ package fr.butinfoalt.riseandfall.front;
 
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.NamedItemStringConverter;
+import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.Race;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
+
+import java.util.Objects;
 
 public class WelcomeView {
     /**
@@ -23,6 +30,12 @@ public class WelcomeView {
      */
     @FXML
     public Label instructions;
+
+    /**
+     * Champ pour le composant de l'image de fond.
+     */
+    @FXML
+    public ImageView backgroundImageView;
 
     /**
      * Animation de clignotement des instructions.
@@ -47,6 +60,11 @@ public class WelcomeView {
                 new KeyFrame(Duration.millis(300), e -> instructions.setTextFill(startColor))
         );
         this.instructionsBlinkTransition.setCycleCount(4);
+
+    }
+
+    public void initializeScene(Scene scene) {
+        UIUtils.setBackgroundImage("images/background1.png", scene, this.backgroundImageView);
     }
 
     /**
@@ -67,4 +85,6 @@ public class WelcomeView {
         MainController mainController = View.MAIN.getController();
         mainController.updateFields();
     }
+
 }
+

@@ -84,6 +84,9 @@ public class RiseAndFallApplication extends Application {
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
+
+        WelcomeView controller = View.WELCOME.getController();
+        controller.initializeScene(scene);
     }
 
     /**
