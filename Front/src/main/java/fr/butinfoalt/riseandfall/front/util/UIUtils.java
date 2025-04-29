@@ -10,6 +10,12 @@ import javafx.stage.Stage;
 import java.util.Objects;
 
 public class UIUtils {
+    /**
+     * Méthode pour définir l'image de fond de la scène.
+     * @param imagePath le chemin de l'image de fond
+     * @param scene la scène à laquelle l'image de fond sera appliquée
+     * @param backgroundImageView le composant ImageView qui affichera l'image de fond
+     */
     public static void setBackgroundImage(String imagePath, Scene scene, ImageView backgroundImageView) {
         // Chargement de l'image de fond
         Image backgroundImage = new Image(Objects.requireNonNull(RiseAndFallApplication.class.getResource(imagePath)).toExternalForm());
