@@ -63,8 +63,8 @@ public class OrderController {
      */
     public void loadPendingOrders() {
         ClientPlayer player = RiseAndFall.getPlayer();
-        this.pendingUnits = new EnumIntMap<>(UnitType.class);
-        this.pendingBuildings = new EnumIntMap<>(BuildingType.class);
+        this.pendingUnits = player.getUnitMap().createEmptyClone();
+        this.pendingBuildings = player.getBuildingMap().createEmptyClone();
 
         for (BaseOrder order : player.getPendingOrders()) {
             if (order instanceof OrderCreateUnit orderCreateUnit) {

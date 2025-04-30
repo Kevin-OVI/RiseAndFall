@@ -10,12 +10,14 @@ public enum UnitType implements PurchasableItem {
     /**
      * Type d'unité représentant un guerrier, qui coûte 10 pièces d'or.
      */
-    WARRIOR("Guerrier", 10);
+    WARRIOR("Guerrier", 10),
+    UNDEAD_SPECIAL("Unité mort vivante", 10, Race.UNDEAD);
 
     /**
      * Nom d'affichage du type d'unité.
      */
     private final String displayName;
+
     /**
      * Prix de l'unité en pièces d'or.
      */
@@ -24,11 +26,11 @@ public enum UnitType implements PurchasableItem {
     /**
      * Race qui peut construire cette unité.
      */
-    private final Race accessibleBy;
+    private final Race accessibleByRace;
 
 
     /**
-     * Constructeur de l'énumération UnitType.
+     * Constructeur de l'énumération UnitType accessible par toutes les races.
      *
      * @param displayName Le nom d'affichage du type d'unité.
      * @param price       Le prix de l'unité en pièces d'or.
@@ -38,16 +40,16 @@ public enum UnitType implements PurchasableItem {
     }
 
     /**
-     * Constructeur de l'énumération UnitType.
+     * Constructeur de l'énumération UnitType accessible par une race spécifiée.
      *
-     * @param displayName Le nom d'affichage du type d'unité.
-     * @param price       Le prix de l'unité en pièces d'or.
-     * @param race        La race qui peut construire cette unité.
+     * @param displayName      Le nom d'affichage du type d'unité.
+     * @param price            Le prix de l'unité en pièces d'or.
+     * @param accessibleByRace La race qui peut construire cette unité.
      */
-    UnitType(String displayName, int price, Race race) {
+    UnitType(String displayName, int price, Race accessibleByRace) {
         this.displayName = displayName;
         this.price = price;
-        this.accessibleBy = race;
+        this.accessibleByRace = accessibleByRace;
     }
 
     /**
@@ -75,7 +77,7 @@ public enum UnitType implements PurchasableItem {
      *
      * @return La race qui peut construire cette unité.
      */
-    public Race getAccessibleBy() {
-        return this.accessibleBy;
+    public Race getAccessibleByRace() {
+        return this.accessibleByRace;
     }
 }
