@@ -17,7 +17,7 @@
         <VBox alignment="CENTER" spacing="10">
             <TitleLabel>Vos unités :</TitleLabel>
             <!--Ce composant est rempli dynamiquement avec les types d'unités-->
-            <VBox fx:id="unitVBox" alignment="CENTER"/>
+            <VBox fx:id="unitVBox" alignment="CENTER" spacing="10"/>
         </VBox>
 
         <VBox alignment="CENTER" spacing="10">
