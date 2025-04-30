@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.network.server;
 
 import fr.butinfoalt.riseandfall.network.common.*;
+import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.Closeable;
 import java.io.IOException;

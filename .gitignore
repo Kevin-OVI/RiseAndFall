@@ -40,3 +40,5 @@ build/
 # Project exclude paths
 /out/
 *.jar
+
+*.env
