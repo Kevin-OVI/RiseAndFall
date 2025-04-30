@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front.description;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
+import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import javafx.beans.InvalidationListener;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -38,30 +39,15 @@ public class DescriptionStage extends Stage {
      */
     private void setupScene(Scene scene) {
         DescriptionController controller = View.DESCRIPTION.getController();
-        scene.getStylesheets().add(Objects.requireNonNull(RiseAndFallApplication.class.getResource("description.css")).toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/description.css")).toExternalForm());
 
-        // Définir l'image de fond
-        Image image = new Image(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("images/background.jpg")));
-        controller.backgroundImageView.setImage(image);
-
-        // Adapter la taille de l'image de fond à la taille de la fenêtre.
-        // On recadre l'image de manière à ce qu'elle recouvre tout l'écran sans être déformée.
-        InvalidationListener adaptImageSize = (observable) -> {
-            controller.backgroundImageView.setFitWidth(Math.max(scene.getWidth(), scene.getHeight() * image.getWidth() / image.getHeight()));
-            controller.backgroundImageView.setFitHeight(Math.max(scene.getHeight(), scene.getWidth() * image.getHeight() / image.getWidth()));
-            controller.backgroundImageView.setX((scene.getWidth() - controller.backgroundImageView.getFitWidth()) / 2);
-            controller.backgroundImageView.setY((scene.getHeight() - controller.backgroundImageView.getFitHeight()) / 2);
-        };
-        scene.widthProperty().addListener(adaptImageSize);
-        scene.heightProperty().addListener(adaptImageSize);
-        adaptImageSize.invalidated(null); // Appel initial pour adapter l'image à la taille de la fenêtre
-
-        Text mainTitle = new Text("Rise and Fall\n");
+        UIUtils.setBackgroundImage("images/map.jpg", scene, controller.backgroundImageView);
+        Text mainTitle = new Text("Rise & Fall\n");
         mainTitle.setTextAlignment(TextAlignment.CENTER);
         mainTitle.setStyle("-fx-font-size: 36px; -fx-font-weight: bold;");
 
         // Texte formaté avec des titres en gras
-        Text intro1 = new Text("Rise and Fall est un jeu développé par une équipe de choc.\n");
+        Text intro1 = new Text("Rise & Fall est un jeu développé par une équipe de choc.\n");
         Text intro2 = new Text("Le but est de créer un jeu tour par tour dans un monde fantasy.\n");
         Text intro3 = new Text("On a présenté le projet, maintenant passons aux règles du jeu :\n\n");
 
@@ -112,6 +98,13 @@ public class DescriptionStage extends Stage {
 
         // Centrer le texte dans le ScrollPane si sa hauteur est inférieure à celle du ScrollPane
         InvalidationListener adaptTextPosition = (observable) -> {
+            double viewportWidth = controller.textScrollPane.getViewportBounds().getWidth();
+            if (controller.textFlow.getWidth() < viewportWidth) {
+                controller.textFlow.setTranslateX((viewportWidth - controller.textFlow.getWidth()) / 2);
+            } else {
+                controller.textFlow.setTranslateX(0);
+            }
+
             double viewportHeight = controller.textScrollPane.getViewportBounds().getHeight();
             if (controller.textFlow.getHeight() < viewportHeight) {
                 controller.textFlow.setTranslateY((viewportHeight - controller.textFlow.getHeight()) / 2);
@@ -121,6 +114,7 @@ public class DescriptionStage extends Stage {
         };
 
         controller.textScrollPane.viewportBoundsProperty().addListener(adaptTextPosition);
+        controller.textFlow.widthProperty().addListener(adaptTextPosition);
         controller.textFlow.heightProperty().addListener(adaptTextPosition);
     }
 }

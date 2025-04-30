@@ -55,7 +55,7 @@ public class OrderCreateUnit implements BaseOrder {
      * @return Le type d'unité à créer.
      */
     public UnitType getUnitType() {
-        return unitType;
+        return this.unitType;
     }
 
     /**
@@ -64,7 +64,7 @@ public class OrderCreateUnit implements BaseOrder {
      * @return Le nombre d'unités à créer.
      */
     public int getCount() {
-        return count;
+        return this.count;
     }
 
     @Override

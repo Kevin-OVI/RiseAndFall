@@ -8,35 +8,61 @@ import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 
 import java.util.ArrayList;
 
+
 /**
  * Représente un joueur dans le jeu.
- * Chaque joueur a une quantité d'or, des bâtiments et des unités.
+ * Chaque joueur a une race, une quantité d'or, une quantité d'intelligence, des bâtiments et des unités.
  * Il peut également donner des ordres pour créer des bâtiments ou des unités.
  */
 public class Player {
     /**
      * Association entre les types de bâtiments et le nombre de bâtiments de chaque type.
      */
-    private final EnumIntMap<BuildingType> buildingMap = new EnumIntMap<>(BuildingType.class);
+    private final EnumIntMap<BuildingType> buildingMap;
     /**
      * Association entre les types d'unités et le nombre d'unités de chaque type.
      */
-    private final EnumIntMap<UnitType> unitMap = new EnumIntMap<>(UnitType.class);
+    private final EnumIntMap<UnitType> unitMap;
     /**
      * Liste des ordres à exécuter au prochain tour pour le joueur.
      */
     private final ArrayList<BaseOrder> pendingOrders = new ArrayList<>();
     /**
+     * Race du joueur
+     */
+    private final Race race;
+    /**
      * Quantité d'or que possède le joueur.
      * Initialisé à 50 pièces d'or au début de la partie.
      */
     private int goldAmount = 50;
+    /**
+     * Quantité d'intelligence que possède le joueur.
+     */
     private int intelligence = 50;
 
-    public Player() {
+    /**
+     * Constructeur de la classe Player.
+     *
+     * @param race La race choisie par le joueur.
+     */
+    public Player(Race race) {
+        this.race = race;
+        this.buildingMap = new EnumIntMap<>(BuildingType.class, buildingType -> buildingType.getAccessibleByRace() == null || buildingType.getAccessibleByRace() == this.race);
+        this.unitMap = new EnumIntMap<>(UnitType.class, unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race);
+
         for (Entry<BuildingType> entry : this.buildingMap) {
             entry.setValue(entry.getKey().getInitialAmount());
         }
+    }
+
+    /**
+     * Méthode pour obtenir la race du joueur.
+     *
+     * @return La race du joueur.
+     */
+    public Race getRace() {
+        return this.race;
     }
 
     /**
@@ -45,7 +71,7 @@ public class Player {
      * @return La quantité d'or actuelle du joueur.
      */
     public int getGoldAmount() {
-        return goldAmount;
+        return this.goldAmount;
     }
 
     /**
@@ -63,7 +89,7 @@ public class Player {
      * @return La quantité d'intelligence actuelle du joueur.
      */
     public int getIntelligence() {
-        return intelligence;
+        return this.intelligence;
     }
 
     /**
@@ -90,6 +116,7 @@ public class Player {
         for (Entry<BuildingType> entry : this.buildingMap) {
             allowedCount += entry.getValue() * entry.getKey().getMaxUnits();
         }
+
         return allowedCount;
     }
 
@@ -117,7 +144,7 @@ public class Player {
      * @return La liste des bâtiments du joueur.
      */
     public EnumIntMap<BuildingType> getBuildingMap() {
-        return buildingMap;
+        return this.buildingMap;
     }
 
     /**
@@ -126,7 +153,7 @@ public class Player {
      * @return La liste des unités du joueur.
      */
     public EnumIntMap<UnitType> getUnitMap() {
-        return unitMap;
+        return this.unitMap;
     }
 
     /**

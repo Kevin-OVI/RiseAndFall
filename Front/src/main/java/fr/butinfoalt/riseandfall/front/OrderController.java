@@ -1,7 +1,10 @@
 package fr.butinfoalt.riseandfall.front;
 
-import fr.butinfoalt.riseandfall.front.components.PurchasableItemAmountSelector;
+import fr.butinfoalt.riseandfall.front.components.BuildingAmountSelector;
+import fr.butinfoalt.riseandfall.front.components.UnitItemSelector;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
+import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Modifier;
 import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
@@ -11,8 +14,11 @@ import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+
 
 /**
  * Contrôleur pour la vue de gestion des ordres.
@@ -26,25 +32,21 @@ public class OrderController {
      * Liste des bâtiments en attente de création.
      */
     private EnumIntMap<BuildingType> pendingBuildings;
-
     /**
      * Champ pour le composant de la quantité d'or.
      */
     @FXML
     private Label goldField;
-
     /**
      * Champ pour le composant contenant la quantité d'unités pouvant être produites.
      */
     @FXML
     private Label unitsField;
-
     /**
      * Champ pour le composant contenant les unités.
      */
     @FXML
     private VBox unitVBox;
-
     /**
      * Champ pour le composant contenant les bâtiments.
      */
@@ -52,16 +54,27 @@ public class OrderController {
     private VBox buildingsVBox;
 
     /**
+     * Champ pour le composant contenant le prix total.
+     */
+    @FXML
+    public Label totalPrice;
+    /**
+     * Champ pour le composant contenant l'image de fond.
+     */
+    @FXML
+    public ImageView backgroundImageView;
+    /**
      * Méthode pour charger les ordres en attente du joueur dans l'interface.
      * Elle met à jour les composants de l'interface utilisateur
      * pour afficher les unités et bâtiments en attente de création,
      * ainsi que la quantité d'or disponible.
      */
     public void loadPendingOrders() {
-        this.pendingUnits = new EnumIntMap<>(UnitType.class);
-        this.pendingBuildings = new EnumIntMap<>(BuildingType.class);
+        ClientPlayer player = RiseAndFall.getPlayer();
+        this.pendingUnits = player.getUnitMap().createEmptyClone();
+        this.pendingBuildings = player.getBuildingMap().createEmptyClone();
 
-        for (BaseOrder order : ClientPlayer.SINGLE_PLAYER.getPendingOrders()) {
+        for (BaseOrder order : player.getPendingOrders()) {
             if (order instanceof OrderCreateUnit orderCreateUnit) {
                 pendingUnits.increment(orderCreateUnit.getUnitType(), orderCreateUnit.getCount());
             } else if (order instanceof OrderCreateBuilding orderCreateBuilding) {
@@ -69,16 +82,19 @@ public class OrderController {
             }
         }
 
-        Counter goldCounter = new Counter(ClientPlayer.SINGLE_PLAYER.getGoldAmount());
-        goldCounter.addListener(goldAmount -> this.goldField.setText("Or restant : " + goldAmount));
-        Counter allowedUnitsCounter = new Counter(ClientPlayer.SINGLE_PLAYER.getAllowedUnitCount());
+        Counter goldCounter = new Counter(player.getGoldAmount());
+        goldCounter.addListener(goldAmount -> {
+            this.goldField.setText("Or restant : " + goldAmount);
+            this.totalPrice.setText("Prix total : " + (goldCounter.getInitialValue() - goldAmount));
+        });
+        Counter allowedUnitsCounter = new Counter(player.getAllowedUnitCount());
         allowedUnitsCounter.addListener(allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
         Counter allowedBuildingsCounter = new Counter(5);
 
         this.unitVBox.getChildren().clear();
         for (EnumIntMap.Entry<UnitType> entry : pendingUnits) {
             Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
-            PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
+            UnitItemSelector selector = new UnitItemSelector(entry, goldCounter,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
             this.unitVBox.getChildren().add(selector);
@@ -87,7 +103,7 @@ public class OrderController {
         this.buildingsVBox.getChildren().clear();
         for (EnumIntMap.Entry<BuildingType> entry : pendingBuildings) {
             Modifier buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
-            PurchasableItemAmountSelector<BuildingType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
+            BuildingAmountSelector selector = new BuildingAmountSelector(entry, goldCounter,
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> buildingModifier.setDelta(-amount));
             allowedBuildingsCounter.addListener(value -> selector.updateButtonsState());
@@ -113,20 +129,26 @@ public class OrderController {
      */
     @FXML
     private void handleSave() {
-        ClientPlayer.SINGLE_PLAYER.clearPendingOrders();
+        ClientPlayer player = RiseAndFall.getPlayer();
+        player.clearPendingOrders();
         for (EnumIntMap.Entry<UnitType> entry : this.pendingUnits) {
             int nbTroops = entry.getValue();
             if (nbTroops > 0) {
-                ClientPlayer.SINGLE_PLAYER.addPendingOrder(new OrderCreateUnit(entry.getKey(), nbTroops));
+                player.addPendingOrder(new OrderCreateUnit(entry.getKey(), nbTroops));
             }
         }
         for (EnumIntMap.Entry<BuildingType> entry : this.pendingBuildings) {
             int nbHuts = entry.getValue();
             if (nbHuts > 0) {
-                ClientPlayer.SINGLE_PLAYER.addPendingOrder(new OrderCreateBuilding(entry.getKey(), nbHuts));
+                player.addPendingOrder(new OrderCreateBuilding(entry.getKey(), nbHuts));
             }
         }
 
         this.switchBack();
+    }
+
+    public void initialize(){
+        Scene scene = RiseAndFallApplication.getMainWindow().getScene();
+        UIUtils.setBackgroundImage("images/background.png", scene, backgroundImageView);
     }
 }

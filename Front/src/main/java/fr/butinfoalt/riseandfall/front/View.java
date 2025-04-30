@@ -1,10 +1,12 @@
 package fr.butinfoalt.riseandfall.front;
 
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -16,6 +18,7 @@ public enum View {
      *
      */
     WELCOME("welcome-view.fxml", "Rise & Fall - Bienvenue"),
+
     /**
      * Vue principale de l'application.
      */
@@ -30,15 +33,24 @@ public enum View {
     DESCRIPTION("description-view.fxml", "Rise & Fall - Description et règles du jeu"),
     ;
 
-    /**
-     * Le loader FXML utilisé pour charger la vue.
-     */
-    private final FXMLLoader fxmlLoader;
+
+    private static final String GENERAL_STYLESHEET = Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/style.css")).toExternalForm();
+
 
     /**
      * Le titre de la fenêtre associé à la vue.
      */
     private final String windowTitle;
+
+    /**
+     * Le nom du fichier FXML associé à la vue.
+     */
+    private final String viewName;
+
+    /**
+     * Le loader FXML utilisé pour charger la vue.
+     */
+    private FXMLLoader fxmlLoader;
 
     /**
      * Constructeur de l'énumération View.
@@ -48,13 +60,20 @@ public enum View {
      * @param windowTitle Le titre de la fenêtre.
      */
     View(String viewName, String windowTitle) {
-        this.fxmlLoader = new FXMLLoader(View.class.getResource(viewName));
+        this.viewName = viewName;
         this.windowTitle = windowTitle;
-        try {
-            this.fxmlLoader.load();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load FXML file: " + viewName, e);
+    }
+
+    private FXMLLoader getFxmlLoader() {
+        if (this.fxmlLoader == null) {
+            this.fxmlLoader = new FXMLLoader(View.class.getResource(this.viewName));
+            try {
+                this.fxmlLoader.load();
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to load FXML file: " + this.viewName, e);
+            }
         }
+        return this.fxmlLoader;
     }
 
     /**
@@ -63,7 +82,12 @@ public enum View {
      * @return La racine de la scène de la vue.
      */
     public Parent getSceneRoot() {
-        return this.fxmlLoader.getRoot();
+        Parent root = this.getFxmlLoader().getRoot();
+        ObservableList<String> styleSheets = root.getStylesheets();
+        if (!styleSheets.contains(GENERAL_STYLESHEET)) {
+            styleSheets.add(GENERAL_STYLESHEET);
+        }
+        return root;
     }
 
     /**
@@ -72,7 +96,7 @@ public enum View {
      * @return Le contrôleur de la vue.
      */
     public <T> T getController() {
-        return this.fxmlLoader.getController();
+        return this.getFxmlLoader().getController();
     }
 
     /**

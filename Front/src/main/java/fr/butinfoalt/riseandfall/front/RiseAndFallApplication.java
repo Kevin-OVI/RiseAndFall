@@ -3,8 +3,10 @@ package fr.butinfoalt.riseandfall.front;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.util.Objects;
 import java.util.Stack;
 
 /**
@@ -30,6 +32,7 @@ public class RiseAndFallApplication extends Application {
      * @param args Arguments de la ligne de commande (non utilisés).
      */
     public static void main(String[] args) {
+        Font.loadFont(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("fonts/IMFellEnglishSC-Regular.ttf")), 12);
         Application.launch();
     }
 
@@ -74,13 +77,16 @@ public class RiseAndFallApplication extends Application {
      */
     @Override
     public void start(Stage stage) {
+        mainWindow = stage;
+
         Scene scene = new Scene(View.WELCOME.getSceneRoot(), WIDTH, HEIGHT);
         stage.setTitle(View.WELCOME.getWindowTitle());
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
 
-        mainWindow = stage;
+        WelcomeView controller = View.WELCOME.getController();
+        controller.initializeScene(scene);
     }
 
     /**
