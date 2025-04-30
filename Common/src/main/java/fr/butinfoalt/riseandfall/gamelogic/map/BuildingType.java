@@ -21,6 +21,9 @@ public enum BuildingType implements PurchasableItem {
      * Type de bâtiment représentant une Bibliothèque, qui coûte 10 pièces d'or, ajoute 2 points d'intelligence par tour.
      */
     LIBRARY("Bibliothèque", 10, 0, 2, 0),
+
+    UNDEAD_SPECIAL("Bâtiment de Morts Vivants", 10, 0, 0, 2, Race.UNDEAD),
+    HUMAN_SPECIAL("Bâtiment d'Humains", 10, 0, 0, 2, Race.HUMAN),
     ;
 
 

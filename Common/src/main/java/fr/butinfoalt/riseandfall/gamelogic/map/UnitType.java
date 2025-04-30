@@ -11,7 +11,9 @@ public enum UnitType implements PurchasableItem {
      * Type d'unité représentant un guerrier, qui coûte 10 pièces d'or.
      */
     WARRIOR("Guerrier", 10),
-    UNDEAD_SPECIAL("Unité mort vivante", 10, Race.UNDEAD);
+    UNDEAD_SPECIAL("Unité mort vivante", 10, Race.UNDEAD),
+    HUMAN_SPECIAL("Unité humaine", 10, Race.HUMAN),
+    ;
 
     /**
      * Nom d'affichage du type d'unité.
