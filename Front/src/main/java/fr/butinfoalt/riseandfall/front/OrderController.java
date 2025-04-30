@@ -149,6 +149,6 @@ public class OrderController {
 
     public void initialize(){
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
-        UIUtils.setBackgroundImage("images/background1.png", scene, backgroundImageView);
+        UIUtils.setBackgroundImage("images/background.png", scene, backgroundImageView);
     }
 }

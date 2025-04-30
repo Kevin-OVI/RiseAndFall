@@ -64,7 +64,7 @@ public class WelcomeView {
     }
 
     public void initializeScene(Scene scene) {
-        UIUtils.setBackgroundImage("images/background1.png", scene, this.backgroundImageView);
+        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
     }
 
     /**

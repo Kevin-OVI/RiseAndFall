@@ -41,7 +41,7 @@ public class DescriptionStage extends Stage {
         DescriptionController controller = View.DESCRIPTION.getController();
         scene.getStylesheets().add(Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/description.css")).toExternalForm());
 
-        UIUtils.setBackgroundImage("images/background.jpg", scene, controller.backgroundImageView);
+        UIUtils.setBackgroundImage("images/map.jpg", scene, controller.backgroundImageView);
         Text mainTitle = new Text("Rise & Fall\n");
         mainTitle.setTextAlignment(TextAlignment.CENTER);
         mainTitle.setStyle("-fx-font-size: 36px; -fx-font-weight: bold;");
