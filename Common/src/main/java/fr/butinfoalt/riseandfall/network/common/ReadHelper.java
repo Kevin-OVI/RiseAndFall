@@ -8,13 +8,31 @@ import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Classe utilitaire pour lire des données à partir d'un flux d'entrée.
+ */
 public class ReadHelper {
+    /**
+     * Le flux d'entrée à partir duquel lire les données.
+     */
     private final InputStream inputStream;
 
+    /**
+     * Constructeur de la classe ReadHelper.
+     *
+     * @param inputStream Le flux d'entrée à partir duquel lire les données.
+     */
     public ReadHelper(InputStream inputStream) {
         this.inputStream = inputStream;
     }
 
+    /**
+     * Lit un nombre spécifié d'octets à partir du flux d'entrée.
+     *
+     * @param len Le nombre d'octets à lire.
+     * @return Un tableau d'octets contenant les données lues.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public byte[] readNBytes(int len) throws IOException {
         byte[] buffer = this.inputStream.readNBytes(len);
         if (buffer.length != len) {
@@ -23,38 +41,93 @@ public class ReadHelper {
         return buffer;
     }
 
+    /**
+     * Lit un octet du flux d'entrée et le convertit en un booléen.
+     *
+     * @return true si l'octet est différent de 0, false sinon.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public boolean readBoolean() throws IOException {
         return this.readByte() != 0;
     }
 
+    /**
+     * Lit un octet du flux d'entrée.
+     *
+     * @return L'octet lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public byte readByte() throws IOException {
         return this.readNBytes(1)[0];
     }
 
+    /**
+     * Lit un entier court à partir du flux d'entrée.
+     *
+     * @return L'entier lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public short readShort() throws IOException {
         return ByteBuffer.wrap(this.readNBytes(2)).getShort();
     }
 
+    /**
+     * Lit un entier à partir du flux d'entrée.
+     *
+     * @return L'entier lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public int readInt() throws IOException {
         return ByteBuffer.wrap(this.readNBytes(4)).getInt();
     }
 
+    /**
+     * Lit un entier long à partir du flux d'entrée.
+     *
+     * @return L'entier lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public long readLong() throws IOException {
         return ByteBuffer.wrap(this.readNBytes(8)).getLong();
     }
 
+    /**
+     * Lit un flottant de 4 octets à partir du flux d'entrée.
+     *
+     * @return Le flottant lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public float readFloat() throws IOException {
         return ByteBuffer.wrap(this.readNBytes(4)).getFloat();
     }
 
+    /**
+     * Lit un double à partir du flux d'entrée.
+     *
+     * @return Le double lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public double readDouble() throws IOException {
         return ByteBuffer.wrap(this.readNBytes(8)).getDouble();
     }
 
+    /**
+     * Lit un caractère à partir du flux d'entrée.
+     *
+     * @return Le caractère lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public char readChar() throws IOException {
         return ByteBuffer.wrap(this.readNBytes(2)).getChar();
     }
 
+    /**
+     * Lit un tableau de booléens à partir du flux d'entrée.
+     * Les booléens sont stockés sous forme de bits dans un tableau d'octets pour économiser de l'espace.
+     *
+     * @return Le tableau de booléens lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public boolean[] readBooleanArray() throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
@@ -69,12 +142,24 @@ public class ReadHelper {
         return booleans;
     }
 
+    /**
+     * Lit un tableau d'octets à partir du flux d'entrée.
+     *
+     * @return Le tableau d'octets lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public byte[] readByteArray() throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
         return this.readNBytes(size);
     }
 
+    /**
+     * Lit un tableau d'entiers courts à partir du flux d'entrée.
+     *
+     * @return Le tableau d'entiers courts lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public short[] readShortArray() throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
@@ -86,6 +171,12 @@ public class ReadHelper {
         return shorts;
     }
 
+    /**
+     * Lit un tableau d'entiers à partir du flux d'entrée.
+     *
+     * @return Le tableau d'entiers lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public int[] readIntArray() throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
@@ -97,6 +188,12 @@ public class ReadHelper {
         return ints;
     }
 
+    /**
+     * Lit un tableau d'entiers longs à partir du flux d'entrée.
+     *
+     * @return Le tableau d'entiers longs lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public long[] readLongArray() throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
@@ -108,6 +205,12 @@ public class ReadHelper {
         return longs;
     }
 
+    /**
+     * Lit un tableau de flottants à partir du flux d'entrée.
+     *
+     * @return Le tableau de flottants lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public float[] readFloatArray() throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
@@ -119,6 +222,12 @@ public class ReadHelper {
         return floats;
     }
 
+    /**
+     * Lit un tableau de doubles à partir du flux d'entrée.
+     *
+     * @return Le tableau de doubles lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public double[] readDoubleArray() throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
@@ -130,6 +239,12 @@ public class ReadHelper {
         return doubles;
     }
 
+    /**
+     * Lit un tableau de caractères à partir du flux d'entrée.
+     *
+     * @return Le tableau de caractères lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public char[] readCharArray() throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
@@ -141,16 +256,37 @@ public class ReadHelper {
         return chars;
     }
 
+    /**
+     * Lit une chaîne de caractères à partir du flux d'entrée.
+     * La chaîne est encodée en UTF-8.
+     *
+     * @return La chaîne de caractères lue.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public String readString() throws IOException {
         byte[] b = this.readByteArray();
         if (b == null) return null;
         return new String(b, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Lit un objet sérialisable à partir du flux d'entrée.
+     *
+     * @param deserializer L'interface de désérialisation pour l'objet.
+     * @param <T>          Le type de l'objet désérialisé, qui doit implémenter l'interface ISerializable.
+     * @return L'objet désérialisé.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
     public <T extends ISerializable> T readSerializable(IDeserializer<T> deserializer) throws IOException {
         return deserializer.deserialize(this);
     }
 
+    /**
+     * Lit un fichier à partir du flux d'entrée et l'enregistre dans le fichier spécifié.
+     *
+     * @param file Le fichier dans lequel enregistrer les données lues.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture ou de l'écriture.
+     */
     public void readFileTo(File file) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             long remainingSize = this.readLong();
@@ -166,6 +302,12 @@ public class ReadHelper {
         }
     }
 
+    /**
+     * Lit un fichier à partir du flux d'entrée et le renvoie sous forme de fichier temporaire.
+     *
+     * @return Le fichier temporaire contenant les données lues.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture ou de l'écriture.
+     */
     public File readFile() throws IOException {
         File file = File.createTempFile("riseandfall-protocol", ".tmp");
         this.readFileTo(file);
