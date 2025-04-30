@@ -1,5 +1,7 @@
 package fr.butinfoalt.riseandfall.gamelogic.map;
 
+import fr.butinfoalt.riseandfall.gamelogic.Race;
+
 /**
  * Enum représentant les types d'unités disponibles dans le jeu.
  * Chaque type d'unité a un nom d'affichage et un prix.
@@ -20,14 +22,32 @@ public enum UnitType implements PurchasableItem {
     private final int price;
 
     /**
+     * Race qui peut construire cette unité.
+     */
+    private final Race accessibleBy;
+
+
+    /**
      * Constructeur de l'énumération UnitType.
      *
      * @param displayName Le nom d'affichage du type d'unité.
      * @param price       Le prix de l'unité en pièces d'or.
      */
     UnitType(String displayName, int price) {
+        this(displayName, price, null);
+    }
+
+    /**
+     * Constructeur de l'énumération UnitType.
+     *
+     * @param displayName Le nom d'affichage du type d'unité.
+     * @param price       Le prix de l'unité en pièces d'or.
+     * @param race        La race qui peut construire cette unité.
+     */
+    UnitType(String displayName, int price, Race race) {
         this.displayName = displayName;
         this.price = price;
+        this.accessibleBy = race;
     }
 
     /**
@@ -48,5 +68,14 @@ public enum UnitType implements PurchasableItem {
     @Override
     public int getPrice() {
         return this.price;
+    }
+
+    /**
+     * Méthode pour obtenir la race qui peut construire cette unité.
+     *
+     * @return La race qui peut construire cette unité.
+     */
+    public Race getAccessibleBy() {
+        return this.accessibleBy;
     }
 }

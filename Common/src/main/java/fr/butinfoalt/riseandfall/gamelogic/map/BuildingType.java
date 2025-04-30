@@ -1,5 +1,7 @@
 package fr.butinfoalt.riseandfall.gamelogic.map;
 
+import fr.butinfoalt.riseandfall.gamelogic.Race;
+
 /**
  * Enum représentant les types de bâtiments disponibles dans le jeu.
  * Chaque type de bâtiment a un nom d'affichage, un prix, une production d'or et un nombre maximum d'unités.
@@ -51,7 +53,7 @@ public enum BuildingType implements PurchasableItem {
     /**
      * Race qui peut construire ce bâtiment.
      */
-    private final Race AccessibleBy;
+    private final Race accessibleBy;
 
     /**
      * Constructeur de l'énumération BuildingType.
@@ -98,7 +100,7 @@ public enum BuildingType implements PurchasableItem {
         this.intelligenceProduction = intelligenceProduction;
         this.maxUnits = maxUnits;
         this.initialAmount = initialAmount;
-        this.AccessibleBy = race;
+        this.accessibleBy = race;
     }
 
     /**
@@ -159,6 +161,6 @@ public enum BuildingType implements PurchasableItem {
     }
 
     public Race getAccessibleBy() {
-        return this.AccessibleBy;
+        return this.accessibleBy;
     }
 }

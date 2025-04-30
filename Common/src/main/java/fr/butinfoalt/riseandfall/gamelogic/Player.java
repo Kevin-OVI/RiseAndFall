@@ -7,6 +7,7 @@ import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 /**
@@ -204,6 +205,12 @@ public class Player {
         return Arrays.stream(BuildingType.values())
                 .filter(buildingType -> buildingType.getAccessibleBy() == null || buildingType.getAccessibleBy() == this.race)
                 .toArray(BuildingType[]::new);
+    }
+
+    public UnitType[] getAccessible() {
+        return Arrays.stream(UnitType.values())
+                .filter(unitType -> unitType.getAccessibleBy() == null || unitType.getAccessibleBy() == this.race)
+                .toArray(UnitType[]::new);
     }
 
 
