@@ -4,15 +4,11 @@ import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
-import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-
-import java.util.Objects;
 
 /**
  * Contrôleur pour la vue principale de l'application.
@@ -95,16 +91,16 @@ public class MainController {
         ClientPlayer player = RiseAndFall.getPlayer();
         this.goldField.setText("Or : " + player.getGoldAmount());
         this.intelligenceField.setText("Intelligence : " + player.getIntelligence());
-        this.raceField.setText("Race : " + player.getRace().getDisplayName());
+        this.raceField.setText("Race : " + player.getRace().getName());
 
         this.unitVBox.getChildren().clear();
         this.buildingsVBox.getChildren().clear();
         for (var entry : player.getUnitMap()) {
-            Label label = new Label(entry.getKey().getDisplayName() + " : " + entry.getValue());
+            Label label = new Label(entry.getKey().getName() + " : " + entry.getValue());
             this.unitVBox.getChildren().add(label);
         }
         for (var entry : player.getBuildingMap()) {
-            Label label = new Label(entry.getKey().getDisplayName() + " : " + entry.getValue());
+            Label label = new Label(entry.getKey().getName() + " : " + entry.getValue());
             this.buildingsVBox.getChildren().add(label);
         }
     }

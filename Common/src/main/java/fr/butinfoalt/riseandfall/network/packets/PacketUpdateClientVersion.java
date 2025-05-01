@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Packet qui contient le fichier de mise à jour du client.
  */
-public class PacketUpdate implements IPacket {
+public class PacketUpdateClientVersion implements IPacket {
     /**
      * Fichier de mise à jour du client
      */
@@ -21,7 +21,7 @@ public class PacketUpdate implements IPacket {
      *
      * @param updateJarFile Fichier de mise à jour du client
      */
-    public PacketUpdate(File updateJarFile) {
+    public PacketUpdateClientVersion(File updateJarFile) {
         this.updateJarFile = updateJarFile;
     }
 
@@ -31,7 +31,7 @@ public class PacketUpdate implements IPacket {
      * @param readHelper Le helper de lecture pour lire les données du paquet
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation
      */
-    public PacketUpdate(ReadHelper readHelper) throws IOException {
+    public PacketUpdateClientVersion(ReadHelper readHelper) throws IOException {
         this.updateJarFile = readHelper.readFile();
     }
 

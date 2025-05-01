@@ -4,19 +4,16 @@ import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.NamedItemStringConverter;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.Race;
+import fr.butinfoalt.riseandfall.gamelogic.ServerData;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
-
-import java.util.Objects;
 
 public class WelcomeView {
     /**
@@ -49,7 +46,7 @@ public class WelcomeView {
     @FXML
     public void initialize() {
         this.raceChoiceBox.getItems().clear();
-        this.raceChoiceBox.getItems().addAll(Race.values());
+        this.raceChoiceBox.getItems().addAll(ServerData.getRaces());
         this.raceChoiceBox.setConverter(new NamedItemStringConverter<>());
 
         Color startColor = Color.BLACK;
@@ -87,4 +84,3 @@ public class WelcomeView {
     }
 
 }
-

@@ -7,6 +7,8 @@ import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 
 /**
@@ -48,8 +50,16 @@ public class Player {
      */
     public Player(Race race) {
         this.race = race;
-        this.buildingMap = new EnumIntMap<>(BuildingType.class, buildingType -> buildingType.getAccessibleByRace() == null || buildingType.getAccessibleByRace() == this.race);
-        this.unitMap = new EnumIntMap<>(UnitType.class, unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race);
+        this.buildingMap = new EnumIntMap<>(
+                Arrays.stream(ServerData.getBuildingTypes())
+                        .filter(buildingType -> buildingType.getAccessibleByRace() == null || buildingType.getAccessibleByRace() == this.race)
+                        .collect(Collectors.toList())
+        );
+        this.unitMap = new EnumIntMap<>(
+                Arrays.stream(ServerData.getUnitTypes())
+                        .filter(unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race)
+                        .collect(Collectors.toList())
+        );
 
         for (Entry<BuildingType> entry : this.buildingMap) {
             entry.setValue(entry.getKey().getInitialAmount());

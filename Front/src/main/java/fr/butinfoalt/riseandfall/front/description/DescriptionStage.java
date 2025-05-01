@@ -5,7 +5,6 @@ import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import javafx.beans.InvalidationListener;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;

@@ -1,36 +1,32 @@
 package fr.butinfoalt.riseandfall.gamelogic.map;
 
 import fr.butinfoalt.riseandfall.gamelogic.Race;
+import fr.butinfoalt.riseandfall.network.common.ISerializable;
+import fr.butinfoalt.riseandfall.network.common.ReadHelper;
+import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+
+import java.io.IOException;
 
 /**
  * Enum représentant les types de bâtiments disponibles dans le jeu.
  * Chaque type de bâtiment a un nom d'affichage, un prix, une production d'or et un nombre maximum d'unités.
  */
-public enum BuildingType implements PurchasableItem {
+public class BuildingType implements PurchasableItem, ISerializable {
     /**
-     * Type de bâtiment représentant une carrière, qui coûte 5 pièces d'or, produit 1 pièce d'or par tour.
+     * L'identifiant du bâtiment dans la base de données.
      */
-    QUARRY("Carrière", 5, 1, 0, 0, 4),
-
-    /**
-     * Type de bâtiment représentant une caserne, qui coûte 10 pièces d'or, peut produire 3 unités par tour.
-     */
-    BARRACKS("Caserne", 10, 0, 0, 3, 1),
-
-    /**
-     * Type de bâtiment représentant une Bibliothèque, qui coûte 10 pièces d'or, ajoute 2 points d'intelligence par tour.
-     */
-    LIBRARY("Bibliothèque", 10, 0, 2, 0),
-
-    UNDEAD_SPECIAL("Bâtiment de Morts Vivants", 10, 0, 0, 2, Race.UNDEAD),
-    HUMAN_SPECIAL("Bâtiment d'Humains", 10, 0, 0, 2, Race.HUMAN),
-    ;
-
+    private final int id;
 
     /**
      * Nom d'affichage du type de bâtiment.
      */
-    private final String displayName;
+    private final String name;
+
+    /**
+     * Description du bâtiment.
+     */
+    private final String description;
+
     /**
      * Prix du bâtiment en pièces d'or.
      */
@@ -58,60 +54,22 @@ public enum BuildingType implements PurchasableItem {
      */
     private final Race accessibleByRace;
 
-    /**
-     * Constructeur de l'énumération BuildingType accessible par toutes les races et avec une quantité initiale de 0.
-     *
-     * @param displayName            Le nom d'affichage du type de bâtiment.
-     * @param price                  Le prix du bâtiment en pièces d'or.
-     * @param goldProduction         La production d'or du bâtiment par tour.
-     * @param intelligenceProduction La production d'intelligence du bâtiment par tour.
-     * @param maxUnits               Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
-     */
-    BuildingType(String displayName, int price, int goldProduction, int intelligenceProduction, int maxUnits) {
-        this(displayName, price, goldProduction, intelligenceProduction, maxUnits, 0, null);
-    }
-
-    /**
-     * Constructeur de l'énumération BuildingType accessible par toutes les races et avec une quantité initiale spécifiée.
-     *
-     * @param displayName            Le nom d'affichage du type de bâtiment.
-     * @param price                  Le prix du bâtiment en pièces d'or.
-     * @param goldProduction         La production d'or du bâtiment par tour.
-     * @param intelligenceProduction La production d'intelligence du bâtiment par tour.
-     * @param maxUnits               Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
-     * @param initialAmount          Le nombre initial de bâtiments de ce type.
-     */
-    BuildingType(String displayName, int price, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount) {
-        this(displayName, price, goldProduction, intelligenceProduction, maxUnits, initialAmount, null);
-    }
-
-    /**
-     * Constructeur de l'énumération BuildingType accessible par une race spécifiée et avec une quantité initiale de 0.
-     *
-     * @param displayName            Le nom d'affichage du type de bâtiment.
-     * @param price                  Le prix du bâtiment en pièces d'or.
-     * @param goldProduction         La production d'or du bâtiment par tour.
-     * @param intelligenceProduction La production d'intelligence du bâtiment par tour.
-     * @param maxUnits               Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
-     * @param accessibleByRace       La race qui peut construire ce bâtiment.
-     */
-    BuildingType(String displayName, int price, int goldProduction, int intelligenceProduction, int maxUnits, Race accessibleByRace) {
-        this(displayName, price, goldProduction, intelligenceProduction, maxUnits, 0, accessibleByRace);
-    }
-
 
     /**
      * Constructeur de l'énumération BuildingType accessible par une race et avec une quantité initiale spécifiées.
      *
-     * @param displayName      Le nom d'affichage du type de bâtiment.
+     * @param name             Le nom d'affichage du type de bâtiment.
+     * @param description      La description du bâtiment.
      * @param price            Le prix du bâtiment en pièces d'or.
      * @param goldProduction   La production d'or du bâtiment par tour.
      * @param maxUnits         Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      * @param initialAmount    Le nombre initial de bâtiments de ce type.
      * @param accessibleByRace La race qui peut construire ce bâtiment.
      */
-    BuildingType(String displayName, int price, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
-        this.displayName = displayName;
+    public BuildingType(int id, String name, String description, int price, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
         this.price = price;
         this.goldProduction = goldProduction;
         this.intelligenceProduction = intelligenceProduction;
@@ -120,14 +78,27 @@ public enum BuildingType implements PurchasableItem {
         this.accessibleByRace = accessibleByRace;
     }
 
+    public BuildingType(ReadHelper readHelper, Race[] races) throws IOException {
+        this.id = readHelper.readInt();
+        this.name = readHelper.readString();
+        this.description = readHelper.readString();
+        this.price = readHelper.readInt();
+        this.goldProduction = readHelper.readInt();
+        this.intelligenceProduction = readHelper.readInt();
+        this.maxUnits = readHelper.readInt();
+        this.initialAmount = readHelper.readInt();
+        int unitAccessibleRaceId = readHelper.readInt();
+        this.accessibleByRace = unitAccessibleRaceId == -1 ? null : races[unitAccessibleRaceId];
+    }
+
     /**
      * Méthode pour obtenir le nom d'affichage du type de bâtiment.
      *
      * @return Le nom d'affichage du type de bâtiment.
      */
     @Override
-    public String getDisplayName() {
-        return this.displayName;
+    public String getName() {
+        return this.name;
     }
 
     /**
@@ -179,5 +150,17 @@ public enum BuildingType implements PurchasableItem {
 
     public Race getAccessibleByRace() {
         return this.accessibleByRace;
+    }
+
+    @Override
+    public void toBytes(WriteHelper writeHelper) throws IOException {
+        writeHelper.writeString(this.name);
+        writeHelper.writeString(this.description);
+        writeHelper.writeInt(this.price);
+        writeHelper.writeInt(this.goldProduction);
+        writeHelper.writeInt(this.intelligenceProduction);
+        writeHelper.writeInt(this.maxUnits);
+        writeHelper.writeInt(this.initialAmount);
+        writeHelper.writeInt(this.accessibleByRace == null ? -1 : this.accessibleByRace.getId());
     }
 }

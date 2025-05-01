@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  *
  * @param <T> Le type de l'élément achetable, qui doit être une énumération implémentant PurchasableItem.
  */
-public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> extends HBox {
+public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HBox {
     /**
      * L'entrée de l'élément achetable
      */
@@ -78,7 +78,7 @@ public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> 
         this.setSpacing(10);
         ObservableList<Node> children = this.getChildren();
 
-        Label nameLabel = new Label(entry.getKey().getDisplayName() + " :");
+        Label nameLabel = new Label(entry.getKey().getName() + " :");
         this.decreaseButton = new Button("-");
         this.countLabel = new Label(String.valueOf(entry.getValue()));
         this.increaseButton = new Button("+");

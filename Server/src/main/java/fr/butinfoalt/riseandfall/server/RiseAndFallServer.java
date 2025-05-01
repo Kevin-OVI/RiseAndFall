@@ -1,29 +1,131 @@
 package fr.butinfoalt.riseandfall.server;
 
 import com.mysql.cj.jdbc.Driver;
+import fr.butinfoalt.riseandfall.gamelogic.Race;
+import fr.butinfoalt.riseandfall.gamelogic.ServerData;
+import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
+import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
+import fr.butinfoalt.riseandfall.network.packets.PacketServerData;
+import fr.butinfoalt.riseandfall.network.packets.PacketToken;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static fr.butinfoalt.riseandfall.server.Environment.*;
 
 public class RiseAndFallServer extends BaseSocketServer {
     private final Connection db;
+    private final AuthenticationManager authManager;
 
     /**
      * Constructeur de la classe BaseSocketServer.
      * Initialise le serveur socket sur le port spécifié.
      *
-     * @param port       Le port sur lequel le serveur écoute les connexions des clients.
+     * @param port Le port sur lequel le serveur écoute les connexions des clients.
      * @param db
      * @throws IOException Si une erreur se produit lors de la création du serveur socket.
      */
     public RiseAndFallServer(int port, Connection db) throws IOException {
         super(port);
         this.db = db;
+        this.authManager = new AuthenticationManager(this);
+        this.loadServerData();
+
+        this.registerReceivePacket((byte) 0, PacketAuthentification.class, this.authManager::onAuthentification, PacketAuthentification::new);
+        this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this.authManager::onTokenAuthentification, PacketToken::new);
+        this.registerSendPacket((byte) 2, PacketServerData.class);
+    }
+
+    private void loadServerData() {
+        try {
+            List<Race> races = new ArrayList<>();
+            List<BuildingType> buildingTypes = new ArrayList<>();
+            List<UnitType> unitTypes = new ArrayList<>();
+
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description FROM race")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int id = set.getInt("id");
+                    String name = set.getString("name");
+                    String description = set.getString("description");
+                    races.add(new Race(id, name, description));
+                }
+            }
+
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type")) {
+                ResultSet set = statement.executeQuery();
+
+                while (set.next()) {
+                    int id = set.getInt("id");
+                    String name = set.getString("name");
+                    String description = set.getString("description");
+                    int price = set.getInt("price");
+                    int goldProduction = set.getInt("gold_production");
+                    int intelligenceProduction = set.getInt("intelligence_production");
+                    int maxUnits = set.getInt("max_units");
+                    int initialAmount = set.getInt("initial_amount");
+                    int accessibleRaceId = set.getInt("accessible_race_id");
+                    Race accessibleRace = set.wasNull() ? null : races.stream().filter(r -> r.getId() == accessibleRaceId).findFirst().orElse(null);
+                    buildingTypes.add(new BuildingType(id, name, description, price, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleRace));
+                }
+            }
+
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price, health, damage, accessible_race_id FROM unit_type")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int id = set.getInt("id");
+                    String name = set.getString("name");
+                    String description = set.getString("description");
+                    int price = set.getInt("price");
+                    int health = set.getInt("health");
+                    int damage = set.getInt("damage");
+                    int accessibleRaceId = set.getInt("accessible_race_id");
+                    Race accessibleRace = set.wasNull() ? null : races.stream().filter(r -> r.getId() == accessibleRaceId).findFirst().orElse(null);
+                    unitTypes.add(new UnitType(id, name, description, price, health, damage, accessibleRace));
+                }
+            }
+
+            ServerData.init(races.toArray(new Race[0]), buildingTypes.toArray(new BuildingType[0]), unitTypes.toArray(new UnitType[0]));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void onClientConnected(SocketWrapper client) {
+        super.onClientConnected(client);
+        try {
+            client.sendPacket(new PacketServerData(ServerData.getRaces(), ServerData.getUnitTypes(), ServerData.getBuildingTypes()));
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'envoi des données du serveur au client : " + e.getMessage());
+            try {
+                client.close();
+            } catch (IOException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Méthode pour obtenir la connexion à la base de données.
+     *
+     * @return La connexion à la base de données.
+     */
+    public Connection getDb() {
+        return this.db;
+    }
+
+    /**
+     * Méthode pour obtenir le gestionnaire d'authentification.
+     *
+     * @return Le gestionnaire d'authentification.
+     */
+    public AuthenticationManager getAuthManager() {
+        return this.authManager;
     }
 
     private static void loadMysqlDriver() {

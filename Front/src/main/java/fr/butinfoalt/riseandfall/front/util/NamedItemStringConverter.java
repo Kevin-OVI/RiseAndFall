@@ -18,7 +18,7 @@ public class NamedItemStringConverter<T extends NamedItem> extends StringConvert
         if (item == null) {
             return "Non sélectionné";
         }
-        return item.getDisplayName();
+        return item.getName();
     }
 
     /**

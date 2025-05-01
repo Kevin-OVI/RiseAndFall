@@ -7,5 +7,5 @@ public interface NamedItem {
     /**
      * @return the display name of the item
      */
-    String getDisplayName();
+    String getName();
 }
