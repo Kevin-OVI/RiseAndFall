@@ -165,4 +165,9 @@ public class BuildingType implements PurchasableItem, ISerializable {
         writeHelper.writeInt(this.initialAmount);
         writeHelper.writeInt(this.accessibleByRace == null ? -1 : this.accessibleByRace.getId());
     }
+
+    @Override
+    public String toString() {
+        return "BuildingType{id=%d, name='%s', description='%s', price=%d, goldProduction=%d, intelligenceProduction=%d, maxUnits=%d, initialAmount=%d, accessibleByRace=%s}".formatted(id, name, description, price, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleByRace);
+    }
 }

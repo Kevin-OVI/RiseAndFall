@@ -155,4 +155,9 @@ public class UnitType implements PurchasableItem, ISerializable {
         writeHelper.writeInt(this.damage);
         writeHelper.writeInt(this.accessibleByRace != null ? this.accessibleByRace.getId() : -1);
     }
+
+    @Override
+    public String toString() {
+        return "UnitType{id=%d, name='%s', description='%s', price=%d, health=%d, damage=%d, accessibleByRace=%s}".formatted(id, name, description, price, health, damage, accessibleByRace);
+    }
 }

@@ -60,4 +60,9 @@ public class Race implements NamedItem, ISerializable {
         writeHelper.writeString(this.name);
         writeHelper.writeString(this.description);
     }
+
+    @Override
+    public String toString() {
+        return "Race{id=%d, name='%s', description='%s'}".formatted(id, name, description);
+    }
 }
