@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<AnchorPane prefWidth="400" prefHeight="300" style="-fx-background-color: #f4f4f4;">
+    <VBox alignment="CENTER" spacing="15" layoutX="50" layoutY="50" prefWidth="300" prefHeight="200">
+        <Label text="Connexion" style="-fx-font-size: 24px; -fx-text-fill: #333;"/>
+        <TextField promptText="Nom d'utilisateur"/>
+        <PasswordField promptText="Mot de passe"/>
+        <Button text="Se connecter" style="-fx-background-color: #0078D7; -fx-text-fill: white;"/>
+        <Hyperlink text="Pas encore de compte ?"/>
+    </VBox>
+</AnchorPane>

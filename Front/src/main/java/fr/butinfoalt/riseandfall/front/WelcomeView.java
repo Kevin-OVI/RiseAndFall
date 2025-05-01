@@ -62,10 +62,6 @@ public class WelcomeView {
         UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
     }
 
-    /*public void initializeScene(Scene scene) {
-
-    }*/
-
     /**
      * Méthode appelée lorsque l'utilisateur clique sur le bouton "Jouer".
      * Elle vérifie qu'une race a été sélectionnée et crée un joueur, puis passe à la vue principale.

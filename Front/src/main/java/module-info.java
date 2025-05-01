@@ -14,4 +14,6 @@ module fr.butinfoalt.riseandfall.front {
     exports fr.butinfoalt.riseandfall.front.components;
     opens fr.butinfoalt.riseandfall.front.gamelogic to javafx.fxml;
     exports fr.butinfoalt.riseandfall.front.gamelogic;
+    opens fr.butinfoalt.riseandfall.front.authentification to javafx.fxml;
+    exports fr.butinfoalt.riseandfall.front.authentification;
 }

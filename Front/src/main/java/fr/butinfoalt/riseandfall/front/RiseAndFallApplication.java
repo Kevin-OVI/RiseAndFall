@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
+import fr.butinfoalt.riseandfall.front.authentification.LoadingController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -90,8 +91,8 @@ public class RiseAndFallApplication extends Application {
         System.out.println("Application lancée");
         RiseAndFall.initSocketClient();
 
-        /*WelcomeView controller = View.LOADING.getController();
-        controller.initializeScene(scene);*/
+        LoadingController controller = View.LOADING.getController();
+        controller.initializeScene(scene);
     }
 
     /**

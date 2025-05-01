@@ -17,7 +17,7 @@ public enum View {
     /**
      * Page de chargement de l'application.
      */
-    LOADING("authentification/loading.fxml", "Rise & Fall - Chargement"),
+    LOADING("authentification/loading-view.fxml", "Rise & Fall - Chargement"),
 
     /**
      * Page de bienvenue de l'application.
