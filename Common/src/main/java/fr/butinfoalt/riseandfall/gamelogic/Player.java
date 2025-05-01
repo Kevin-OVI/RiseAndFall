@@ -1,9 +1,11 @@
 package fr.butinfoalt.riseandfall.gamelogic;
 
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap;
-import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap.Entry;
-import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.Race;
+import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap.Entry;
+import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 
 import java.util.ArrayList;
@@ -20,11 +22,11 @@ public class Player {
     /**
      * Association entre les types de bâtiments et le nombre de bâtiments de chaque type.
      */
-    private final EnumIntMap<BuildingType> buildingMap;
+    private final ObjectIntMap<BuildingType> buildingMap;
     /**
      * Association entre les types d'unités et le nombre d'unités de chaque type.
      */
-    private final EnumIntMap<UnitType> unitMap;
+    private final ObjectIntMap<UnitType> unitMap;
     /**
      * Liste des ordres à exécuter au prochain tour pour le joueur.
      */
@@ -50,12 +52,12 @@ public class Player {
      */
     public Player(Race race) {
         this.race = race;
-        this.buildingMap = new EnumIntMap<>(
+        this.buildingMap = new ObjectIntMap<>(
                 Arrays.stream(ServerData.getBuildingTypes())
                         .filter(buildingType -> buildingType.getAccessibleByRace() == null || buildingType.getAccessibleByRace() == this.race)
                         .collect(Collectors.toList())
         );
-        this.unitMap = new EnumIntMap<>(
+        this.unitMap = new ObjectIntMap<>(
                 Arrays.stream(ServerData.getUnitTypes())
                         .filter(unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race)
                         .collect(Collectors.toList())
@@ -153,7 +155,7 @@ public class Player {
      *
      * @return La liste des bâtiments du joueur.
      */
-    public EnumIntMap<BuildingType> getBuildingMap() {
+    public ObjectIntMap<BuildingType> getBuildingMap() {
         return this.buildingMap;
     }
 
@@ -162,7 +164,7 @@ public class Player {
      *
      * @return La liste des unités du joueur.
      */
-    public EnumIntMap<UnitType> getUnitMap() {
+    public ObjectIntMap<UnitType> getUnitMap() {
         return this.unitMap;
     }
 

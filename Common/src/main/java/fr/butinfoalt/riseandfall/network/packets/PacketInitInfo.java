@@ -1,6 +1,6 @@
 package fr.butinfoalt.riseandfall.network.packets;
 
-import fr.butinfoalt.riseandfall.Version;
+import fr.butinfoalt.riseandfall.util.Version;
 import fr.butinfoalt.riseandfall.network.common.IPacket;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;

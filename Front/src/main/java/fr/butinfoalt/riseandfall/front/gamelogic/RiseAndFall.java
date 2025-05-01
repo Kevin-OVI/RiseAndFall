@@ -1,7 +1,7 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
-import fr.butinfoalt.riseandfall.gamelogic.Race;
+import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 
 import java.io.IOException;
 

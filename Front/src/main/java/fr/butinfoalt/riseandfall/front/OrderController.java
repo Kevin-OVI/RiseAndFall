@@ -5,11 +5,11 @@ import fr.butinfoalt.riseandfall.front.components.UnitItemSelector;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
-import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
-import fr.butinfoalt.riseandfall.gamelogic.counter.Modifier;
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap;
-import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+import fr.butinfoalt.riseandfall.util.counter.Counter;
+import fr.butinfoalt.riseandfall.util.counter.Modifier;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
+import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
@@ -27,11 +27,11 @@ public class OrderController {
     /**
      * Liste des unités en attente de création.
      */
-    private EnumIntMap<UnitType> pendingUnits;
+    private ObjectIntMap<UnitType> pendingUnits;
     /**
      * Liste des bâtiments en attente de création.
      */
-    private EnumIntMap<BuildingType> pendingBuildings;
+    private ObjectIntMap<BuildingType> pendingBuildings;
     /**
      * Champ pour le composant de la quantité d'or.
      */
@@ -92,7 +92,7 @@ public class OrderController {
         Counter allowedBuildingsCounter = new Counter(5);
 
         this.unitVBox.getChildren().clear();
-        for (EnumIntMap.Entry<UnitType> entry : pendingUnits) {
+        for (ObjectIntMap.Entry<UnitType> entry : pendingUnits) {
             Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
             UnitItemSelector selector = new UnitItemSelector(entry, goldCounter,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
@@ -101,7 +101,7 @@ public class OrderController {
         }
 
         this.buildingsVBox.getChildren().clear();
-        for (EnumIntMap.Entry<BuildingType> entry : pendingBuildings) {
+        for (ObjectIntMap.Entry<BuildingType> entry : pendingBuildings) {
             Modifier buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
             BuildingAmountSelector selector = new BuildingAmountSelector(entry, goldCounter,
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
@@ -131,13 +131,13 @@ public class OrderController {
     private void handleSave() {
         ClientPlayer player = RiseAndFall.getPlayer();
         player.clearPendingOrders();
-        for (EnumIntMap.Entry<UnitType> entry : this.pendingUnits) {
+        for (ObjectIntMap.Entry<UnitType> entry : this.pendingUnits) {
             int nbTroops = entry.getValue();
             if (nbTroops > 0) {
                 player.addPendingOrder(new OrderCreateUnit(entry.getKey(), nbTroops));
             }
         }
-        for (EnumIntMap.Entry<BuildingType> entry : this.pendingBuildings) {
+        for (ObjectIntMap.Entry<BuildingType> entry : this.pendingBuildings) {
             int nbHuts = entry.getValue();
             if (nbHuts > 0) {
                 player.addPendingOrder(new OrderCreateBuilding(entry.getKey(), nbHuts));

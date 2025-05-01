@@ -1,10 +1,11 @@
 package fr.butinfoalt.riseandfall.server;
 
 import com.mysql.cj.jdbc.Driver;
-import fr.butinfoalt.riseandfall.gamelogic.Race;
-import fr.butinfoalt.riseandfall.gamelogic.ServerData;
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
+import fr.butinfoalt.riseandfall.gamelogic.data.Race;
+import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
 import fr.butinfoalt.riseandfall.network.packets.PacketServerData;
@@ -87,7 +88,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int maxUnits = set.getInt("max_units");
                     int initialAmount = set.getInt("initial_amount");
                     int accessibleRaceId = set.getInt("accessible_race_id");
-                    Race accessibleRace = set.wasNull() ? null : ServerData.getRaceByDbId(races, accessibleRaceId);
+                    Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
                     buildingTypes.add(new BuildingType(id, name, description, price, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleRace));
                 }
             }
@@ -102,7 +103,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int health = set.getInt("health");
                     int damage = set.getInt("damage");
                     int accessibleRaceId = set.getInt("accessible_race_id");
-                    Race accessibleRace = set.wasNull() ? null : ServerData.getRaceByDbId(races, accessibleRaceId);
+                    Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
                     unitTypes.add(new UnitType(id, name, description, price, health, damage, accessibleRace));
                 }
             }

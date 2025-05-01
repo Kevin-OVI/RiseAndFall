@@ -1,6 +1,6 @@
 package fr.butinfoalt.riseandfall.front.util;
 
-import fr.butinfoalt.riseandfall.gamelogic.NamedItem;
+import fr.butinfoalt.riseandfall.gamelogic.data.NamedItem;
 import javafx.util.StringConverter;
 
 /**

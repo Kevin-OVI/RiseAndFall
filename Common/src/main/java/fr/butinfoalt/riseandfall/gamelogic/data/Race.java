@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall.gamelogic;
+package fr.butinfoalt.riseandfall.gamelogic.data;
 
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
@@ -10,7 +10,7 @@ import java.io.IOException;
  * Représente les différentes races disponibles dans le jeu.
  * Chaque race possède des caractéristiques et avantages spécifiques.
  */
-public class Race implements NamedItem, ISerializable {
+public class Race implements Identifiable, NamedItem, ISerializable {
     private final int id;
     private final String name;
     private final String description;
@@ -32,6 +32,7 @@ public class Race implements NamedItem, ISerializable {
      *
      * @return L'identifiant de la race dans la base de données
      */
+    @Override
     public int getId() {
         return this.id;
     }
@@ -41,6 +42,7 @@ public class Race implements NamedItem, ISerializable {
      *
      * @return Le nom d'affichage de la race.
      */
+    @Override
     public String getName() {
         return this.name;
     }

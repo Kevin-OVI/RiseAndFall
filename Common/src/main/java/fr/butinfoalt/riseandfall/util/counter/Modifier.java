@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall.gamelogic.counter;
+package fr.butinfoalt.riseandfall.util.counter;
 
 /**
  * Classe représentant un modificateur appliqué à un compteur.

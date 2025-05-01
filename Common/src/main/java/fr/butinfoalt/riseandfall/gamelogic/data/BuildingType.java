@@ -1,7 +1,5 @@
-package fr.butinfoalt.riseandfall.gamelogic.map;
+package fr.butinfoalt.riseandfall.gamelogic.data;
 
-import fr.butinfoalt.riseandfall.gamelogic.Race;
-import fr.butinfoalt.riseandfall.gamelogic.ServerData;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
@@ -12,7 +10,7 @@ import java.io.IOException;
  * Enum représentant les types de bâtiments disponibles dans le jeu.
  * Chaque type de bâtiment a un nom d'affichage, un prix, une production d'or et un nombre maximum d'unités.
  */
-public class BuildingType implements PurchasableItem, ISerializable {
+public class BuildingType implements Identifiable, PurchasableItem, ISerializable {
     /**
      * L'identifiant du bâtiment dans la base de données.
      */
@@ -89,7 +87,17 @@ public class BuildingType implements PurchasableItem, ISerializable {
         this.maxUnits = readHelper.readInt();
         this.initialAmount = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
-        this.accessibleByRace = ServerData.getRaceByDbId(races, unitAccessibleRaceId);
+        this.accessibleByRace = Identifiable.getByIdOrNull(races, unitAccessibleRaceId);
+    }
+
+    /**
+     * Méthode pour obtenir l'identifiant du bâtiment dans la base de données.
+     *
+     * @return L'identifiant du bâtiment dans la base de données.
+     */
+    @Override
+    public int getId() {
+        return this.id;
     }
 
     /**

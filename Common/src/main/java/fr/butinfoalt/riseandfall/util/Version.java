@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall;
+package fr.butinfoalt.riseandfall.util;
 
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
  */
 public class Version implements Comparable<Version>, ISerializable {
     /**
-     * Version actuelle de l'application.
+     * Version actuelle de l'application. (pas encore utilisée)
      */
-    public static final Version CURRENT_VERSION = new Version(1, 2, 3, 4, 5);
+    public static final Version CURRENT_VERSION = new Version(0, 0, 0);
 
     /**
      * Version de l'application.

@@ -3,7 +3,7 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 import fr.butinfoalt.riseandfall.front.MainController;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.Race;
+import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 
 /**
  * Représente un joueur dans le jeu du coté client.

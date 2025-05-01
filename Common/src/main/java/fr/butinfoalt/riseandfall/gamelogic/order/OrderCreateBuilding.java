@@ -1,7 +1,7 @@
 package fr.butinfoalt.riseandfall.gamelogic.order;
 
 import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 
 /**
  * Représente un ordre de création d'un bâtiment.

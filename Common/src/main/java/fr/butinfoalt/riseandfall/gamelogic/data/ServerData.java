@@ -1,7 +1,4 @@
-package fr.butinfoalt.riseandfall.gamelogic;
-
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+package fr.butinfoalt.riseandfall.gamelogic.data;
 
 import java.util.Arrays;
 
@@ -68,17 +65,5 @@ public final class ServerData {
      */
     public static UnitType[] getUnitTypes() {
         return unitTypes;
-    }
-
-    /**
-     * Récupère une race à partir de son identifiant dans la base de données.
-     *
-     * @param races La liste des races
-     * @param id    L'identifiant de la race dans la base de données
-     * @return La race correspondante, ou null si aucune ou si l'identifiant est négatif
-     */
-    public static Race getRaceByDbId(Race[] races, int id) {
-        if (id < 0) return null;
-        return Arrays.stream(races).filter(race -> race.getId() == id).findFirst().orElse(null);
     }
 }

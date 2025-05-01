@@ -1,7 +1,5 @@
-package fr.butinfoalt.riseandfall.gamelogic.map;
+package fr.butinfoalt.riseandfall.gamelogic.data;
 
-import fr.butinfoalt.riseandfall.gamelogic.Race;
-import fr.butinfoalt.riseandfall.gamelogic.ServerData;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
@@ -12,7 +10,7 @@ import java.io.IOException;
  * Enum représentant les types d'unités disponibles dans le jeu.
  * Chaque type d'unité a un nom d'affichage et un prix.
  */
-public class UnitType implements PurchasableItem, ISerializable {
+public class UnitType implements Identifiable, PurchasableItem, ISerializable {
     /**
      * L'identifiant de l'unité dans la base de données.
      */
@@ -86,7 +84,17 @@ public class UnitType implements PurchasableItem, ISerializable {
         this.health = readHelper.readInt();
         this.damage = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
-        this.accessibleByRace = ServerData.getRaceByDbId(races, unitAccessibleRaceId);
+        this.accessibleByRace = Identifiable.getByIdOrNull(races, unitAccessibleRaceId);
+    }
+
+    /**
+     * Méthode pour obtenir l'identifiant de l'unité dans la base de données.
+     *
+     * @return L'identifiant de l'unité dans la base de données.
+     */
+    @Override
+    public int getId() {
+        return id;
     }
 
     /**

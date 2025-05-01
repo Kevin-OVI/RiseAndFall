@@ -1,8 +1,8 @@
 package fr.butinfoalt.riseandfall.network.packets;
 
-import fr.butinfoalt.riseandfall.gamelogic.Race;
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+import fr.butinfoalt.riseandfall.gamelogic.data.Race;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.network.common.IPacket;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;

@@ -1,18 +1,18 @@
 package fr.butinfoalt.riseandfall.front.components;
 
-import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap;
+import fr.butinfoalt.riseandfall.util.counter.Counter;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 
 import java.util.Map;
 import java.util.function.Function;
 
 public class BuildingAmountSelector extends PurchasableItemAmountSelector<BuildingType> {
-    public BuildingAmountSelector(EnumIntMap.Entry<BuildingType> entry, Counter goldCounter, Function<Integer, Boolean> amountValidator) {
+    public BuildingAmountSelector(ObjectIntMap.Entry<BuildingType> entry, Counter goldCounter, Function<Integer, Boolean> amountValidator) {
         super(entry, goldCounter, amountValidator);
     }
 
-    public BuildingAmountSelector(EnumIntMap.Entry<BuildingType> entry, Counter goldCounter) {
+    public BuildingAmountSelector(ObjectIntMap.Entry<BuildingType> entry, Counter goldCounter) {
         super(entry, goldCounter);
     }
 

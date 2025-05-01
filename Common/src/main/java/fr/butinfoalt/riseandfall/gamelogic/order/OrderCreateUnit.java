@@ -1,7 +1,7 @@
 package fr.butinfoalt.riseandfall.gamelogic.order;
 
 import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 
 /**
  * Représente un ordre de création d'une unité.

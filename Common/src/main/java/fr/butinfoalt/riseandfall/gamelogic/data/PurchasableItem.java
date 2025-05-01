@@ -1,6 +1,4 @@
-package fr.butinfoalt.riseandfall.gamelogic.map;
-
-import fr.butinfoalt.riseandfall.gamelogic.NamedItem;
+package fr.butinfoalt.riseandfall.gamelogic.data;
 
 /**
  * Interface représentant un objet achetable dans le jeu.

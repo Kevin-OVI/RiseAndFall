@@ -1,10 +1,10 @@
 package fr.butinfoalt.riseandfall.front.components;
 
-import fr.butinfoalt.riseandfall.gamelogic.Dispatcher;
-import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
-import fr.butinfoalt.riseandfall.gamelogic.counter.Modifier;
-import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap;
-import fr.butinfoalt.riseandfall.gamelogic.map.PurchasableItem;
+import fr.butinfoalt.riseandfall.util.Dispatcher;
+import fr.butinfoalt.riseandfall.util.counter.Counter;
+import fr.butinfoalt.riseandfall.util.counter.Modifier;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
+import fr.butinfoalt.riseandfall.gamelogic.data.PurchasableItem;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
@@ -28,7 +28,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
     /**
      * L'entrée de l'élément achetable
      */
-    protected final EnumIntMap.Entry<T> entry;
+    protected final ObjectIntMap.Entry<T> entry;
 
     /**
      * Fonction de validation supplémentaire de la quantité en plus de celle du prix.
@@ -69,7 +69,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
      * @param goldCounter     Le compteur d'or à modifier.
      * @param amountValidator Fonction de validation de la quantité.
      */
-    public PurchasableItemAmountSelector(EnumIntMap.Entry<T> entry, Counter goldCounter, Function<Integer, Boolean> amountValidator) {
+    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter goldCounter, Function<Integer, Boolean> amountValidator) {
         this.entry = entry;
         this.amountValidator = amountValidator;
         this.goldModifier = goldCounter.addModifier(-entry.getKey().getPrice() * entry.getValue());
@@ -108,7 +108,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
      * @param entry       L'entrée de l'élément achetable.
      * @param goldCounter Le compteur d'or à modifier.
      */
-    public PurchasableItemAmountSelector(EnumIntMap.Entry<T> entry, Counter goldCounter) {
+    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter goldCounter) {
         this(entry, goldCounter, null);
     }
 
