@@ -89,7 +89,7 @@ public class BuildingType implements PurchasableItem, ISerializable {
         this.maxUnits = readHelper.readInt();
         this.initialAmount = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
-        this.accessibleByRace = unitAccessibleRaceId == -1 ? null : ServerData.getRaceByDbId(races, unitAccessibleRaceId);
+        this.accessibleByRace = ServerData.getRaceByDbId(races, unitAccessibleRaceId);
     }
 
     /**

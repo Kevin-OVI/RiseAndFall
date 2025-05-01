@@ -86,7 +86,7 @@ public class UnitType implements PurchasableItem, ISerializable {
         this.health = readHelper.readInt();
         this.damage = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
-        this.accessibleByRace = unitAccessibleRaceId == -1 ? null : ServerData.getRaceByDbId(races, unitAccessibleRaceId);
+        this.accessibleByRace = ServerData.getRaceByDbId(races, unitAccessibleRaceId);
     }
 
     /**
