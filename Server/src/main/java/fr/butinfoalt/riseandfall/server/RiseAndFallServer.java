@@ -18,8 +18,19 @@ import java.util.List;
 
 import static fr.butinfoalt.riseandfall.server.Environment.*;
 
+/**
+ * Classe principale du serveur de jeu Rise and Fall.
+ * Elle étend la classe BaseSocketServer pour gérer les connexions des clients.
+ * Elle initialise également la base de données et charge les données du serveur.
+ */
 public class RiseAndFallServer extends BaseSocketServer {
+    /**
+     * La connexion à la base de données.
+     */
     private final Connection db;
+    /**
+     * Le gestionnaire d'authentification pour gérer les connexions des clients.
+     */
     private final AuthenticationManager authManager;
 
     /**
@@ -27,7 +38,7 @@ public class RiseAndFallServer extends BaseSocketServer {
      * Initialise le serveur socket sur le port spécifié.
      *
      * @param port Le port sur lequel le serveur écoute les connexions des clients.
-     * @param db
+     * @param db   La connexion à la base de données.
      * @throws IOException Si une erreur se produit lors de la création du serveur socket.
      */
     public RiseAndFallServer(int port, Connection db) throws IOException {
@@ -41,11 +52,10 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerSendPacket((byte) 2, PacketServerData.class);
     }
 
-    @Override
-    public void close() throws IOException {
-        super.close();
-    }
-
+    /**
+     * Méthode pour charger les données du serveur depuis la base de données.
+     * Elle récupère les races, les types de bâtiments et les types d'unités.
+     */
     private void loadServerData() {
         try {
             Race[] races;
@@ -103,6 +113,12 @@ public class RiseAndFallServer extends BaseSocketServer {
         }
     }
 
+    /**
+     * Méthode appelée lorsqu'un client se connecte au serveur.
+     * Elle envoie les données statiques du serveur au client via le PacketServerData.
+     *
+     * @param client Le wrapper de socket du client connecté.
+     */
     @Override
     public void onClientConnected(SocketWrapper client) {
         super.onClientConnected(client);
@@ -119,6 +135,11 @@ public class RiseAndFallServer extends BaseSocketServer {
         }
     }
 
+    /**
+     * Méthode appelée lorsqu'un client se déconnecte du serveur.
+     *
+     * @param client Le wrapper de socket du client déconnecté.
+     */
     @Override
     protected void onClientDisconnected(SocketWrapper client) {
         super.onClientDisconnected(client);
@@ -143,6 +164,10 @@ public class RiseAndFallServer extends BaseSocketServer {
         return this.authManager;
     }
 
+    /**
+     * Méthode pour charger le driver MySQL.
+     * Elle lève une exception si le driver n'est pas trouvé.
+     */
     private static void loadMysqlDriver() {
         try {
             Class.forName(Driver.class.getName());
@@ -151,6 +176,11 @@ public class RiseAndFallServer extends BaseSocketServer {
         }
     }
 
+    /**
+     * Méthode pour établir une connexion à la base de données.
+     *
+     * @return La connexion à la base de données.
+     */
     private static Connection connectToDatabase() {
         String url = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?serverTimezone=UTC";
 
@@ -165,6 +195,13 @@ public class RiseAndFallServer extends BaseSocketServer {
         }
     }
 
+    /**
+     * Méthode principale pour démarrer le serveur.
+     * Elle charge le driver MySQL, établit la connexion à la base de données,
+     * démarre le serveur et gère les tâches de fermeture.
+     *
+     * @param args Les arguments de la ligne de commande (non utilisés).
+     */
     public static void main(String[] args) {
         ArrayList<Runnable> shutdownTasks = new ArrayList<>();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
