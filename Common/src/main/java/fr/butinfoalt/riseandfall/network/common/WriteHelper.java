@@ -267,13 +267,20 @@ public class WriteHelper {
     }
 
     /**
-     * Écris un objet sérialisable dans le flux de sortie.
+     * Écris un tableau d'objets sérialisables dans le flux de sortie.
      *
-     * @param serializable L'objet sérialisable à écrire.
+     * @param serializables Le tableau d'objets sérialisables à écrire.
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
-    public void writeSerializable(ISerializable serializable) throws IOException {
-        serializable.toBytes(this);
+    public void writeSerializableArray(ISerializable[] serializables) throws IOException {
+        if (serializables == null) {
+            this.writeInt(-1);
+            return;
+        }
+        this.writeInt(serializables.length);
+        for (ISerializable serializable : serializables) {
+            serializable.toBytes(this);
+        }
     }
 
     /**

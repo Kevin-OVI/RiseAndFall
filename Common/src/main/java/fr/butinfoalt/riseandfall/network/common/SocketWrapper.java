@@ -140,7 +140,7 @@ public abstract class SocketWrapper {
     public void sendPacket(IPacket packet) throws IOException {
         byte packetId = this.packetRegistry.getSendPacketId(packet.getClass());
         this.writeHelper.writeByte(packetId);
-        this.writeHelper.writeSerializable(packet);
+        packet.toBytes(this.writeHelper);
         this.socket.getOutputStream().flush();
     }
 

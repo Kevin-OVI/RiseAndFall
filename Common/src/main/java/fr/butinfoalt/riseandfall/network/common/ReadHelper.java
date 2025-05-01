@@ -270,15 +270,41 @@ public class ReadHelper {
     }
 
     /**
-     * Lit un objet sérialisable à partir du flux d'entrée.
+     * Lit un tableau d'objets sérialisables à partir du flux d'entrée.
      *
-     * @param deserializer L'interface de désérialisation pour l'objet.
-     * @param <T>          Le type de l'objet désérialisé, qui doit implémenter l'interface ISerializable.
-     * @return L'objet désérialisé.
+     * @param deserializer L'interface de désérialisation pour les objets sérialisables.
+     * @param <T>          Le type des objets sérialisables.
+     * @return Le tableau d'objets sérialisables lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public <T extends ISerializable> T readSerializable(IDeserializer<T> deserializer) throws IOException {
-        return deserializer.deserialize(this);
+    public <T extends ISerializable> T[] readSerializableArray(IDeserializer<T> deserializer) throws IOException {
+        int size = this.readInt();
+        if (size < 0) return null;
+        T[] array = (T[]) new Object[size];
+        for (int i = 0; i < size; i++) {
+            array[i] = deserializer.deserialize(this);
+        }
+        return array;
+    }
+
+    /**
+     * Lit un tableau d'objets sérialisables à partir du flux d'entrée et d'un argument de contexte.
+     *
+     * @param deserializer L'interface de désérialisation pour les objets sérialisables.
+     * @param context      Le contexte utilisé lors de la désérialisation.
+     * @param <T>          Le type des objets sérialisables.
+     * @param <U>          Le type du contexte.
+     * @return Le tableau d'objets sérialisables lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
+    public <T extends ISerializable, U> T[] readSerializableArray(IContextDeserializer<T, U> deserializer, U context) throws IOException {
+        int size = this.readInt();
+        if (size < 0) return null;
+        T[] array = (T[]) new Object[size];
+        for (int i = 0; i < size; i++) {
+            array[i] = deserializer.deserialize(this, context);
+        }
+        return array;
     }
 
     /**

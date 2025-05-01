@@ -38,7 +38,7 @@ public class PacketInitInfo implements IPacket {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation
      */
     public PacketInitInfo(ReadHelper readHelper) throws IOException {
-        this.clientVersion = readHelper.readSerializable(Version::new);
+        this.clientVersion = new Version(readHelper);
         this.username = readHelper.readString();
     }
 
@@ -50,7 +50,7 @@ public class PacketInitInfo implements IPacket {
      */
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
-        writeHelper.writeSerializable(this.clientVersion);
+        this.clientVersion.toBytes(writeHelper);
         writeHelper.writeString(this.username);
     }
 
