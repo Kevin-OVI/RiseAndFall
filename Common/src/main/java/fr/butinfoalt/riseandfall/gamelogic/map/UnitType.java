@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.gamelogic.map;
 
 import fr.butinfoalt.riseandfall.gamelogic.Race;
+import fr.butinfoalt.riseandfall.gamelogic.ServerData;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
@@ -85,7 +86,7 @@ public class UnitType implements PurchasableItem, ISerializable {
         this.health = readHelper.readInt();
         this.damage = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
-        this.accessibleByRace = unitAccessibleRaceId == -1 ? null : races[unitAccessibleRaceId];
+        this.accessibleByRace = unitAccessibleRaceId == -1 ? null : ServerData.getRaceByDbId(races, unitAccessibleRaceId);
     }
 
     /**

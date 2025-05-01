@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
+import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -33,6 +34,7 @@ public class RiseAndFallApplication extends Application {
      */
     public static void main(String[] args) {
         Font.loadFont(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("fonts/IMFellEnglishSC-Regular.ttf")), 12);
+        System.out.println("Lancement de l'application");
         Application.launch();
     }
 
@@ -79,14 +81,17 @@ public class RiseAndFallApplication extends Application {
     public void start(Stage stage) {
         mainWindow = stage;
 
-        Scene scene = new Scene(View.WELCOME.getSceneRoot(), WIDTH, HEIGHT);
-        stage.setTitle(View.WELCOME.getWindowTitle());
+        Scene scene = new Scene(View.LOADING.getSceneRoot(), WIDTH, HEIGHT);
+        stage.setTitle(View.LOADING.getWindowTitle());
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
 
-        WelcomeView controller = View.WELCOME.getController();
-        controller.initializeScene(scene);
+        System.out.println("Application lancée");
+        RiseAndFall.initSocketClient();
+
+        /*WelcomeView controller = View.LOADING.getController();
+        controller.initializeScene(scene);*/
     }
 
     /**

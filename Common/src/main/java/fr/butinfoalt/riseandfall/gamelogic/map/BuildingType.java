@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.gamelogic.map;
 
 import fr.butinfoalt.riseandfall.gamelogic.Race;
+import fr.butinfoalt.riseandfall.gamelogic.ServerData;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
@@ -88,7 +89,7 @@ public class BuildingType implements PurchasableItem, ISerializable {
         this.maxUnits = readHelper.readInt();
         this.initialAmount = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
-        this.accessibleByRace = unitAccessibleRaceId == -1 ? null : races[unitAccessibleRaceId];
+        this.accessibleByRace = unitAccessibleRaceId == -1 ? null : ServerData.getRaceByDbId(races, unitAccessibleRaceId);
     }
 
     /**
@@ -154,6 +155,7 @@ public class BuildingType implements PurchasableItem, ISerializable {
 
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
+        writeHelper.writeInt(this.id);
         writeHelper.writeString(this.name);
         writeHelper.writeString(this.description);
         writeHelper.writeInt(this.price);

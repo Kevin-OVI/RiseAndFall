@@ -3,6 +3,7 @@ module fr.butinfoalt.riseandfall.front {
     requires javafx.fxml;
     requires java.desktop;
     requires fr.butinfoalt.riseandfall;
+    requires io.github.cdimascio.dotenv.java;
 
 
     opens fr.butinfoalt.riseandfall.front to javafx.fxml;

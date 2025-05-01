@@ -58,11 +58,13 @@ public class WelcomeView {
         );
         this.instructionsBlinkTransition.setCycleCount(4);
 
-    }
-
-    public void initializeScene(Scene scene) {
+        Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
     }
+
+    /*public void initializeScene(Scene scene) {
+
+    }*/
 
     /**
      * Méthode appelée lorsque l'utilisateur clique sur le bouton "Jouer".

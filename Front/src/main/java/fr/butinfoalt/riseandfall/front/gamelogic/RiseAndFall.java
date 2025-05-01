@@ -1,6 +1,11 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
+import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
 import fr.butinfoalt.riseandfall.gamelogic.Race;
+import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
+import fr.butinfoalt.riseandfall.network.packets.PacketToken;
+
+import java.io.IOException;
 
 /**
  * Classe principale du jeu RiseAndFall coté client.
@@ -12,6 +17,7 @@ public class RiseAndFall {
      * Il n'y a qu'un seul joueur dans le jeu.
      */
     private static ClientPlayer player;
+    private static RiseAndFallClient client;
 
     /**
      * Méthode pour obtenir le joueur actuel.
@@ -37,5 +43,19 @@ public class RiseAndFall {
      */
     public static void resetPlayer() {
         player = null;
+    }
+
+    public static void initSocketClient() {
+        client = new RiseAndFallClient();
+        System.out.println("Création du client");
+        try {
+            client.connect();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static RiseAndFallClient getClient() {
+        return client;
     }
 }

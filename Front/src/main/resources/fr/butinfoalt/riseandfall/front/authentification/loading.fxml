@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml" prefWidth="400" prefHeight="300" style="-fx-background-color: #f4f4f4;">
+    <VBox alignment="CENTER" spacing="20">
+        <ProgressIndicator />
+        <Label text="Chargement en cours..." style="-fx-font-size: 16px; -fx-text-fill: #555;" />
+    </VBox>
+</StackPane>

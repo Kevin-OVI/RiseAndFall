@@ -56,7 +56,10 @@ public class BaseSocketClient implements AutoCloseable {
         if (this.socketWrapper != null) {
             throw new IllegalStateException("Client is already connected");
         }
-        this.socketWrapper = new SocketWrapper(new Socket(this.host, this.port), this.packetRegistry) {
+        System.out.println("Connecting to " + host + ":" + port);
+        Socket socket = new Socket(this.host, this.port);
+        System.out.println("Connected to " + host + ":" + port);
+        this.socketWrapper = new SocketWrapper(socket, this.packetRegistry) {
             @Override
             protected void onDisconnected(SocketWrapper socketWrapper) {
                 boolean callDisconnected;

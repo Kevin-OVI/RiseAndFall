@@ -43,18 +43,20 @@ public class RiseAndFallServer extends BaseSocketServer {
 
     private void loadServerData() {
         try {
-            List<Race> races = new ArrayList<>();
+            Race[] races;
             List<BuildingType> buildingTypes = new ArrayList<>();
             List<UnitType> unitTypes = new ArrayList<>();
 
             try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description FROM race")) {
+                List<Race> racesList = new ArrayList<>();
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    races.add(new Race(id, name, description));
+                    racesList.add(new Race(id, name, description));
                 }
+                races = racesList.toArray(new Race[0]);
             }
 
             try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type")) {
@@ -70,7 +72,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int maxUnits = set.getInt("max_units");
                     int initialAmount = set.getInt("initial_amount");
                     int accessibleRaceId = set.getInt("accessible_race_id");
-                    Race accessibleRace = set.wasNull() ? null : races.stream().filter(r -> r.getId() == accessibleRaceId).findFirst().orElse(null);
+                    Race accessibleRace = set.wasNull() ? null : ServerData.getRaceByDbId(races, accessibleRaceId);
                     buildingTypes.add(new BuildingType(id, name, description, price, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleRace));
                 }
             }
@@ -85,12 +87,12 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int health = set.getInt("health");
                     int damage = set.getInt("damage");
                     int accessibleRaceId = set.getInt("accessible_race_id");
-                    Race accessibleRace = set.wasNull() ? null : races.stream().filter(r -> r.getId() == accessibleRaceId).findFirst().orElse(null);
+                    Race accessibleRace = set.wasNull() ? null : ServerData.getRaceByDbId(races, accessibleRaceId);
                     unitTypes.add(new UnitType(id, name, description, price, health, damage, accessibleRace));
                 }
             }
 
-            ServerData.init(races.toArray(new Race[0]), buildingTypes.toArray(new BuildingType[0]), unitTypes.toArray(new UnitType[0]));
+            ServerData.init(races, buildingTypes.toArray(new BuildingType[0]), unitTypes.toArray(new UnitType[0]));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -99,6 +101,7 @@ public class RiseAndFallServer extends BaseSocketServer {
     @Override
     public void onClientConnected(SocketWrapper client) {
         super.onClientConnected(client);
+        System.out.println("Client connecté : " + client.getName());
         try {
             client.sendPacket(new PacketServerData(ServerData.getRaces(), ServerData.getUnitTypes(), ServerData.getBuildingTypes()));
         } catch (IOException e) {
@@ -106,8 +109,10 @@ public class RiseAndFallServer extends BaseSocketServer {
             try {
                 client.close();
             } catch (IOException ignored) {
+                System.err.println("Erreur lors de la fermeture de la connexion du client : " + client.getName());
             }
         }
+        System.out.println("Données du serveur envoyées au client : " + client.getName());
     }
 
     /**

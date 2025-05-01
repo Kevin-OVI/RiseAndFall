@@ -8,6 +8,7 @@ import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class PacketServerData implements IPacket {
     private final Race[] races;
@@ -21,21 +22,25 @@ public class PacketServerData implements IPacket {
     }
 
     public PacketServerData(ReadHelper readHelper) throws IOException {
+        System.out.println("Lecture du paquet de données serveur");
         int raceCount = readHelper.readInt();
         this.races = new Race[raceCount];
         for (int i = 0; i < raceCount; i++) {
             this.races[i] = readHelper.readSerializable(Race::new);
         }
+        System.out.println("Races lues : " + Arrays.toString(races));
         int unitTypeCount = readHelper.readInt();
         this.unitTypes = new UnitType[unitTypeCount];
         for (int i = 0; i < unitTypeCount; i++) {
             this.unitTypes[i] = new UnitType(readHelper, this.races);
         }
+        System.out.println("UnitTypes lus : " + Arrays.toString(unitTypes));
         int buildingTypeCount = readHelper.readInt();
         this.buildingTypes = new BuildingType[buildingTypeCount];
         for (int i = 0; i < buildingTypeCount; i++) {
             this.buildingTypes[i] = new BuildingType(readHelper, this.races);
         }
+        System.out.println("Paquet lu : " + this);
     }
 
     @Override
@@ -44,17 +49,25 @@ public class PacketServerData implements IPacket {
         for (Race race : this.races) {
             writeHelper.writeSerializable(race);
         }
+        writeHelper.writeInt(this.unitTypes.length);
+        for (UnitType unitType : this.unitTypes) {
+            unitType.toBytes(writeHelper);
+        }
+        writeHelper.writeInt(this.buildingTypes.length);
+        for (BuildingType buildingType : this.buildingTypes) {
+            buildingType.toBytes(writeHelper);
+        }
     }
 
-    public Race[] getListRace() {
+    public Race[] getRaces() {
         return this.races;
     }
 
-    public UnitType[] getListUnitType() {
+    public UnitType[] getUnitTypes() {
         return this.unitTypes;
     }
 
-    public BuildingType[] getListBuildingType() {
+    public BuildingType[] getBuildingTypes() {
         return this.buildingTypes;
     }
 }

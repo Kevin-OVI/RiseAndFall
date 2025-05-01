@@ -35,4 +35,8 @@ public final class ServerData {
     public static UnitType[] getUnitTypes() {
         return unitTypes;
     }
+
+    public static Race getRaceByDbId(Race[] races, int id) {
+        return Arrays.stream(races).filter(race -> race.getId() == id).findFirst().orElse(null);
+    }
 }

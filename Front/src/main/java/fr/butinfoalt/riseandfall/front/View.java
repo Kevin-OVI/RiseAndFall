@@ -15,7 +15,12 @@ import java.util.function.Consumer;
  */
 public enum View {
     /**
-     *
+     * Page de chargement de l'application.
+     */
+    LOADING("authentification/loading.fxml", "Rise & Fall - Chargement"),
+
+    /**
+     * Page de bienvenue de l'application.
      */
     WELCOME("welcome-view.fxml", "Rise & Fall - Bienvenue"),
 
