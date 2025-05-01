@@ -50,14 +50,12 @@ public abstract class SocketWrapper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de l'initialisation.
      */
     public SocketWrapper(Socket socket, PacketRegistry packetRegistry) throws IOException {
-        System.out.println("Création du wrapper de socket");
         this.socket = socket;
         this.packetRegistry = packetRegistry;
         this.readHelper = new ReadHelper(socket.getInputStream());
         this.writeHelper = new WriteHelper(socket.getOutputStream());
         this.readThread = new Thread(this::readTask, "Socket Wrapper Read Thread");
         this.readThread.start();
-        System.out.println("Thread de lecture démarré");
     }
 
     /**
@@ -83,10 +81,8 @@ public abstract class SocketWrapper {
         try {
             while (this.socket.isConnected()) {
                 byte packetId = this.readHelper.readByte();
-                System.out.println("Reception du paquet" + packetId);
                 this.handlePacket(packetId);
             }
-            System.out.println("Fermeture de la socket");
         } catch (IOException e) {
             if (!(e instanceof SocketException && "Socket closed".equals(e.getMessage()))) {
                 throw new RuntimeException(e);

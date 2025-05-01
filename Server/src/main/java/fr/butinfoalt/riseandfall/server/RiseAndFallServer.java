@@ -41,6 +41,11 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerSendPacket((byte) 2, PacketServerData.class);
     }
 
+    @Override
+    public void close() throws IOException {
+        super.close();
+    }
+
     private void loadServerData() {
         try {
             Race[] races;
@@ -112,7 +117,6 @@ public class RiseAndFallServer extends BaseSocketServer {
                 System.err.println("Erreur lors de la fermeture de la connexion du client : " + client.getName());
             }
         }
-        System.out.println("Données du serveur envoyées au client : " + client.getName());
     }
 
     @Override
@@ -153,7 +157,7 @@ public class RiseAndFallServer extends BaseSocketServer {
         try {
             Connection conn = DriverManager.getConnection(url, DB_USER, DB_PASSWORD);
             if (conn.isValid(2)) {
-                System.out.println("Connexion à la base réussie !");
+                System.out.println("Connexion à la base de données réussie !");
             }
             return conn;
         } catch (SQLException e) {
@@ -162,30 +166,42 @@ public class RiseAndFallServer extends BaseSocketServer {
     }
 
     public static void main(String[] args) {
-        loadMysqlDriver();
+        ArrayList<Runnable> shutdownTasks = new ArrayList<>();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            for (Runnable task : shutdownTasks) {
+                task.run();
+            }
+        }));
 
+        loadMysqlDriver();
         Connection db = connectToDatabase();
+        shutdownTasks.add(() -> {
+            System.out.println("Fermeture de la connexion à la base de données...");
+            try {
+                db.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         try (RiseAndFallServer server = new RiseAndFallServer(SERVER_PORT, db)) {
             server.start();
-            System.out.println("Server started");
+            shutdownTasks.addFirst(() -> {
+                System.out.println("Arrêt du serveur...");
+                try {
+                    server.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            System.out.println("Serveur démarré sur le port " + SERVER_PORT);
             try {
                 server.join();
-            } catch (InterruptedException e) {
-                System.out.println("Server interrupted");
-                server.close();
+            } catch (InterruptedException ignored) {
             }
+            System.out.println("Serveur arrêté.");
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                if (!db.isClosed()) {
-                    db.close();
-                    System.out.println("Connexion fermée proprement.");
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 }

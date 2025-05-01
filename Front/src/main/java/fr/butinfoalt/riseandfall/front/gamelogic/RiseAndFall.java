@@ -2,8 +2,6 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
 import fr.butinfoalt.riseandfall.gamelogic.Race;
-import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
-import fr.butinfoalt.riseandfall.network.packets.PacketToken;
 
 import java.io.IOException;
 
@@ -47,7 +45,6 @@ public class RiseAndFall {
 
     public static void initSocketClient() {
         client = new RiseAndFallClient();
-        System.out.println("Création du client");
         try {
             client.connect();
         } catch (IOException e) {

@@ -37,7 +37,6 @@ public class RiseAndFallApplication extends Application {
      */
     public static void main(String[] args) {
         Font.loadFont(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("fonts/IMFellEnglishSC-Regular.ttf")), 12);
-        System.out.println("Lancement de l'application");
         Application.launch();
     }
 
@@ -91,7 +90,6 @@ public class RiseAndFallApplication extends Application {
         stage.setOnCloseRequest(this::onCloseRequest);
         stage.show();
 
-        System.out.println("Application lancée");
         RiseAndFall.initSocketClient();
 
         LoadingController controller = View.LOADING.getController();
