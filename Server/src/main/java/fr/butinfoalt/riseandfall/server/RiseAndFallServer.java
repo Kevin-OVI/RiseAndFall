@@ -115,6 +115,12 @@ public class RiseAndFallServer extends BaseSocketServer {
         System.out.println("Données du serveur envoyées au client : " + client.getName());
     }
 
+    @Override
+    protected void onClientDisconnected(SocketWrapper client) {
+        super.onClientDisconnected(client);
+        System.out.println("Client déconnecté : " + client.getName());
+    }
+
     /**
      * Méthode pour obtenir la connexion à la base de données.
      *

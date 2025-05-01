@@ -7,7 +7,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Stack;
 
@@ -86,6 +88,7 @@ public class RiseAndFallApplication extends Application {
         stage.setTitle(View.LOADING.getWindowTitle());
         stage.setScene(scene);
         stage.setMaximized(true);
+        stage.setOnCloseRequest(this::onCloseRequest);
         stage.show();
 
         System.out.println("Application lancée");
@@ -93,6 +96,16 @@ public class RiseAndFallApplication extends Application {
 
         LoadingController controller = View.LOADING.getController();
         controller.initializeScene(scene);
+    }
+
+    private void onCloseRequest(WindowEvent windowEvent) {
+        if (!windowEvent.isConsumed()) {
+            try {
+                RiseAndFall.getClient().close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**

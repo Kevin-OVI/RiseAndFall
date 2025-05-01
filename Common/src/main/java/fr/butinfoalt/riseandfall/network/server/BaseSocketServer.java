@@ -139,19 +139,19 @@ public class BaseSocketServer extends Thread implements Closeable {
     /**
      * Méthode appelée lorsqu'un client se connecte au serveur.
      *
-     * @param socketWrapper Le wrapper de socket du client connecté.
+     * @param client Le wrapper de socket du client connecté.
      */
-    protected synchronized void onClientConnected(SocketWrapper socketWrapper) {
-        this.connectedClients.add(socketWrapper);
+    protected synchronized void onClientConnected(SocketWrapper client) {
+        this.connectedClients.add(client);
     }
 
     /**
      * Méthode appelée lorsqu'un client se déconnecte du serveur.
      *
-     * @param socketWrapper Le wrapper de socket du client déconnecté.
+     * @param client Le wrapper de socket du client déconnecté.
      */
-    protected synchronized void onClientDisconnected(SocketWrapper socketWrapper) {
-        this.connectedClients.remove(socketWrapper);
+    protected synchronized void onClientDisconnected(SocketWrapper client) {
+        this.connectedClients.remove(client);
     }
 
     /**
