@@ -1,7 +1,7 @@
 package fr.butinfoalt.riseandfall.network.packets;
 
-import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.network.common.IPacket;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
@@ -48,9 +48,9 @@ public class PacketServerData implements IPacket {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation
      */
     public PacketServerData(ReadHelper readHelper) throws IOException {
-        this.races = readHelper.readSerializableArray(Race::new);
-        this.unitTypes = readHelper.readSerializableArray(UnitType::new, this.races);
-        this.buildingTypes = readHelper.readSerializableArray(BuildingType::new, this.races);
+        this.races = readHelper.readSerializableArray(Race.class, Race::new);
+        this.unitTypes = readHelper.readSerializableArray(UnitType.class, UnitType::new, this.races);
+        this.buildingTypes = readHelper.readSerializableArray(BuildingType.class, BuildingType::new, this.races);
     }
 
     /**

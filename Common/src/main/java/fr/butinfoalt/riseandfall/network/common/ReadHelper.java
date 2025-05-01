@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -277,10 +278,11 @@ public class ReadHelper {
      * @return Le tableau d'objets sérialisables lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public <T extends ISerializable> T[] readSerializableArray(IDeserializer<T> deserializer) throws IOException {
+    public <T extends ISerializable> T[] readSerializableArray(Class<T> arrayComponentType, IDeserializer<T> deserializer) throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
-        T[] array = (T[]) new Object[size];
+        @SuppressWarnings("unchecked")
+        T[] array = (T[]) Array.newInstance(arrayComponentType, size);
         for (int i = 0; i < size; i++) {
             array[i] = deserializer.deserialize(this);
         }
@@ -297,10 +299,11 @@ public class ReadHelper {
      * @return Le tableau d'objets sérialisables lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public <T extends ISerializable, U> T[] readSerializableArray(IContextDeserializer<T, U> deserializer, U context) throws IOException {
+    public <T extends ISerializable, U> T[] readSerializableArray(Class<T> arrayComponentType,  IContextDeserializer<T, U> deserializer, U context) throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
-        T[] array = (T[]) new Object[size];
+        @SuppressWarnings("unchecked")
+        T[] array = (T[]) Array.newInstance(arrayComponentType, size);
         for (int i = 0; i < size; i++) {
             array[i] = deserializer.deserialize(this, context);
         }
