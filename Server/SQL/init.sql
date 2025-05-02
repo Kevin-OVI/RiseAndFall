@@ -1,90 +1,104 @@
-SET foreign_key_checks = 0;
-
-DROP TABLE IF EXISTS `order`;
+-- Détruire les tables existantes
+DROP TABLE IF EXISTS unit_creation_order;
+DROP TABLE IF EXISTS building_creation_order;
 DROP TABLE IF EXISTS unit_type;
 DROP TABLE IF EXISTS building_type;
-DROP TABLE IF EXISTS `player`;
+DROP TABLE IF EXISTS player;
+DROP TABLE IF EXISTS game;
 DROP TABLE IF EXISTS user_token;
 DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS game;
 DROP TABLE IF EXISTS race;
 
+
+-- Créer les tables nécessaires
 CREATE TABLE race (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    description VARCHAR(255)
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE user (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(255),
-    email VARCHAR(255),
-    password_hash VARCHAR(255),
-    race_id BIGINT UNSIGNED NOT NULL,
-    FOREIGN KEY (race_id) REFERENCES race(id)
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE user_token (
     id SERIAL PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
-    token VARCHAR(255),
+    token VARCHAR(255) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 CREATE TABLE game (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    day_time INT DEFAULT 15,
-    nb_max_player INT DEFAULT 30,
-    current_day INT DEFAULT 0,
-    password_hash VARCHAR(255) DEFAULT NULL
+    name VARCHAR(255) NOT NULL,
+    turn_interval INT NOT NULL DEFAULT 15,
+    current_turn INT NOT NULL DEFAULT 0,
+    min_players INT NOT NULL DEFAULT 3,
+    max_players INT NOT NULL DEFAULT 30,
+    password_hash VARCHAR(255) DEFAULT NULL,
+    state ENUM('WAITING', 'RUNNING', 'ENDED') NOT NULL DEFAULT 'WAITING',
+    last_turn_at TIMESTAMP DEFAULT NULL
 );
 
 CREATE TABLE player (
     id SERIAL PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     game_id BIGINT UNSIGNED NOT NULL,
-    gold INT DEFAULT 50,
-    intelligence INT DEFAULT 50,
+    race_id BIGINT UNSIGNED NOT NULL,
+    gold INT NOT NULL DEFAULT 50,
+    intelligence INT NOT NULL DEFAULT 50,
     FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (game_id) REFERENCES game(id)
+    FOREIGN KEY (game_id) REFERENCES game(id),
+    FOREIGN KEY (race_id) REFERENCES race(id)
 );
 
 CREATE TABLE building_type (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    description VARCHAR(255),
-    price INT,
-    gold_production INT,
-    intelligence_production INT,
-    max_units INT,
-    initial_amount INT,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    price INT NOT NULL,
+    gold_production INT NOT NULL,
+    intelligence_production INT NOT NULL,
+    max_units INT NOT NULL,
+    initial_amount INT NOT NULL,
     accessible_race_id BIGINT UNSIGNED,
     FOREIGN KEY (accessible_race_id) REFERENCES race(id)
 );
 
 CREATE TABLE unit_type (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    description VARCHAR(255),
-    price INT,
-    health INT,
-    damage INT,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    price INT NOT NULL,
+    health INT NOT NULL,
+    damage INT NOT NULL,
     accessible_race_id BIGINT UNSIGNED,
     FOREIGN KEY (accessible_race_id) REFERENCES race(id)
 );
 
-CREATE TABLE `order` (
+CREATE TABLE building_creation_order (
     id SERIAL PRIMARY KEY,
     player_id BIGINT UNSIGNED NOT NULL,
-    building_id BIGINT UNSIGNED NOT NULL,
-    unit_id BIGINT UNSIGNED NOT NULL,
-    amount INT,
+    building_type_id BIGINT UNSIGNED NOT NULL,
+    amount INT NOT NULL,
     FOREIGN KEY (player_id) REFERENCES player(id),
-    FOREIGN KEY (building_id) REFERENCES building_type(id),
+    FOREIGN KEY (building_type_id) REFERENCES building_type(id)
+);
+
+CREATE TABLE unit_creation_order (
+    id SERIAL PRIMARY KEY,
+    player_id BIGINT UNSIGNED NOT NULL,
+    unit_id BIGINT UNSIGNED NOT NULL,
+    amount INT NOT NULL,
+    FOREIGN KEY (player_id) REFERENCES player(id),
     FOREIGN KEY (unit_id) REFERENCES unit_type(id)
 );
 
+
+-- Insertion des données statiques
 INSERT INTO race (id, name, description)
 VALUES
     (1, 'Mort-Vivant', 'individu mort qui revient a la vie'),
@@ -102,6 +116,3 @@ INSERT INTO unit_type (name, description, price, health, damage, accessible_race
      ('Guerrier', 'Une unité de combat robuste et polyvalente', 10, 100.0, 15.0, NULL),
      ('Génie', 'Un expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 10, 80.0, 12.0, NULL),
      ('Zombie', 'Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels avec ses griffes et ses morsures infectieuses', 20, 70, 20, 1);
-
-
-SET foreign_key_checks = 1;
