@@ -12,8 +12,13 @@ import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 
 /**
@@ -84,23 +89,81 @@ public class OrderController {
         Counter allowedBuildingsCounter = new Counter(5);
 
         this.unitVBox.getChildren().clear();
+        TableView<UnitTypeRow> unitTable = new javafx.scene.control.TableView<>();
+        unitTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<UnitTypeRow, String> nameCol = new TableColumn<>("Unité");
+        nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
+
+        TableColumn<UnitTypeRow, UnitItemSelector> controlCol = new TableColumn<>("Quantité");
+        controlCol.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getSelector()));
+        controlCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(UnitItemSelector item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(item);
+                }
+            }
+        });
+        TableColumn<UnitTypeRow, String> priceCol = new TableColumn<>("Prix");
+        priceCol.setCellValueFactory(data -> new SimpleStringProperty(
+            String.valueOf(data.getValue().getName())
+        ));
+
+        unitTable.getColumns().addAll(nameCol, controlCol, priceCol);
+
         for (EnumIntMap.Entry<UnitType> entry : pendingUnits) {
             Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
             UnitItemSelector selector = new UnitItemSelector(entry, goldCounter,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
-            this.unitVBox.getChildren().add(selector);
+            unitTable.getItems().add(new UnitTypeRow(entry.getKey().toString(), selector));
         }
 
+        this.unitVBox.getChildren().add(unitTable);
+
         this.buildingsVBox.getChildren().clear();
+        javafx.scene.control.TableView<BuildingTypeRow> buildingTable;
+        buildingTable = new TableView<>();
+        buildingTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<BuildingTypeRow, String> nameColB = new TableColumn<>("Bâtiment");
+        nameColB.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
+
+        TableColumn<BuildingTypeRow, BuildingAmountSelector> controlColB = new TableColumn<>("Quantité");
+        controlColB.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getSelector()));
+        controlColB.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(BuildingAmountSelector item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(item);
+                }
+            }
+        });
+
+        TableColumn<BuildingTypeRow, String> priceColB = new TableColumn<>("Prix");
+        priceColB.setCellValueFactory(data -> new SimpleStringProperty(
+            String.valueOf(data.getValue().getName())
+        ));
+
+        buildingTable.getColumns().addAll(nameColB, controlColB, priceColB);
+
         for (EnumIntMap.Entry<BuildingType> entry : pendingBuildings) {
             Modifier buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
             BuildingAmountSelector selector = new BuildingAmountSelector(entry, goldCounter,
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> buildingModifier.setDelta(-amount));
             allowedBuildingsCounter.addListener(value -> selector.updateButtonsState());
-            this.buildingsVBox.getChildren().add(selector);
+            buildingTable.getItems().add(new BuildingTypeRow(entry.getKey().toString(), selector));
         }
+
+        this.buildingsVBox.getChildren().add(buildingTable);
 
         goldCounter.setDispatchChanges(true);
         allowedBuildingsCounter.setDispatchChanges(true);
@@ -137,5 +200,32 @@ public class OrderController {
         }
 
         this.switchBack();
+    }
+    public static class UnitTypeRow {
+        private final String name;
+        private final UnitItemSelector selector;
+
+        public UnitTypeRow(String name, UnitItemSelector selector) {
+            this.name = name;
+            this.selector = selector;
+        }
+
+        public String getName() { return name; }
+
+        public UnitItemSelector getSelector() { return selector; }
+    }
+
+    public static class BuildingTypeRow {
+        private final String name;
+        private final BuildingAmountSelector selector;
+
+        public BuildingTypeRow(String name, BuildingAmountSelector selector) {
+            this.name = name;
+            this.selector = selector;
+        }
+
+        public String getName() { return name; }
+
+        public BuildingAmountSelector getSelector() { return selector; }
     }
 }

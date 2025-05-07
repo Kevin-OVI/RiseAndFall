@@ -3,6 +3,7 @@ package fr.butinfoalt.riseandfall.front.components;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
 import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap;
+import javafx.collections.transformation.SortedList;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -33,4 +34,7 @@ public class BuildingAmountSelector extends PurchasableItemAmountSelector<Buildi
         }
         return details;
     }
+
+
+    
 }
