@@ -18,7 +18,7 @@ public class PacketRegistry {
     /**
      * Association entre l'identifiant du paquet et le gestionnaire de paquets pour la réception.
      */
-    private final HashMap<Byte, PacketHandlerAndDecoder<?>> receiveIdToPacket = new HashMap<>();
+    private final HashMap<Byte, IRawHandler> receiveIdToPacket = new HashMap<>();
     /**
      * Association entre la classe du paquet et l'identifiant du paquet pour la réception.
      */
@@ -51,13 +51,28 @@ public class PacketRegistry {
      * @param <T>           Type de paquet.
      */
     public <T extends IPacket> void registerReceivePacket(byte packetId, Class<T> packetClass, IPacketHandler<T> packetHandler, IDeserializer<T> packetDecoder) {
+        this.registerReceivePacket(packetId, packetClass, (sender, readHelper) -> {
+            T packet = packetDecoder.deserialize(readHelper);
+            packetHandler.handlePacket(sender, packet);
+        });
+    }
+
+    /**
+     * Enregistre un paquet à recevoir avec un gestionnaire brut.
+     *
+     * @param packetId                Identifiant du paquet.
+     * @param packetClass             Classe du paquet.
+     * @param packetDecoderAndHandler Gestionnaire brut de paquets, qui gère la désérialisation et le traitement du paquet.
+     * @param <T>                     Type de paquet.
+     */
+    public <T extends IPacket> void registerReceivePacket(byte packetId, Class<T> packetClass, IRawHandler packetDecoderAndHandler) {
         if (this.receiveIdToPacket.containsKey(packetId)) {
             throw new RuntimeException("Id %d is already used".formatted(packetId));
         }
         if (this.receivePacketToId.containsKey(packetClass)) {
             throw new RuntimeException("Packet class %s is already registered".formatted(packetClass.getCanonicalName()));
         }
-        this.receiveIdToPacket.put(packetId, new PacketHandlerAndDecoder<T>(packetHandler, packetDecoder));
+        this.receiveIdToPacket.put(packetId, packetDecoderAndHandler);
         this.receivePacketToId.put(packetClass, packetId);
     }
 
@@ -76,10 +91,10 @@ public class PacketRegistry {
     }
 
     /**
-     * Récupère la classe de paquet associée à un identifiant de paquet pour l'envoi.
+     * Récupère l'identifiant du paquet associé à une classe de paquet pour l'envoi.
      *
-     * @param packetId Identifiant du paquet.
-     * @return Classe de paquet associée.
+     * @param packetClass La classe du paquet.
+     * @return L'identifiant du paquet associé.
      */
     public byte getSendPacketId(Class<? extends IPacket> packetClass) {
         return this.sendPacketToId.get(packetClass);
@@ -91,18 +106,7 @@ public class PacketRegistry {
      * @param packetId Identifiant du paquet.
      * @return Gestionnaire de paquets et décodeur associés.
      */
-    public PacketHandlerAndDecoder<?> getPacketDecoder(byte packetId) {
+    public IRawHandler getRawHandler(byte packetId) {
         return this.receiveIdToPacket.get(packetId);
-    }
-
-
-    /**
-     * Enregistrement d'un gestionnaire de paquets et d'un décodeur.
-     *
-     * @param <T>     Type de paquet.
-     * @param handler Gestionnaire de paquets.
-     * @param decoder Décodeur de paquets.
-     */
-    public record PacketHandlerAndDecoder<T extends IPacket>(IPacketHandler<T> handler, IDeserializer<T> decoder) {
     }
 }

@@ -1,15 +1,9 @@
 package fr.butinfoalt.riseandfall.server;
 
 import com.mysql.cj.jdbc.Driver;
-import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
-import fr.butinfoalt.riseandfall.gamelogic.data.Race;
-import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
-import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
+import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
-import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
-import fr.butinfoalt.riseandfall.network.packets.PacketServerData;
-import fr.butinfoalt.riseandfall.network.packets.PacketToken;
+import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
 
 import java.io.IOException;
@@ -35,6 +29,11 @@ public class RiseAndFallServer extends BaseSocketServer {
     private final AuthenticationManager authManager;
 
     /**
+     * Le gestionnaire de jeu pour gérer les parties en attente, en cours ou terminées.
+     */
+    private final GameManager gameManager;
+
+    /**
      * Constructeur de la classe BaseSocketServer.
      * Initialise le serveur socket sur le port spécifié.
      *
@@ -46,11 +45,17 @@ public class RiseAndFallServer extends BaseSocketServer {
         super(port);
         this.db = db;
         this.authManager = new AuthenticationManager(this);
+        this.gameManager = new GameManager(this);
         this.loadServerData();
 
         this.registerReceivePacket((byte) 0, PacketAuthentification.class, this.authManager::onAuthentification, PacketAuthentification::new);
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this.authManager::onTokenAuthentification, PacketToken::new);
         this.registerSendPacket((byte) 2, PacketServerData.class);
+        this.registerReceivePacket((byte) 3, PacketCreateOrJoinGame.class, this.gameManager::onCreateOrJoinGame, PacketCreateOrJoinGame::new);
+        this.registerSendPacket((byte) 4, PacketInitialGameData.class);
+        this.registerReceivePacket((byte) 5, PacketUpdateOrders.class, this.gameManager::onUpdateOrders, PacketUpdateOrders::new);
+        this.registerSendPacket((byte) 6, PacketUpdateGameData.class);
+        this.registerReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
     }
 
     /**
@@ -144,7 +149,27 @@ public class RiseAndFallServer extends BaseSocketServer {
     @Override
     protected void onClientDisconnected(SocketWrapper client) {
         super.onClientDisconnected(client);
+        this.gameManager.onClientDisconnected(client);
+        this.authManager.onClientDisconnected(client);
         System.out.println("Client déconnecté : " + client.getName());
+    }
+
+    /**
+     * Méthode appelée lors de la réception d'un paquet de type PacketGameAction.
+     * Elle gère les actions du jeu telles que la déconnexion du client ou le passage au tour suivant.
+     *
+     * @param sender Le socket du client qui a envoyé le paquet.
+     * @param packet Le paquet de jeu reçu.
+     */
+    private void onGameAction(SocketWrapper sender, PacketGameAction packet) {
+        switch (packet.getAction()) {
+            case QUIT_GAME -> this.gameManager.onClientDisconnected(sender);
+            case LOG_OUT -> {
+                this.gameManager.onClientDisconnected(sender);
+                this.authManager.onClientDisconnected(sender);
+            }
+            case NEXT_TURN -> this.gameManager.onNextTurn(sender);
+        }
     }
 
     /**

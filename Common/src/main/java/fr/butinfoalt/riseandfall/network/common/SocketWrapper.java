@@ -104,13 +104,8 @@ public abstract class SocketWrapper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors du traitement du paquet.
      */
     private <T extends IPacket> void handlePacket(byte packetId) throws IOException {
-        @SuppressWarnings("unchecked")
-        PacketRegistry.PacketHandlerAndDecoder<T> packetHandlerAndDecoder = (PacketRegistry.PacketHandlerAndDecoder<T>) this.packetRegistry.getPacketDecoder(packetId);
-        IDeserializer<T> packetDecoder = packetHandlerAndDecoder.decoder();
-        IPacketHandler<T> packetHandler = packetHandlerAndDecoder.handler();
-
-        T decodedPacket = packetDecoder.deserialize(this.readHelper);
-        packetHandler.handlePacket(this, decodedPacket);
+        IRawHandler handler = this.packetRegistry.getRawHandler(packetId);
+        handler.deserialize(this, this.readHelper);
     }
 
     /**

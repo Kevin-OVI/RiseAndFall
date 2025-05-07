@@ -51,15 +51,28 @@ public class RiseAndFallApplication extends Application {
 
     /**
      * Méthode pour changer la vue de la fenêtre principale.
+     * On peut choisir de remplacer la vue actuelle ou de l'empiler pour y revenir plus tard.
+     *
+     * @param view    La nouvelle vue à afficher.
+     * @param replace Indique si la vue actuelle doit être remplacée ou non.
+     */
+    public static void switchToView(View view, boolean replace) {
+        Parent newRoot = view.getSceneRoot();
+        if (!replace) {
+            stageViewStack.push(new StageViewElement(mainWindow.getScene().getRoot(), mainWindow.getTitle()));
+        }
+        mainWindow.getScene().setRoot(newRoot);
+        mainWindow.setTitle(view.getWindowTitle());
+    }
+
+    /**
+     * Méthode pour changer la vue de la fenêtre principale.
      * On empile d'abord la vue actuelle avant de la remplacer par la nouvelle vue afin de pouvoir y revenir.
      *
      * @param view La nouvelle vue à afficher.
      */
     public static void switchToView(View view) {
-        Parent newRoot = view.getSceneRoot();
-        stageViewStack.push(new StageViewElement(mainWindow.getScene().getRoot(), mainWindow.getTitle()));
-        mainWindow.getScene().setRoot(newRoot);
-        mainWindow.setTitle(view.getWindowTitle());
+        switchToView(view, false);
     }
 
     /**

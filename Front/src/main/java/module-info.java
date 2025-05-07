@@ -4,6 +4,7 @@ module fr.butinfoalt.riseandfall.front {
     requires java.desktop;
     requires fr.butinfoalt.riseandfall;
     requires io.github.cdimascio.dotenv.java;
+    requires java.sql; // Pas de SQL sur le client mais nécessaire pour l'objet java.sql.Timestamp
 
 
     opens fr.butinfoalt.riseandfall.front to javafx.fxml;

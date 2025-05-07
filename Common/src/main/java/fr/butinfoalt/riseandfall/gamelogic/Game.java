@@ -1,84 +1,71 @@
 package fr.butinfoalt.riseandfall.gamelogic;
 
+import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
+import fr.butinfoalt.riseandfall.network.common.ISerializable;
+import fr.butinfoalt.riseandfall.network.common.ReadHelper;
+import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+
+import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.Set;
 
 /**
- * Représente une partie de jeu.
- * Chaque partie a :
- * - un nom
- * - un intervalle de tours
- * - un nombre minimum et maximum de joueurs
- * - indication de partie privée
- * - un état (en attente, en cours, terminée)
- * - un tour actuel
- * - une liste de joueurs
+ * Classe abstraite représentant une partie du jeu.
+ * Elle contient les informations de base sur la partie, telles que l'identifiant, le nom, l'intervalle entre les tours,
+ * l'état de la partie, le timestamp du dernier tour et le tour actuel.
  */
-public class Game {
+public abstract class Game implements Identifiable, ISerializable {
+    /**
+     * Identifiant de la partie dans la base de données.
+     */
+    private final int id;
     /**
      * Nom de la partie.
      */
-    private final String name;
+    protected final String name;
     /**
      * Intervalle entre chaque tour (en minutes).
      */
-    private final int turnInterval;
-    /**
-     * Nombre minimum de joueurs pour commencer la partie.
-     */
-    private final int minPlayers;
-    /**
-     * Nombre maximum de joueurs dans la partie.
-     */
-    private final int maxPlayers;
-    /**
-     * Indique si la partie est privée ou publique.
-     */
-    private final boolean isPrivate;
-
+    protected final int turnInterval;
     /**
      * État de la partie (en attente, en cours, terminée).
      */
-    private GameState state;
-
+    protected GameState state;
     /**
      * Timestamp du dernier tour.
      */
-    private Timestamp lastTurnTimestamp;
-
+    protected Timestamp lastTurnTimestamp;
     /**
      * Tour actuel de la partie.
      */
-    private int currentTurn;
-
-    /**
-     * Liste des joueurs dans la partie.
-     */
-    private final Set<Player> players;
+    protected int currentTurn;
 
     /**
      * Constructeur de la classe Game.
      *
-     * @param name         Nom de la partie.
-     * @param turnInterval Intervalle entre chaque tour (en minutes).
-     * @param minPlayers   Nombre minimum de joueurs pour commencer la partie.
-     * @param maxPlayers   Nombre maximum de joueurs dans la partie.
-     * @param isPrivate    Indique si la partie est privée ou publique.
-     * @param state        État de la partie (en attente, en cours, terminée).
-     * @param currentTurn  Tour actuel de la partie.
-     * @param players      Liste des joueurs dans la partie.
+     * @param id                Identifiant de la partie dans la base de données.
+     * @param name              Nom de la partie.
+     * @param turnInterval      Intervalle entre chaque tour (en minutes).
+     * @param state             État de la partie (en attente, en cours, terminée).
+     * @param lastTurnTimestamp Timestamp du dernier tour.
+     * @param currentTurn       Tour actuel de la partie.
      */
-    public Game(String name, int turnInterval, int minPlayers, int maxPlayers, boolean isPrivate, GameState state, Timestamp lastTurnTimestamp, int currentTurn, Set<Player> players) {
+    public Game(int id, String name, int turnInterval, GameState state, Timestamp lastTurnTimestamp, int currentTurn) {
+        this.id = id;
         this.name = name;
         this.turnInterval = turnInterval;
-        this.minPlayers = minPlayers;
-        this.maxPlayers = maxPlayers;
-        this.isPrivate = isPrivate;
         this.state = state;
         this.lastTurnTimestamp = lastTurnTimestamp;
         this.currentTurn = currentTurn;
-        this.players = players;
+    }
+
+    /**
+     * Méthode pour obtenir l'identifiant de la partie.
+     *
+     * @return L'identifiant de la partie.
+     */
+    @Override
+    public int getId() {
+        return this.id;
     }
 
     /**
@@ -100,68 +87,12 @@ public class Game {
     }
 
     /**
-     * Méthode pour obtenir le nombre minimum de joueurs pour commencer la partie.
-     *
-     * @return Le nombre minimum de joueurs pour commencer la partie.
-     */
-    public int getMinPlayers() {
-        return this.minPlayers;
-    }
-
-    /**
-     * Méthode pour obtenir le nombre maximum de joueurs dans la partie.
-     *
-     * @return Le nombre maximum de joueurs dans la partie.
-     */
-    public int getMaxPlayers() {
-        return this.maxPlayers;
-    }
-
-    /**
-     * Méthode pour savoir si la partie est privée ou publique.
-     *
-     * @return true si la partie est privée, false sinon.
-     */
-    public boolean isPrivate() {
-        return this.isPrivate;
-    }
-
-    /**
      * Méthode pour obtenir l'état de la partie.
      *
      * @return L'état de la partie (en attente, en cours, terminée).
      */
     public GameState getState() {
         return this.state;
-    }
-
-    /**
-     * Méthode pour démarrer la partie.
-     * La partie ne peut être démarrée que si elle est en attente et qu'il y a suffisamment de joueurs.
-     *
-     * @throws IllegalStateException Si la partie n'est pas en attente ou s'il n'y a pas assez de joueurs.
-     */
-    public void start() throws IllegalStateException {
-        if (this.state != GameState.WAITING) {
-            throw new IllegalStateException("Cannot start a game that is not in waiting state.");
-        }
-        if (this.players.size() < this.minPlayers) {
-            throw new IllegalStateException("Cannot start this game with less than %d players.".formatted(this.minPlayers));
-        }
-        this.state = GameState.RUNNING;
-    }
-
-    /**
-     * Méthode pour terminer la partie.
-     * La partie ne peut être terminée que si elle est en cours.
-     *
-     * @throws IllegalStateException Si la partie n'est pas en cours.
-     */
-    public void end() throws IllegalStateException {
-        if (this.state != GameState.RUNNING) {
-            throw new IllegalStateException("Cannot end a game that is not running.");
-        }
-        this.state = GameState.ENDED;
     }
 
     /**
@@ -179,6 +110,9 @@ public class Game {
      * @return Le temps restant avant le prochain tour (en millisecondes).
      */
     public int timeUntilNextTurn() {
+        if (this.lastTurnTimestamp == null) {
+            return 0;
+        }
         return (int) (this.lastTurnTimestamp.getTime() + this.turnInterval * 60 * 1000 - System.currentTimeMillis());
     }
 
@@ -192,54 +126,41 @@ public class Game {
     }
 
     /**
-     * Méthode pour passer au tour suivant.
-     * Exécute les ordres de chaque joueur et incrémente le tour actuel.
+     * Sérialise les données modifiables de la partie.
+     *
+     * @param writeHelper L'instance de WriteHelper utilisée pour écrire les données.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
-    public void nextTurn() {
-        for (Player player : this.players) {
-            player.executeOrders();
-        }
-        this.currentTurn++;
-        this.lastTurnTimestamp = new Timestamp(System.currentTimeMillis());
+    public void serializeModifiableData(WriteHelper writeHelper) throws IOException {
+        writeHelper.writeInt(this.state.ordinal());
+        writeHelper.writeLong(this.lastTurnTimestamp == null ? -1 : this.lastTurnTimestamp.getTime());
+        writeHelper.writeInt(this.currentTurn);
     }
 
     /**
-     * Méthode pour obtenir la liste des joueurs dans la partie.
+     * Désérialise et met à jour les données modifiables de la partie.
      *
-     * @return La liste des joueurs dans la partie.
+     * @param readHelper L'instance de ReadHelper utilisée pour lire les données.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
-    public Set<Player> getPlayers() {
-        return Collections.unmodifiableSet(this.players);
+    public void updateModifiableData(ReadHelper readHelper) throws IOException {
+        this.state = GameState.values()[readHelper.readInt()];
+        long lastTurnTimestampValue = readHelper.readLong();
+        this.lastTurnTimestamp = lastTurnTimestampValue == -1 ? null : new Timestamp(lastTurnTimestampValue);
+        this.currentTurn = readHelper.readInt();
     }
 
     /**
-     * Méthode pour ajouter un joueur à la partie.
-     * Un joueur ne peut être ajouté que si la partie est en attente et qu'il y a de la place.
+     * Méthode pour sérialiser les données de la partie dans un flux de sortie.
      *
-     * @param player Le joueur à ajouter.
-     * @throws IllegalStateException Si la partie n'est pas en attente ou si elle est pleine.
+     * @param writeHelper Le helper d'écriture qui fournit les méthodes pour écrire les données.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de l'écriture des données.
      */
-    public void addPlayer(Player player) {
-        if (this.state != GameState.WAITING) {
-            throw new IllegalStateException("Cannot add player to a game that has already started.");
-        }
-        if (this.players.size() >= this.maxPlayers) {
-            throw new IllegalStateException("Cannot add player, game is full.");
-        }
-        this.players.add(player);
-    }
-
-    /**
-     * Méthode pour retirer un joueur de la partie.
-     * Un joueur ne peut être retiré que si la partie est en attente.
-     *
-     * @param player Le joueur à retirer.
-     * @throws IllegalStateException Si la partie n'est pas en attente.
-     */
-    public void removePlayer(Player player) {
-        if (this.state != GameState.WAITING) {
-            throw new IllegalStateException("Cannot remove player from a game that has already started.");
-        }
-        this.players.remove(player);
+    @Override
+    public void toBytes(WriteHelper writeHelper) throws IOException {
+        writeHelper.writeInt(this.id);
+        writeHelper.writeString(this.name);
+        writeHelper.writeInt(this.turnInterval);
+        this.serializeModifiableData(writeHelper);
     }
 }

@@ -5,19 +5,23 @@ import fr.butinfoalt.riseandfall.front.components.UnitItemSelector;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
-import fr.butinfoalt.riseandfall.util.counter.Counter;
-import fr.butinfoalt.riseandfall.util.counter.Modifier;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
-import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
+import fr.butinfoalt.riseandfall.network.packets.PacketUpdateOrders;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
+import fr.butinfoalt.riseandfall.util.counter.Counter;
+import fr.butinfoalt.riseandfall.util.counter.Modifier;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 
 /**
@@ -63,6 +67,7 @@ public class OrderController {
      */
     @FXML
     public ImageView backgroundImageView;
+
     /**
      * Méthode pour charger les ordres en attente du joueur dans l'interface.
      * Elle met à jour les composants de l'interface utilisateur
@@ -129,25 +134,33 @@ public class OrderController {
      */
     @FXML
     private void handleSave() {
-        ClientPlayer player = RiseAndFall.getPlayer();
-        player.clearPendingOrders();
+        ArrayList<BaseOrder> newOrders = new ArrayList<>();
+
         for (ObjectIntMap.Entry<UnitType> entry : this.pendingUnits) {
             int nbTroops = entry.getValue();
             if (nbTroops > 0) {
-                player.addPendingOrder(new OrderCreateUnit(entry.getKey(), nbTroops));
+                newOrders.add(new OrderCreateUnit(entry.getKey(), nbTroops));
             }
         }
         for (ObjectIntMap.Entry<BuildingType> entry : this.pendingBuildings) {
             int nbHuts = entry.getValue();
             if (nbHuts > 0) {
-                player.addPendingOrder(new OrderCreateBuilding(entry.getKey(), nbHuts));
+                newOrders.add(new OrderCreateBuilding(entry.getKey(), nbHuts));
             }
         }
+        try {
+            RiseAndFall.getClient().sendPacket(new PacketUpdateOrders(newOrders));
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'envoi du paquet de mise à jour des ordres : ");
+            e.printStackTrace();
+            return;
+        }
+        RiseAndFall.getPlayer().updatePendingOrders(newOrders);
 
         this.switchBack();
     }
 
-    public void initialize(){
+    public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, backgroundImageView);
     }

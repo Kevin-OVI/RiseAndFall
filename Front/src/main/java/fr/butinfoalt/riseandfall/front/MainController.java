@@ -4,11 +4,14 @@ import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
+import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+
+import java.io.IOException;
 
 /**
  * Contrôleur pour la vue principale de l'application.
@@ -72,7 +75,12 @@ public class MainController {
      */
     @FXML
     private void handleEndTurn() {
-        RiseAndFall.getPlayer().executeOrders();
+        try {
+            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.NEXT_TURN));
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'envoi du paquet de fin de tour :");
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -80,6 +88,12 @@ public class MainController {
      */
     @FXML
     public void handleQuitGame() {
+        try {
+            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.QUIT_GAME));
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'envoi du paquet pour quitter la partie :");
+            e.printStackTrace();
+        }
         RiseAndFall.resetPlayer();
         RiseAndFallApplication.switchToPreviousView();
     }
