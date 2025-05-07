@@ -4,8 +4,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
       fx:controller="fr.butinfoalt.riseandfall.front.OrderController">
+    <ImageView fx:id="backgroundImageView" managed="false"/>
 
     <VBox.margin>
         <Insets top="20"/>
@@ -21,7 +23,7 @@
         <TitleLabel>Entrainement d'unités :</TitleLabel>
 
         <!--Ce composant est rempli dynamiquement avec les types d'unités-->
-        <VBox fx:id="unitVBox" alignment="CENTER"/>
+        <VBox fx:id="unitVBox" alignment="CENTER" spacing="10"/>
     </VBox>
 
     <VBox alignment="CENTER" spacing="10">

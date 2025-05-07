@@ -18,11 +18,11 @@ public class Player {
     /**
      * Association entre les types de bâtiments et le nombre de bâtiments de chaque type.
      */
-    private final EnumIntMap<BuildingType> buildingMap = new EnumIntMap<>(BuildingType.class);
+    private final EnumIntMap<BuildingType> buildingMap;
     /**
      * Association entre les types d'unités et le nombre d'unités de chaque type.
      */
-    private final EnumIntMap<UnitType> unitMap = new EnumIntMap<>(UnitType.class);
+    private final EnumIntMap<UnitType> unitMap;
     /**
      * Liste des ordres à exécuter au prochain tour pour le joueur.
      */
@@ -48,6 +48,8 @@ public class Player {
      */
     public Player(Race race) {
         this.race = race;
+        this.buildingMap = new EnumIntMap<>(BuildingType.class, buildingType -> buildingType.getAccessibleByRace() == null || buildingType.getAccessibleByRace() == this.race);
+        this.unitMap = new EnumIntMap<>(UnitType.class, unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race);
 
         for (Entry<BuildingType> entry : this.buildingMap) {
             entry.setValue(entry.getKey().getInitialAmount());

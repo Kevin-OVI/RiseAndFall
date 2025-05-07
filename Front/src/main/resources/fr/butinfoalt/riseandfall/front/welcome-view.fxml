@@ -6,10 +6,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.image.ImageView?>
 <VBox xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx" alignment="CENTER"
       spacing="20.0"
       fx:controller="fr.butinfoalt.riseandfall.front.WelcomeView"
       prefHeight="400.0" prefWidth="600.0">
+    <ImageView fx:id="backgroundImageView" managed="false"/>
     <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
         Bienvenue sur Rise &amp; Fall futur empereur.
     </TitleLabel>

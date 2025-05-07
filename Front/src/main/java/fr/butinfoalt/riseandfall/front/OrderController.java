@@ -4,6 +4,7 @@ import fr.butinfoalt.riseandfall.front.components.BuildingAmountSelector;
 import fr.butinfoalt.riseandfall.front.components.UnitItemSelector;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Modifier;
 import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
@@ -15,11 +16,14 @@ import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
+
 
 /**
  * Contrôleur pour la vue de gestion des ordres.
@@ -59,7 +63,11 @@ public class OrderController {
      */
     @FXML
     public Label totalPrice;
-
+    /**
+     * Champ pour le composant contenant l'image de fond.
+     */
+    @FXML
+    public ImageView backgroundImageView;
     /**
      * Méthode pour charger les ordres en attente du joueur dans l'interface.
      * Elle met à jour les composants de l'interface utilisateur
@@ -68,8 +76,8 @@ public class OrderController {
      */
     public void loadPendingOrders() {
         ClientPlayer player = RiseAndFall.getPlayer();
-        this.pendingUnits = new EnumIntMap<>(UnitType.class);
-        this.pendingBuildings = new EnumIntMap<>(BuildingType.class);
+        this.pendingUnits = player.getUnitMap().createEmptyClone();
+        this.pendingBuildings = player.getBuildingMap().createEmptyClone();
 
         for (BaseOrder order : player.getPendingOrders()) {
             if (order instanceof OrderCreateUnit orderCreateUnit) {
@@ -201,6 +209,12 @@ public class OrderController {
 
         this.switchBack();
     }
+
+    public void initialize(){
+        Scene scene = RiseAndFallApplication.getMainWindow().getScene();
+        UIUtils.setBackgroundImage("images/background.png", scene, backgroundImageView);
+    }
+
     public static class UnitTypeRow {
         private final String name;
         private final UnitItemSelector selector;
