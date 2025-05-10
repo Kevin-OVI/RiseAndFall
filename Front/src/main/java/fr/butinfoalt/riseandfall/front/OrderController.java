@@ -75,9 +75,14 @@ public class OrderController {
      * pour afficher les unités et bâtiments en attente de création,
      * ainsi que la quantité d'or disponible.
      */
+
     public void loadPendingOrders() {
+
         ClientPlayer player = RiseAndFall.getPlayer();
         this.pendingUnits = player.getUnitMap().createEmptyClone();
+        this.unitVBox.setAlignment(javafx.geometry.Pos.CENTER);
+        this.buildingsVBox.setAlignment(javafx.geometry.Pos.CENTER);
+
         this.pendingBuildings = player.getBuildingMap().createEmptyClone();
 
         for (BaseOrder order : player.getPendingOrders()) {
@@ -181,8 +186,18 @@ public class OrderController {
         allowedBuildingsCounter.setDispatchChanges(true);
         allowedUnitsCounter.setDispatchChanges(true);
 
-        unitTable.setStyle("-fx-font-size: 14px; -fx-pref-height: 180px;");
-        buildingTable.setStyle("-fx-font-size: 14px; -fx-pref-height: 180px;");
+        unitTable.setMaxWidth(600);
+        buildingTable.setMaxWidth(600);
+
+        unitTable.setStyle("-fx-font-size: 14px; -fx-pref-height: 140px; -fx-padding: 10;");
+        nameCol.setStyle("-fx-alignment: CENTER;");
+        controlCol.setStyle("-fx-alignment: CENTER;");
+        priceCol.setStyle("-fx-alignment: CENTER;");
+        buildingTable.setStyle("-fx-font-size: 14px; -fx-pref-height: 230px; -fx-padding: 10;");
+        nameColB.setStyle("-fx-alignment: CENTER;");
+        controlColB.setStyle("-fx-alignment: CENTER;");
+        priceColB.setStyle("-fx-alignment: CENTER;");
+
     }
 
     /**

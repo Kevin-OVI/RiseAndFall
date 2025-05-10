@@ -1,223 +1,168 @@
 package fr.butinfoalt.riseandfall.front.components;
 
-import fr.butinfoalt.riseandfall.gamelogic.Dispatcher;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
 import fr.butinfoalt.riseandfall.gamelogic.counter.Modifier;
 import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap;
-import fr.butinfoalt.riseandfall.gamelogic.map.PurchasableItem;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-/**
- * Composant pour sélectionner la quantité d'un élément achetable.
- *
- * @param <T> Le type de l'élément achetable, qui doit être une énumération implémentant PurchasableItem.
- */
-public class PurchasableItemAmountSelector<T extends Enum<T> & PurchasableItem> extends HBox {
-    /**
-     * L'entrée de l'élément achetable
-     */
+public abstract class PurchasableItemAmountSelector<T extends Enum<T>> extends HBox {
     protected final EnumIntMap.Entry<T> entry;
-
-    /**
-     * Fonction de validation supplémentaire de la quantité en plus de celle du prix.
-     * Si null, aucune validation supplémentaire n'est effectuée.
-     */
-    private final Function<Integer, Boolean> amountValidator;
-
-    /**
-     * Le dispatcher pour la quantité de l'élément.
-     * Il est utilisé pour notifier les changements de quantité.
-     */
-    private final Dispatcher<Integer> changeDispatcher = new Dispatcher<>(true);
-
-    /**
-     * Le modificateur d'or associé à cet élément.
-     */
+    protected final Counter goldCounter;
+    protected final IntegerProperty countProperty;
+    protected final Label countLabel;
+    protected final Button minusButton;
+    protected final Button plusButton;
+    protected final List<Consumer<Integer>> listeners;
+    protected Function<Integer, Boolean> amountValidator;
     private final Modifier goldModifier;
 
-    /**
-     * Le bouton de diminution de la quantité.
-     */
-    private final Button decreaseButton;
-
-    /**
-     * Le label affichant la quantité actuelle de l'élément.
-     */
-    private final Label countLabel;
-
-    /**
-     * Le bouton d'augmentation de la quantité.
-     */
-    private final Button increaseButton;
-
-    /**
-     * Constructeur de la classe PurchasableItemAmountSelector.
-     *
-     * @param entry           L'entrée de l'élément achetable.
-     * @param goldCounter     Le compteur d'or à modifier.
-     * @param amountValidator Fonction de validation de la quantité.
-     */
-    public PurchasableItemAmountSelector(EnumIntMap.Entry<T> entry, Counter goldCounter, Function<Integer, Boolean> amountValidator) {
+    public PurchasableItemAmountSelector(EnumIntMap.Entry<T> entry, Counter goldCounter,
+            Function<Integer, Boolean> amountValidator) {
         this.entry = entry;
+        this.goldCounter = goldCounter;
         this.amountValidator = amountValidator;
-        this.goldModifier = goldCounter.addModifier(-entry.getKey().getPrice() * entry.getValue());
 
-        this.setAlignment(Pos.CENTER);
-        this.setSpacing(10);
-        ObservableList<Node> children = this.getChildren();
+        this.listeners = new ArrayList<>();
+        this.countProperty = new SimpleIntegerProperty(entry.getValue());
 
-        Label nameLabel = new Label(entry.getKey().getDisplayName() + " :");
-        this.decreaseButton = new Button("-");
-        this.countLabel = new Label(String.valueOf(entry.getValue()));
-        this.increaseButton = new Button("+");
+        // Calcul du prix unitaire
+        int price = 0;
+        try {
+            var method = entry.getKey().getClass().getMethod("getPrice");
+            price = (int) method.invoke(entry.getKey());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        String detailsText = this.getDetails().entrySet().stream()
-                .sorted(Map.Entry.comparingByKey()) // Trier les entrées par clé dans l'ordre alphabétique
-                .map(stringStringEntry -> stringStringEntry.getKey() + " : " + stringStringEntry.getValue()) // Formater chaque entrée
-                .collect(Collectors.joining(", ")); // Joindre les entrées avec une virgule
-        Label detailsLabel = new Label(detailsText);
+        final int unitPrice = price;
+        this.goldModifier = goldCounter.addModifier(-unitPrice * entry.getValue());
 
-        this.decreaseButton.setOnAction(this::onDecreaseButtonClicked);
-        this.increaseButton.setOnAction(this::onIncreaseButtonClicked);
+        // Bouton -
+        this.minusButton = new Button("-");
+        this.minusButton.setOnAction(event -> {
+            int newCount = this.countProperty.get() - 1;
+            if (newCount >= 0) {
+                this.countProperty.set(newCount);
+                this.entry.setValue(newCount);
+                this.goldModifier.setDelta(-unitPrice * newCount);
+                this.notifyListeners(newCount);
+                this.updateButtonsState();
+            }
+        });
 
-        this.updateDecreaseButtonState();
-        goldCounter.addListener(goldAmount -> this.updateIncreaseButtonState());
+        // Label pour le compteur
+        this.countLabel = new Label(String.valueOf(this.countProperty.get()));
+        this.countProperty.addListener((observable, oldValue, newValue) -> {
+            this.countLabel.setText(String.valueOf(newValue.intValue()));
+        });
 
-        children.add(nameLabel);
-        children.add(this.decreaseButton);
-        children.add(this.countLabel);
-        children.add(this.increaseButton);
-        children.add(detailsLabel);
+        // Bouton +
+        this.plusButton = new Button("+");
+        this.plusButton.setOnAction(event -> {
+            int newCount = this.countProperty.get() + 1;
+            if (this.goldModifier.computeWithAlternativeDelta(-unitPrice * newCount) >= 0
+                    && this.amountValidator.apply(newCount)) {
+                this.countProperty.set(newCount);
+                this.entry.setValue(newCount);
+                this.goldModifier.setDelta(-unitPrice * newCount);
+                this.notifyListeners(newCount);
+                this.updateButtonsState();
+            }
+        });
+
+        this.setSpacing(5);
+        this.setAlignment(Pos.CENTER); // Centrer tous les éléments dans le HBox
+        this.setPadding(new Insets(5));
+
+        // MODIFICATION ICI: Ne pas afficher le nom à côté des boutons et centrer les
+        // éléments
+        // this.getChildren().addAll(new Label(getDisplayName(entry.getKey())),
+        // this.minusButton, this.countLabel, this.plusButton);
+        this.getChildren().addAll(this.minusButton, this.countLabel, this.plusButton);
+
+        setTooltip();
+        this.updateButtonsState();
     }
 
-    /**
-     * Constructeur de la classe PurchasableItemAmountSelector.
-     *
-     * @param entry       L'entrée de l'élément achetable.
-     * @param goldCounter Le compteur d'or à modifier.
-     */
     public PurchasableItemAmountSelector(EnumIntMap.Entry<T> entry, Counter goldCounter) {
-        this(entry, goldCounter, null);
+        this(entry, goldCounter, (amount) -> true);
     }
 
-    /**
-     * Méthode appelée lorsque le bouton de diminution est cliqué.
-     *
-     * @param actionEvent L'événement d'action.
-     */
-    private void onDecreaseButtonClicked(ActionEvent actionEvent) {
-        int count = this.entry.getValue();
-        if (count > 0) {
-            entry.setValue(--count);
-            countLabel.setText(String.valueOf(count));
-            this.goldModifier.setDelta(-entry.getKey().getPrice() * count);
-            this.changeDispatcher.dispatch(count);
+    private String getDisplayName(Enum<?> e) {
+        try {
+            var method = e.getClass().getMethod("getDisplayName");
+            return (String) method.invoke(e);
+        } catch (Exception ex) {
+            // Fallback : formatte le nom enum
+            String name = e.name().replace('_', ' ').toLowerCase();
+            return Character.toUpperCase(name.charAt(0)) + name.substring(1);
         }
-        this.updateButtonsState();
     }
 
-    /**
-     * Méthode appelée lorsque le bouton d'augmentation est cliqué.
-     *
-     * @param actionEvent L'événement d'action.
-     */
-    private void onIncreaseButtonClicked(ActionEvent actionEvent) {
-        int count = entry.getValue();
-        if (this.goldModifier.getCounter().getCurrentValue() >= entry.getKey().getPrice()) {
-            entry.setValue(++count);
-            countLabel.setText(String.valueOf(count));
-            this.goldModifier.setDelta(-entry.getKey().getPrice() * count);
-            this.changeDispatcher.dispatch(count);
-        }
-        this.updateButtonsState();
-    }
-
-    /**
-     * Met à jour l'état du bouton de diminution en fonction de la quantité actuelle.
-     */
-    private void updateDecreaseButtonState() {
-        int count = entry.getValue();
-        decreaseButton.setDisable(count <= 0 || !this.isAmountValid(count - 1));
-    }
-
-    private void updateIncreaseButtonState() {
-        int count = entry.getValue();
-        increaseButton.setDisable(this.goldModifier.getCounter().getCurrentValue() < entry.getKey().getPrice() || !this.isAmountValid(count + 1));
-    }
-
-    /**
-     * Vérifie si la quantité est invalide en fonction de la fonction de validation fournie.
-     *
-     * @param amount La quantité à valider.
-     * @return true si la quantité est invalide, false sinon.
-     */
-    private boolean isAmountValid(int amount) {
-        if (this.amountValidator != null) {
-            return this.amountValidator.apply(amount);
-        }
-        return false;
-    }
-
-    /**
-     * Ajoute un écouteur pour les changements de quantité.
-     *
-     * @param listener L'écouteur à ajouter.
-     */
     public void addListener(Consumer<Integer> listener) {
-        this.changeDispatcher.addListener(listener);
+        this.listeners.add(listener);
     }
 
-    /**
-     * Supprime un écouteur pour les changements de quantité.
-     *
-     * @param listener L'écouteur à supprimer.
-     */
-    public void removeListener(Consumer<Integer> listener) {
-        this.changeDispatcher.removeListener(listener);
+    protected void notifyListeners(int newCount) {
+        for (Consumer<Integer> listener : this.listeners) {
+            listener.accept(newCount);
+        }
     }
 
-    /**
-     * Vérifie si les changements doivent être dispatchés.
-     *
-     * @return true si les changements doivent être dispatchés, false sinon.
-     */
-    public boolean isDispatchChanges() {
-        return this.changeDispatcher.isDispatchChanges();
+    public Map<String, String> getDetails() {
+        Map<String, String> details = new HashMap<>();
+        try {
+            var priceMethod = entry.getKey().getClass().getMethod("getPrice");
+            int price = (int) priceMethod.invoke(entry.getKey());
+            details.put("Prix", price + " or");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return details;
     }
 
-    /**
-     * Définit si les changements doivent être dispatchés.
-     * Si true, la valeur actuelle sera distribuée immédiatement.
-     *
-     * @param dispatchChanges true pour activer le dispatching des changements, false sinon.
-     */
-    public void setDispatchChanges(boolean dispatchChanges) {
-        this.changeDispatcher.setDispatchChanges(dispatchChanges);
-        if (dispatchChanges) {
-            this.changeDispatcher.dispatch(this.entry.getValue());
+    protected void setTooltip() {
+        Map<String, String> details = getDetails();
+        if (!details.isEmpty()) {
+            StringBuilder tooltipText = new StringBuilder();
+            for (Map.Entry<String, String> detail : details.entrySet()) {
+                tooltipText.append(detail.getKey()).append(" : ").append(detail.getValue()).append("\n");
+            }
+            Tooltip tooltip = new Tooltip(tooltipText.toString().trim());
+            Tooltip.install(this, tooltip);
         }
     }
 
     public void updateButtonsState() {
-        this.updateDecreaseButtonState();
-        this.updateIncreaseButtonState();
-    }
+        this.minusButton.setDisable(this.countProperty.get() <= 0);
 
-    public Map<String, String> getDetails() {
-        return new HashMap<>(Map.of(
-                "Prix", String.valueOf(entry.getKey().getPrice())
-        ));
+        // Calcul du prix unitaire
+        int price = 0;
+        try {
+            var method = entry.getKey().getClass().getMethod("getPrice");
+            price = (int) method.invoke(entry.getKey());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        final int unitPrice = price;
+        int newCount = this.countProperty.get() + 1;
+        this.plusButton.setDisable(
+                this.goldModifier.computeWithAlternativeDelta(-unitPrice * newCount) < 0
+                        || !this.amountValidator.apply(newCount));
     }
 }
