@@ -24,7 +24,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 
-
 /**
  * Contrôleur pour la vue de gestion des ordres.
  */
@@ -43,7 +42,8 @@ public class OrderController {
     @FXML
     private Label goldField;
     /**
-     * Champ pour le composant contenant la quantité d'unités pouvant être produites.
+     * Champ pour le composant contenant la quantité d'unités pouvant être
+     * produites.
      */
     @FXML
     private Label unitsField;
@@ -68,6 +68,7 @@ public class OrderController {
      */
     @FXML
     public ImageView backgroundImageView;
+
     /**
      * Méthode pour charger les ordres en attente du joueur dans l'interface.
      * Elle met à jour les composants de l'interface utilisateur
@@ -93,7 +94,8 @@ public class OrderController {
             this.totalPrice.setText("Prix total : " + (goldCounter.getInitialValue() - goldAmount));
         });
         Counter allowedUnitsCounter = new Counter(player.getAllowedUnitCount());
-        allowedUnitsCounter.addListener(allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
+        allowedUnitsCounter.addListener(
+                allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
         Counter allowedBuildingsCounter = new Counter(5);
 
         this.unitVBox.getChildren().clear();
@@ -117,9 +119,7 @@ public class OrderController {
             }
         });
         TableColumn<UnitTypeRow, String> priceCol = new TableColumn<>("Prix");
-        priceCol.setCellValueFactory(data -> new SimpleStringProperty(
-            String.valueOf(data.getValue().getName())
-        ));
+        priceCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getPrice() + " or"));
 
         unitTable.getColumns().addAll(nameCol, controlCol, priceCol);
 
@@ -128,7 +128,10 @@ public class OrderController {
             UnitItemSelector selector = new UnitItemSelector(entry, goldCounter,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
-            unitTable.getItems().add(new UnitTypeRow(entry.getKey().toString(), selector));
+            unitTable.getItems().add(new UnitTypeRow(
+                    getDisplayName(entry.getKey()),
+                    selector,
+                    entry.getKey().getPrice()));
         }
 
         this.unitVBox.getChildren().add(unitTable);
@@ -156,9 +159,7 @@ public class OrderController {
         });
 
         TableColumn<BuildingTypeRow, String> priceColB = new TableColumn<>("Prix");
-        priceColB.setCellValueFactory(data -> new SimpleStringProperty(
-            String.valueOf(data.getValue().getName())
-        ));
+        priceColB.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getPrice() + " or"));
 
         buildingTable.getColumns().addAll(nameColB, controlColB, priceColB);
 
@@ -168,7 +169,10 @@ public class OrderController {
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> buildingModifier.setDelta(-amount));
             allowedBuildingsCounter.addListener(value -> selector.updateButtonsState());
-            buildingTable.getItems().add(new BuildingTypeRow(entry.getKey().toString(), selector));
+            buildingTable.getItems().add(new BuildingTypeRow(
+                    getDisplayName(entry.getKey()),
+                    selector,
+                    entry.getKey().getPrice()));
         }
 
         this.buildingsVBox.getChildren().add(buildingTable);
@@ -176,6 +180,9 @@ public class OrderController {
         goldCounter.setDispatchChanges(true);
         allowedBuildingsCounter.setDispatchChanges(true);
         allowedUnitsCounter.setDispatchChanges(true);
+
+        unitTable.setStyle("-fx-font-size: 14px; -fx-pref-height: 180px;");
+        buildingTable.setStyle("-fx-font-size: 14px; -fx-pref-height: 180px;");
     }
 
     /**
@@ -188,7 +195,8 @@ public class OrderController {
 
     /**
      * Méthode appelée par JavaFX pour gérer l'action de sauvegarde.
-     * Elle enregistre les ordres en attente du joueur et revient à la vue précédente.
+     * Elle enregistre les ordres en attente du joueur et revient à la vue
+     * précédente.
      */
     @FXML
     private void handleSave() {
@@ -210,36 +218,76 @@ public class OrderController {
         this.switchBack();
     }
 
-    public void initialize(){
+    public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, backgroundImageView);
+    }
+
+    private String cleanName(String rawName) {
+        if (rawName == null || rawName.isEmpty()) {
+            return "";
+        }
+        String lower = rawName.toLowerCase().replace("_", " ");
+        return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
+    }
+
+    // Utilitaire pour obtenir un nom lisible
+    private String getDisplayName(Enum<?> e) {
+        try {
+            var method = e.getClass().getMethod("getDisplayName");
+            return (String) method.invoke(e);
+        } catch (Exception ex) {
+            // Fallback : formatte le nom enum
+            String name = e.name().replace('_', ' ').toLowerCase();
+            return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+        }
     }
 
     public static class UnitTypeRow {
         private final String name;
         private final UnitItemSelector selector;
+        private final int price;
 
-        public UnitTypeRow(String name, UnitItemSelector selector) {
-            this.name = name;
+        public UnitTypeRow(String name, UnitItemSelector selector, int price) {
+            this.name = name != null ? name : "";
             this.selector = selector;
+            this.price = price;
         }
 
-        public String getName() { return name; }
+        public String getName() {
+            return name;
+        }
 
-        public UnitItemSelector getSelector() { return selector; }
+        public UnitItemSelector getSelector() {
+            return selector;
+        }
+
+        public int getPrice() {
+            return price;
+        }
     }
 
     public static class BuildingTypeRow {
         private final String name;
         private final BuildingAmountSelector selector;
+        private final int price;
 
-        public BuildingTypeRow(String name, BuildingAmountSelector selector) {
-            this.name = name;
+        public BuildingTypeRow(String name, BuildingAmountSelector selector, int price) {
+            this.name = name != null ? name : "";
             this.selector = selector;
+            this.price = price;
         }
 
-        public String getName() { return name; }
+        public String getName() {
+            return name;
+        }
 
-        public BuildingAmountSelector getSelector() { return selector; }
+        public BuildingAmountSelector getSelector() {
+            return selector;
+        }
+
+        public int getPrice() {
+            return price;
+        }
     }
 }
