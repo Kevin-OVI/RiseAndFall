@@ -1,9 +1,12 @@
-package fr.butinfoalt.riseandfall.front;
+package fr.butinfoalt.riseandfall.front.orders;
 
-import fr.butinfoalt.riseandfall.front.components.BuildingAmountSelector;
-import fr.butinfoalt.riseandfall.front.components.UnitItemSelector;
+import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.front.orders.amountselector.PurchasableItemAmountSelector;
+import fr.butinfoalt.riseandfall.front.orders.table.BuildingsTable;
+import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTable;
+import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTableRow;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
@@ -32,36 +35,42 @@ public class OrderController {
      * Liste des unités en attente de création.
      */
     private ObjectIntMap<UnitType> pendingUnits;
+
     /**
      * Liste des bâtiments en attente de création.
      */
     private ObjectIntMap<BuildingType> pendingBuildings;
+
     /**
      * Champ pour le composant de la quantité d'or.
      */
     @FXML
     private Label goldField;
+
     /**
      * Champ pour le composant contenant la quantité d'unités pouvant être produites.
      */
     @FXML
     private Label unitsField;
+
     /**
-     * Champ pour le composant contenant les unités.
+     * Tableau contenant les unités.
      */
     @FXML
-    private VBox unitVBox;
+    private PurchasableTable<UnitType> unitTable;
+
     /**
-     * Champ pour le composant contenant les bâtiments.
+     * Tableau contenant les bâtiments.
      */
     @FXML
-    private VBox buildingsVBox;
+    private BuildingsTable buildingTable;
 
     /**
      * Champ pour le composant contenant le prix total.
      */
     @FXML
     public Label totalPrice;
+
     /**
      * Champ pour le composant contenant l'image de fond.
      */
@@ -96,23 +105,23 @@ public class OrderController {
         allowedUnitsCounter.addListener(allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
         Counter allowedBuildingsCounter = new Counter(5);
 
-        this.unitVBox.getChildren().clear();
+        this.unitTable.getItems().clear();
         for (ObjectIntMap.Entry<UnitType> entry : pendingUnits) {
             Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
-            UnitItemSelector selector = new UnitItemSelector(entry, goldCounter,
+            PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
-            this.unitVBox.getChildren().add(selector);
+            unitTable.getItems().add(new PurchasableTableRow<>(entry.getKey(), selector));
         }
 
-        this.buildingsVBox.getChildren().clear();
+        this.buildingTable.getItems().clear();
         for (ObjectIntMap.Entry<BuildingType> entry : pendingBuildings) {
             Modifier buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
-            BuildingAmountSelector selector = new BuildingAmountSelector(entry, goldCounter,
+            PurchasableItemAmountSelector<BuildingType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> buildingModifier.setDelta(-amount));
             allowedBuildingsCounter.addListener(value -> selector.updateButtonsState());
-            this.buildingsVBox.getChildren().add(selector);
+            this.buildingTable.getItems().add(new PurchasableTableRow<>(entry.getKey(), selector));
         }
 
         goldCounter.setDispatchChanges(true);
@@ -160,8 +169,14 @@ public class OrderController {
         this.switchBack();
     }
 
+    /**
+     * Méthode appelée par JavaFX à l'initialisation du contrôleur.
+     * Elle initialise l'image de fond et définit des largeurs maximales pour les tableaux.
+     */
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, backgroundImageView);
+        this.unitTable.setMaxWidth(1000);
+        this.buildingTable.setMaxWidth(1000);
     }
 }

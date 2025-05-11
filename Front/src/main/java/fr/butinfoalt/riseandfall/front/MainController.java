@@ -3,6 +3,7 @@ package fr.butinfoalt.riseandfall.front;
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.front.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
 import javafx.fxml.FXML;

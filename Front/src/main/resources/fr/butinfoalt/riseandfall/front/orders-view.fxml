@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import fr.butinfoalt.riseandfall.front.orders.table.BuildingsTable?>
+<?import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTable?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
-      fx:controller="fr.butinfoalt.riseandfall.front.OrderController">
+      fx:controller="fr.butinfoalt.riseandfall.front.orders.OrderController">
     <ImageView fx:id="backgroundImageView" managed="false"/>
 
     <VBox.margin>
@@ -21,14 +23,16 @@
 
     <VBox alignment="CENTER" spacing="10">
         <TitleLabel>Entrainement d'unités :</TitleLabel>
-        <!--Ce composant est rempli dynamiquement avec les types d'unités-->
-        <VBox fx:id="unitVBox" alignment="CENTER" spacing="10"/>
+
+        <!--Ce tableau est rempli dynamiquement avec les types d'unités-->
+        <PurchasableTable fx:id="unitTable"/>
     </VBox>
 
     <VBox alignment="CENTER" spacing="10">
         <TitleLabel>Construction de bâtiments :</TitleLabel>
-        <!--Ce composant est rempli dynamiquement avec les types de bâtiments-->
-        <VBox fx:id="buildingsVBox" alignment="CENTER" spacing="10"/>
+
+        <!--Ce tableau est rempli dynamiquement avec les types de bâtiments-->
+        <BuildingsTable fx:id="buildingTable"/>
     </VBox>
 
     <VBox alignment="CENTER" spacing="10">

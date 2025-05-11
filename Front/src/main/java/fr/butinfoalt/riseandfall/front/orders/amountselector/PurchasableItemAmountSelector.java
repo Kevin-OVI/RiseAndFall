@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall.front.components;
+package fr.butinfoalt.riseandfall.front.orders.amountselector;
 
 import fr.butinfoalt.riseandfall.util.Dispatcher;
 import fr.butinfoalt.riseandfall.util.counter.Counter;
@@ -13,11 +13,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Composant pour sélectionner la quantité d'un élément achetable.
@@ -78,16 +75,9 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
         this.setSpacing(10);
         ObservableList<Node> children = this.getChildren();
 
-        Label nameLabel = new Label(entry.getKey().getName() + " :");
         this.decreaseButton = new Button("-");
         this.countLabel = new Label(String.valueOf(entry.getValue()));
         this.increaseButton = new Button("+");
-
-        String detailsText = this.getDetails().entrySet().stream()
-                .sorted(Map.Entry.comparingByKey()) // Trier les entrées par clé dans l'ordre alphabétique
-                .map(stringStringEntry -> stringStringEntry.getKey() + " : " + stringStringEntry.getValue()) // Formater chaque entrée
-                .collect(Collectors.joining(", ")); // Joindre les entrées avec une virgule
-        Label detailsLabel = new Label(detailsText);
 
         this.decreaseButton.setOnAction(this::onDecreaseButtonClicked);
         this.increaseButton.setOnAction(this::onIncreaseButtonClicked);
@@ -95,11 +85,9 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
         this.updateDecreaseButtonState();
         goldCounter.addListener(goldAmount -> this.updateIncreaseButtonState());
 
-        children.add(nameLabel);
         children.add(this.decreaseButton);
         children.add(this.countLabel);
         children.add(this.increaseButton);
-        children.add(detailsLabel);
     }
 
     /**
@@ -210,14 +198,11 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
         }
     }
 
+    /**
+     * Met à jour l'état des boutons de sélection de quantité.
+     */
     public void updateButtonsState() {
         this.updateDecreaseButtonState();
         this.updateIncreaseButtonState();
-    }
-
-    public Map<String, String> getDetails() {
-        return new HashMap<>(Map.of(
-                "Prix", String.valueOf(entry.getKey().getPrice())
-        ));
     }
 }
