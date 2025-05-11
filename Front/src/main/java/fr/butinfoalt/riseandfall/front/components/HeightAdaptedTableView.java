@@ -27,7 +27,9 @@ public class HeightAdaptedTableView<S> extends TableView<S> {
      */
     private void init() {
         InvalidationListener listener = (observable) -> {
-            this.setMaxHeight((this.getItems().size() + 1) * 40);
+            int height = (this.getItems().size() + 1) * 40;
+            this.setMaxHeight(height);
+            this.setMaxHeight(height);
         };
         this.getItems().addListener(listener);
         listener.invalidated(this.itemsProperty());

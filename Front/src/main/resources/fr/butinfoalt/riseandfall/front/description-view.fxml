@@ -12,7 +12,7 @@
         <!-- Image en arrière-plan -->
         <ImageView fx:id="backgroundImageView" opacity="0.2" managed="false"/>
         <!-- Texte en avant-plan -->
-        <ScrollPane fitToWidth="true" styleClass="text-scroll-pane" fx:id="textScrollPane">
+        <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="textScrollPane">
             <padding>
                 <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>

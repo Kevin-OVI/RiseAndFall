@@ -19,6 +19,7 @@ import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 
 /**
@@ -34,6 +35,9 @@ public class OrderController {
      * Liste des bâtiments en attente de création.
      */
     private EnumIntMap<BuildingType> pendingBuildings;
+
+    @FXML
+    public ScrollPane root;
 
     /**
      * Champ pour le composant de la quantité d'or.
@@ -161,7 +165,7 @@ public class OrderController {
      */
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
-        UIUtils.setBackgroundImage("images/background.png", scene, backgroundImageView);
+        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView, this.root);
         this.unitTable.setMaxWidth(1000);
         this.buildingTable.setMaxWidth(1000);
     }

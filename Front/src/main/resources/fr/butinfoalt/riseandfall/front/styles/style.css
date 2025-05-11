@@ -10,3 +10,7 @@
 .purchasable-table-column {
     -fx-alignment: CENTER;
 }
+
+.scrollpane-transparent, .scrollpane-transparent > .viewport {
+    -fx-background-color: transparent;
+}
