@@ -3,16 +3,13 @@ package fr.butinfoalt.riseandfall.front;
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.front.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
-import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-
-import java.util.Objects;
 
 /**
  * Contrôleur pour la vue principale de l'application.

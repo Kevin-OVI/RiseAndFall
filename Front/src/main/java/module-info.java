@@ -13,4 +13,10 @@ module fr.butinfoalt.riseandfall.front {
     exports fr.butinfoalt.riseandfall.front.components;
     opens fr.butinfoalt.riseandfall.front.gamelogic to javafx.fxml;
     exports fr.butinfoalt.riseandfall.front.gamelogic;
+    exports fr.butinfoalt.riseandfall.front.orders;
+    opens fr.butinfoalt.riseandfall.front.orders to javafx.fxml;
+    exports fr.butinfoalt.riseandfall.front.orders.table;
+    opens fr.butinfoalt.riseandfall.front.orders.table to javafx.fxml;
+    exports fr.butinfoalt.riseandfall.front.orders.amountselector;
+    opens fr.butinfoalt.riseandfall.front.orders.amountselector to javafx.fxml;
 }
