@@ -162,7 +162,7 @@ public class OrderController {
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, backgroundImageView);
-        this.unitTable.setMaxWidth(600);
+        this.unitTable.setMaxWidth(1000);
         this.buildingTable.setMaxWidth(1000);
     }
 }
