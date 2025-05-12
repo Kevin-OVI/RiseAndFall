@@ -68,7 +68,7 @@ public class RiseAndFallServer extends BaseSocketServer {
             List<BuildingType> buildingTypes = new ArrayList<>();
             List<UnitType> unitTypes = new ArrayList<>();
 
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description FROM race")) {
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description FROM race ORDER BY id")) {
                 List<Race> racesList = new ArrayList<>();
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
@@ -80,7 +80,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                 races = racesList.toArray(new Race[0]);
             }
 
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type")) {
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
 
                 while (set.next()) {
@@ -98,7 +98,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                 }
             }
 
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price, health, damage, accessible_race_id FROM unit_type")) {
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price, health, damage, accessible_race_id FROM unit_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");

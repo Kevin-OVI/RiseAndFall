@@ -11,7 +11,7 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
     /**
      * Un tableau d'entiers pour stocker les valeurs associées à chaque valeur de l'énumération.
      */
-    private final Map<T, Integer> map;
+    private final LinkedHashMap<T, Integer> map;
 
     /**
      * Constructeur privé de la classe EnumIntMap.
@@ -20,7 +20,7 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
      * @param keyUniverse Un tableau contenant les valeurs de l'énumération filtrées.
      */
     public ObjectIntMap(Collection<T> keyUniverse) {
-        this.map = new HashMap<>();
+        this.map = new LinkedHashMap<>();
         for (T key : keyUniverse) {
             this.map.put(key, 0);
         }
