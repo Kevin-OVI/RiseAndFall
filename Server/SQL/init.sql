@@ -1,14 +1,5 @@
 -- Détruire les tables existantes
-DROP TABLE IF EXISTS unit_creation_order;
-DROP TABLE IF EXISTS building_creation_order;
-DROP TABLE IF EXISTS unit_type;
-DROP TABLE IF EXISTS building_type;
-DROP TABLE IF EXISTS player;
-DROP TABLE IF EXISTS game;
-DROP TABLE IF EXISTS user_token;
-DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS race;
-
+DROP TABLE IF EXISTS unit_creation_order, building_creation_order, unit_type, building_type, player, game, user_token, user, race;
 
 -- Créer les tables nécessaires
 CREATE TABLE race (
