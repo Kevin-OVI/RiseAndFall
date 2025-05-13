@@ -183,7 +183,7 @@ public class GameManager {
         int buildingsCapacity = 5; // Maximum 5 bâtiments par tour
         List<BaseOrder> newOrders = packet.getOrders();
         for (BaseOrder order : newOrders) {
-            goldCapacity -= order.getPrice();
+            goldCapacity -= order.getPriceGold();
             if (order instanceof OrderCreateBuilding orderCreateBuilding) {
                 buildingsCapacity -= orderCreateBuilding.getCount();
             } else if (order instanceof OrderCreateUnit orderCreateUnit) {

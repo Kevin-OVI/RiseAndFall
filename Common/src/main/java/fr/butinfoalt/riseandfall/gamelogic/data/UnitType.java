@@ -3,12 +3,12 @@ package fr.butinfoalt.riseandfall.gamelogic.data;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.io.IOException;
 
 /**
- * Enum représentant les types d'unités disponibles dans le jeu.
- * Chaque type d'unité a un nom d'affichage et un prix.
+ * Représente un type d'unité disponible dans le jeu.
  */
 public class UnitType implements Identifiable, PurchasableItem, ISerializable {
     /**
@@ -27,11 +27,15 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
     private final String description;
 
     /**
-     * Prix de l'unité en pièces d'or.
+     * Prix de l'unité en or.
      */
     private final int priceGold;
 
-    private int priceIntelligence;
+    /**
+     * Le prix de l'unité en intelligence
+     */
+    private final int priceIntelligence;
+
     /**
      * Points de vie de l'unité.
      */
@@ -49,14 +53,19 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
 
 
     /**
-     * Constructeur de l'énumération UnitType accessible par une race spécifiée.
+     * Constructeur du type UnitType à partir des valeurs de chaque champ.
+     * Il est utilisé sur le serveur au moment de charger les données depuis la base de données.
      *
-     * @param id               L'identifiant de l'unité dans la base de données.
-     * @param name             Le nom d'affichage du type d'unité.
-     * @param priceGold            Le prix de l'unité en pièces d'or.
-     * @param accessibleByRace La race qui peut construire cette unité.
+     * @param id                L'identifiant de l'unité dans la base de données.
+     * @param name              Le nom d'affichage du type d'unité.
+     * @param description       La description de l'unité
+     * @param priceGold         Le prix de l'unité en or.
+     * @param priceIntelligence Le prix de l'unité en intelligence
+     * @param health            Le nombre de points de vie de l'unité
+     * @param damage            La quantité de dégâts qu'inflige l'unité
+     * @param accessibleByRace  La race qui peut construire cette unité.
      */
-    public UnitType(int id, String name, String description, int priceGold,int priceIntelligence, int health, int damage, Race accessibleByRace) {
+    public UnitType(int id, String name, String description, int priceGold, int priceIntelligence, int health, int damage, Race accessibleByRace) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -67,6 +76,14 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
         this.accessibleByRace = accessibleByRace;
     }
 
+    /**
+     * Contructeur de la classe UnitType à partir de données sérialisées.
+     * Il est utilisé sur le client pour désérialiser les données provenant du serveur.
+     *
+     * @param readHelper Le helper de lecture qui fournit les méthodes pour lire les données.
+     * @param races      Un tableau contenant les races déjà désérialisées
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
+     */
     public UnitType(ReadHelper readHelper, Race[] races) throws IOException {
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
@@ -111,15 +128,21 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
     /**
      * Méthode pour obtenir le prix de l'unité en pièces d'or.
      *
-     * @return Le prix de l'unité en pièces d'or.
+     * @return Le prix de l'unité en or.
      */
     @Override
     public int getPriceGold() {
         return this.priceGold;
     }
 
+    /**
+     * Méthode pour obtenir le prix de l'unité en intelligence
+     *
+     * @return Le prix de l'unité en intelligence
+     */
+    @Override
     public int getPriceIntelligence() {
-        return priceIntelligence;
+        return this.priceIntelligence;
     }
 
     /**
@@ -127,7 +150,6 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      *
      * @return Les points de vie de l'unité.
      */
-
     public int getHealth() {
         return this.health;
     }
@@ -164,6 +186,15 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
 
     @Override
     public String toString() {
-        return "UnitType{id=%d, name='%s', description='%s', priceGold=%d,priceIntelligence='%d', health=%d, damage=%d, accessibleByRace=%s}".formatted(id, name, description, priceGold,priceIntelligence, health, damage, accessibleByRace);
+        return new ToStringFormatter("UnitType")
+                .add("id", this.id)
+                .add("name", this.name)
+                .add("description", this.description)
+                .add("priceGold", this.priceGold)
+                .add("priceIntelligence", this.priceIntelligence)
+                .add("health", this.health)
+                .add("damage", this.damage)
+                .add("accessibleByRace", this.accessibleByRace)
+                .build();
     }
 }

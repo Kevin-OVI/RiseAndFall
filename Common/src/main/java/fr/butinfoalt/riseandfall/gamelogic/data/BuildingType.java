@@ -3,12 +3,12 @@ package fr.butinfoalt.riseandfall.gamelogic.data;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.io.IOException;
 
 /**
- * Enum représentant les types de bâtiments disponibles dans le jeu.
- * Chaque type de bâtiment a un nom d'affichage, un prix, une production d'or et un nombre maximum d'unités.
+ * Représente un type de bâtiment disponible dans le jeu.
  */
 public class BuildingType implements Identifiable, PurchasableItem, ISerializable {
     /**
@@ -27,10 +27,15 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
     private final String description;
 
     /**
-     * Prix du bâtiment en pièces d'or.
+     * Prix du bâtiment en or.
      */
     private final int priceGold;
+
+    /**
+     * Prix du bâtiment en intelligence
+     */
     private final int priceIntelligence;
+
     /**
      * Production d'or du bâtiment par tour.
      */
@@ -40,10 +45,12 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      * Production d'intelligence du bâtiment par tour.
      */
     private final int intelligenceProduction;
+
     /**
      * Nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      */
     private final int maxUnits;
+
     /**
      * Nombre initial de bâtiments de ce type.
      */
@@ -54,19 +61,22 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      */
     private final Race accessibleByRace;
 
-
     /**
-     * Constructeur de l'énumération BuildingType accessible par une race et avec une quantité initiale spécifiées.
+     * Constructeur de la classe BuildingType à partir des valeurs de chaque champ.
+     * Il est utilisé sur le serveur au moment de charger les données depuis la base de données.
      *
-     * @param name             Le nom d'affichage du type de bâtiment.
-     * @param description      La description du bâtiment.
-     * @param priceGold            Le prix du bâtiment en pièces d'or.
-     * @param goldProduction   La production d'or du bâtiment par tour.
-     * @param maxUnits         Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
-     * @param initialAmount    Le nombre initial de bâtiments de ce type.
-     * @param accessibleByRace La race qui peut construire ce bâtiment.
+     * @param id                     L'identifiant du type de bâtiment dans la base de données
+     * @param name                   Le nom d'affichage du type de bâtiment.
+     * @param description            La description du bâtiment.
+     * @param priceGold              Le prix du bâtiment en or.
+     * @param priceIntelligence      Le prix du bâtiment en intelligence
+     * @param goldProduction         La production d'or du bâtiment par tour.
+     * @param intelligenceProduction La production d'intelligence du bâtiment par tour.
+     * @param maxUnits               Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
+     * @param initialAmount          Le nombre initial de bâtiments de ce type.
+     * @param accessibleByRace       La race qui peut construire ce bâtiment.
      */
-    public BuildingType(int id, String name, String description, int priceGold,int priceIntelligence, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
+    public BuildingType(int id, String name, String description, int priceGold, int priceIntelligence, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -79,6 +89,14 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         this.accessibleByRace = accessibleByRace;
     }
 
+    /**
+     * Contructeur de la classe BuildingType à partir de données sérialisées.
+     * Il est utilisé sur le client pour désérialiser les données provenant du serveur.
+     *
+     * @param readHelper Le helper de lecture qui fournit les méthodes pour lire les données.
+     * @param races      Un tableau contenant les races déjà désérialisées
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
+     */
     public BuildingType(ReadHelper readHelper, Race[] races) throws IOException {
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
@@ -113,24 +131,33 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         return this.name;
     }
 
-    public String getDescription() {
-        return description;
-    }
     /**
-     * Méthode pour obtenir le prix du bâtiment en pièces d'or.
+     * Méthode pour obtenir la description du type de bâtiment.
      *
-     * @return Le prix du bâtiment en pièces d'or.
+     * @return La description du type de bâtiment.
+     */
+    public String getDescription() {
+        return this.description;
+    }
+
+    /**
+     * Méthode pour obtenir le prix du bâtiment en or.
+     *
+     * @return Le prix du bâtiment en or.
      */
     @Override
-
     public int getPriceGold() {
         return this.priceGold;
     }
 
-
-
+    /**
+     * Méthode pour obtenir le prix du bâtiment en intelligence.
+     *
+     * @return Le prix du bâtiment en intelligence.
+     */
+    @Override
     public int getPriceIntelligence() {
-        return priceIntelligence;
+        return this.priceIntelligence;
     }
 
     /**
@@ -151,7 +178,6 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         return this.intelligenceProduction;
     }
 
-
     /**
      * Méthode pour obtenir le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      *
@@ -170,6 +196,11 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         return this.initialAmount;
     }
 
+    /**
+     * Méthode pour obtenir la race qui peut construire des bâtiments de ce type.
+     *
+     * @return La race qui peut construire ce type de bâtiment, ou null si toutes les races le peuvent.
+     */
     public Race getAccessibleByRace() {
         return this.accessibleByRace;
     }
@@ -190,6 +221,17 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
 
     @Override
     public String toString() {
-        return "BuildingType{id=%d, name='%s', description='%s', priceGold=%d,priceIntelligence='%d', goldProduction=%d, intelligenceProduction=%d, maxUnits=%d, initialAmount=%d, accessibleByRace=%s}".formatted(id, name, description, priceGold,priceIntelligence, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleByRace);
+        return new ToStringFormatter("BuildingType")
+                .add("id", this.id)
+                .add("name", this.name)
+                .add("description", this.description)
+                .add("priceGold", this.priceGold)
+                .add("priceIntelligence", this.priceIntelligence)
+                .add("goldProduction", this.goldProduction)
+                .add("intelligenceProduction", this.intelligenceProduction)
+                .add("maxUnits", this.maxUnits)
+                .add("initialAmount", this.initialAmount)
+                .add("accessibleByRace", this.accessibleByRace)
+                .build();
     }
 }

@@ -11,4 +11,11 @@ public interface PurchasableItem extends NamedItem {
      * @return Le prix de l'objet en or.
      */
     int getPriceGold();
+
+    /**
+     * Obtient le prix de l'objet en intelligence.
+     *
+     * @return Le prix de l'objet en intelligence.
+     */
+    int getPriceIntelligence();
 }
