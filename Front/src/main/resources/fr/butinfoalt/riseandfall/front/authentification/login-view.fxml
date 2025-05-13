@@ -3,12 +3,22 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
-<AnchorPane prefWidth="400" prefHeight="300" style="-fx-background-color: #f4f4f4;">
-    <VBox alignment="CENTER" spacing="15" layoutX="50" layoutY="50" prefWidth="300" prefHeight="200">
-        <Label text="Connexion" style="-fx-font-size: 24px; -fx-text-fill: #333;"/>
-        <TextField promptText="Nom d'utilisateur"/>
-        <PasswordField promptText="Mot de passe"/>
-        <Button text="Se connecter" style="-fx-background-color: #0078D7; -fx-text-fill: white;"/>
-        <Hyperlink text="Pas encore de compte ?"/>
-    </VBox>
-</AnchorPane>
+<?import javafx.scene.image.ImageView?>
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx" alignment="CENTER"
+      spacing="20.0"
+      fx:controller="fr.butinfoalt.riseandfall.front.authentification.LoginController"
+      prefHeight="400.0" prefWidth="600.0">
+    <ImageView fx:id="backgroundImageView" managed="false"/>
+    <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
+        Bienvenue sur Rise &amp; Fall futur empereur.
+    </TitleLabel>
+    <Label text="Connexion" style="-fx-font-size: 24px; -fx-text-fill: #333;"/>
+    <TextField fx:id="username" promptText="Nom d'utilisateur"/>
+    <PasswordField fx:id="password" promptText="Mot de passe"/>
+    <VBox.margin>
+        <Insets bottom="40"/>
+    </VBox.margin>
+    <Button text="Se connecter" style="-fx-background-color: #0078D7; -fx-text-fill: white;" onAction="#login"/>
+</VBox>

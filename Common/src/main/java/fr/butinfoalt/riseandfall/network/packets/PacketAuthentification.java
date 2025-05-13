@@ -18,8 +18,7 @@ public class PacketAuthentification implements IPacket {
     /**
      * Mot de passe haché du client
      */
-    // TODO
-    // private final String passwordHash;
+    private final String passwordHash;
 
     /**
      * Constructeur du paquet d'authentification
@@ -27,9 +26,9 @@ public class PacketAuthentification implements IPacket {
      * @param username     Le nom d'utilisateur du client
      * @param passwordHash Le mot de passe haché du client
      */
-    public PacketAuthentification(String username/*, String passwordHash*/) {
+    public PacketAuthentification(String username, String passwordHash) {
         this.username = username;
-        //this.passwordHash = passwordHash;
+        this.passwordHash = passwordHash;
     }
 
     /**
@@ -40,7 +39,7 @@ public class PacketAuthentification implements IPacket {
      */
     public PacketAuthentification(ReadHelper readHelper) throws IOException {
         this.username = readHelper.readString();
-        //this.passwordHash = readHelper.readString();
+        this.passwordHash = readHelper.readString();
     }
 
     /**
@@ -52,7 +51,7 @@ public class PacketAuthentification implements IPacket {
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
         writeHelper.writeString(this.username);
-        //writeHelper.writeString(this.passwordHash);
+        writeHelper.writeString(this.passwordHash);
     }
 
     /**
@@ -69,7 +68,7 @@ public class PacketAuthentification implements IPacket {
      *
      * @return Le mot de passe haché du client
      */
-    /*public String getPasswordHash() {
+    public String getPasswordHash() {
         return this.passwordHash;
-    }*/
+    }
 }

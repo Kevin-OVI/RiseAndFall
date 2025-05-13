@@ -59,10 +59,9 @@ public class RiseAndFall {
      */
     public static void initSocketClient() {
         client = new RiseAndFallClient();
+
         try {
             client.connect();
-            // TODO : Utiliser un nom d'utilisateur entré par l'utilisateur plutôt que le nom du système
-            client.sendPacket(new PacketAuthentification(System.getProperty("user.name")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

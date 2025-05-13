@@ -86,4 +86,11 @@ public class WelcomeView {
         }
         RiseAndFallApplication.switchToView(View.LOADING);
     }
+
+
+    @FXML
+    public void login(){
+        RiseAndFallApplication.switchToView(View.LOGIN);
+
+    }
 }

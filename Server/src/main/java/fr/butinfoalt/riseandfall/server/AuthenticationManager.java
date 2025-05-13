@@ -46,14 +46,18 @@ public class AuthenticationManager {
      * @param packet Le paquet d'authentification reçu.
      */
     public synchronized void onAuthentification(SocketWrapper sender, PacketAuthentification packet) {
+        System.out.println("Tentative de connexion");
         if (this.userConnections.containsKey(sender)) {
             System.out.printf("Le client %s est déjà authentifié.%n", sender.getName());
             return;
         }
-        // TODO : Vérifier le mot de passe
         String username = packet.getUsername();
+        String password = packet.getPasswordHash();
         User foundUser = null;
+        System.out.println("Username : " + username + " Password : " + password );
+
         for (User user : users) {
+            System.out.println("User trouvé : " + user.getUsername());
             if (user.getUsername().equals(username)) {
                 foundUser = user;
                 break;
