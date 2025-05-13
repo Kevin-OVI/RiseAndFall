@@ -105,5 +105,5 @@ VALUES
 
 INSERT INTO unit_type (name, description, price, health, damage, accessible_race_id) VALUES
      ('Guerrier', 'Une unité de combat robuste et polyvalente', 10, 100.0, 15.0, NULL),
-     ('Génie', 'Un expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 10, 80.0, 12.0, NULL),
+     ('Génie', 'Un expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 10, 80.0, 12.0, 2),
      ('Zombie', 'Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels avec ses griffes et ses morsures infectieuses', 20, 70, 20, 1);
