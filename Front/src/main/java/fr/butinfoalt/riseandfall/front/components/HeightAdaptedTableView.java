@@ -26,9 +26,8 @@ public class HeightAdaptedTableView<S> extends TableView<S> {
      * On considère qu'une ligne fait 40 pixels de haut.
      */
     private void init() {
-        InvalidationListener listener = (observable) -> {
-            this.setMaxHeight((this.getItems().size() + 1) * 40);
-        };
+        this.setFixedCellSize(40);
+        InvalidationListener listener = (observable) -> this.setMaxHeight((this.getItems().size() + 1) * this.getFixedCellSize());
         this.getItems().addListener(listener);
         listener.invalidated(this.itemsProperty());
     }
