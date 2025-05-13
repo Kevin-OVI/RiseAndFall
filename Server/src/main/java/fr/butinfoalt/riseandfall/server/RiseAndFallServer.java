@@ -68,48 +68,55 @@ public class RiseAndFallServer extends BaseSocketServer {
             List<BuildingType> buildingTypes = new ArrayList<>();
             List<UnitType> unitTypes = new ArrayList<>();
 
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description FROM race ORDER BY id")) {
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description,gold_multiplier,intelligence_multiplier,damage_multiplier,health_multiplier FROM race ORDER BY id")) {
                 List<Race> racesList = new ArrayList<>();
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    racesList.add(new Race(id, name, description));
+                    float goldMultiplier = set.getFloat("gold_multiplier");
+                    float intelligenceMultiplier = set.getFloat("intelligence_multiplier");
+                    float damageMultiplier = set.getFloat("damage_multiplier");
+                    float healthMultiplier = set.getFloat("health_multiplier");
+                    racesList.add(new Race(id, name, description,goldMultiplier,intelligenceMultiplier,damageMultiplier,healthMultiplier));
                 }
                 races = racesList.toArray(new Race[0]);
             }
 
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type ORDER BY id")) {
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price_gold,price_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
 
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    int price = set.getInt("price");
+                    int priceGold = set.getInt("price_gold");
+                    int priceIntelligence = set.getInt("price_intelligence");
                     int goldProduction = set.getInt("gold_production");
                     int intelligenceProduction = set.getInt("intelligence_production");
                     int maxUnits = set.getInt("max_units");
                     int initialAmount = set.getInt("initial_amount");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
-                    buildingTypes.add(new BuildingType(id, name, description, price, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleRace));
+                    buildingTypes.add(new BuildingType(id, name, description, priceGold,priceIntelligence, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleRace));
                 }
             }
 
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price, health, damage, accessible_race_id FROM unit_type ORDER BY id")) {
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price_gold,price_intelligence, health, damage, accessible_race_id FROM unit_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    int price = set.getInt("price");
+                    int priceGold = set.getInt("price_gold");
+                    int priceIntelligence = set.getInt("price_intelligence");
                     int health = set.getInt("health");
                     int damage = set.getInt("damage");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
-                    unitTypes.add(new UnitType(id, name, description, price, health, damage, accessibleRace));
+                    unitTypes.add(new UnitType(id, name, description, priceGold,priceIntelligence, health, damage, accessibleRace));
+
                 }
             }
 

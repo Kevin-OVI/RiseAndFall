@@ -14,17 +14,30 @@ public class Race implements Identifiable, NamedItem, ISerializable {
     private final int id;
     private final String name;
     private final String description;
+    private final float goldMultiplier;
+    private final float intelligenceMultiplier;
+    private final float damageMultiplier;
+    private final float healthMultiplier;
 
-    public Race(int id, String name, String description) {
+
+    public Race(int id, String name, String description, float goldMultiplier, float intelligenceMultiplier, float damageMultiplier, float healthMultiplier) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.goldMultiplier = goldMultiplier;
+        this.intelligenceMultiplier = intelligenceMultiplier;
+        this.damageMultiplier = damageMultiplier;
+        this.healthMultiplier = healthMultiplier;
     }
 
     public Race(ReadHelper readHelper) throws IOException {
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
         this.description = readHelper.readString();
+        this.goldMultiplier = readHelper.readFloat();
+        this.intelligenceMultiplier = readHelper.readFloat();
+        this.damageMultiplier = readHelper.readFloat();
+        this.healthMultiplier = readHelper.readFloat();
     }
 
     /**
@@ -56,15 +69,35 @@ public class Race implements Identifiable, NamedItem, ISerializable {
         return this.description;
     }
 
+    public float getGoldMultiplier() {
+        return goldMultiplier;
+    }
+
+    public float getIntelligenceMultiplier() {
+        return intelligenceMultiplier;
+    }
+
+    public float getDamageMultiplier() {
+        return damageMultiplier;
+    }
+
+    public float getHealthMultiplier() {
+        return healthMultiplier;
+    }
+
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
         writeHelper.writeInt(this.id);
         writeHelper.writeString(this.name);
         writeHelper.writeString(this.description);
+        writeHelper.writeFloat(this.goldMultiplier);
+        writeHelper.writeFloat(this.intelligenceMultiplier);
+        writeHelper.writeFloat(this.damageMultiplier);
+        writeHelper.writeFloat(this.healthMultiplier);
     }
 
     @Override
     public String toString() {
-        return "Race{id=%d, name='%s', description='%s'}".formatted(id, name, description);
+        return "Race{id=%d, name='%s', description='%s', goldMultiplier='%f' , intelligenceMultiplier='%f' , damageMultiplier='%f', healthMultiplier='%f' }".formatted(id, name, description,goldMultiplier, intelligenceMultiplier, damageMultiplier, healthMultiplier);
     }
 }

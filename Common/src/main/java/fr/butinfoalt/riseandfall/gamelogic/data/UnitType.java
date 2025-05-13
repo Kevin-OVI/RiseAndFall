@@ -29,8 +29,9 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
     /**
      * Prix de l'unité en pièces d'or.
      */
-    private final int price;
+    private final int priceGold;
 
+    private int priceIntelligence;
     /**
      * Points de vie de l'unité.
      */
@@ -48,29 +49,19 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
 
 
     /**
-     * Constructeur de l'énumération UnitType accessible par toutes les races.
-     *
-     * @param id    L'identifiant de l'unité dans la base de données.
-     * @param name  Le nom d'affichage du type d'unité.
-     * @param price Le prix de l'unité en pièces d'or.
-     */
-    public UnitType(int id, String name, String description, int price, int health, int damage) {
-        this(id, name, description, price, health, damage, null);
-    }
-
-    /**
      * Constructeur de l'énumération UnitType accessible par une race spécifiée.
      *
      * @param id               L'identifiant de l'unité dans la base de données.
      * @param name             Le nom d'affichage du type d'unité.
-     * @param price            Le prix de l'unité en pièces d'or.
+     * @param priceGold            Le prix de l'unité en pièces d'or.
      * @param accessibleByRace La race qui peut construire cette unité.
      */
-    public UnitType(int id, String name, String description, int price, int health, int damage, Race accessibleByRace) {
+    public UnitType(int id, String name, String description, int priceGold,int priceIntelligence, int health, int damage, Race accessibleByRace) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.price = price;
+        this.priceGold = priceGold;
+        this.priceIntelligence = priceIntelligence;
         this.health = health;
         this.damage = damage;
         this.accessibleByRace = accessibleByRace;
@@ -80,7 +71,8 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
         this.description = readHelper.readString();
-        this.price = readHelper.readInt();
+        this.priceGold = readHelper.readInt();
+        this.priceIntelligence = readHelper.readInt();
         this.health = readHelper.readInt();
         this.damage = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
@@ -122,8 +114,12 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      * @return Le prix de l'unité en pièces d'or.
      */
     @Override
-    public int getPrice() {
-        return this.price;
+    public int getPriceGold() {
+        return this.priceGold;
+    }
+
+    public int getPriceIntelligence() {
+        return priceIntelligence;
     }
 
     /**
@@ -131,6 +127,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      *
      * @return Les points de vie de l'unité.
      */
+
     public int getHealth() {
         return this.health;
     }
@@ -158,7 +155,8 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
         writeHelper.writeInt(this.id);
         writeHelper.writeString(this.name);
         writeHelper.writeString(this.description);
-        writeHelper.writeInt(this.price);
+        writeHelper.writeInt(this.priceGold);
+        writeHelper.writeInt(this.priceIntelligence);
         writeHelper.writeInt(this.health);
         writeHelper.writeInt(this.damage);
         writeHelper.writeInt(this.accessibleByRace != null ? this.accessibleByRace.getId() : -1);
@@ -166,6 +164,6 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
 
     @Override
     public String toString() {
-        return "UnitType{id=%d, name='%s', description='%s', price=%d, health=%d, damage=%d, accessibleByRace=%s}".formatted(id, name, description, price, health, damage, accessibleByRace);
+        return "UnitType{id=%d, name='%s', description='%s', priceGold=%d,priceIntelligence='%d', health=%d, damage=%d, accessibleByRace=%s}".formatted(id, name, description, priceGold,priceIntelligence, health, damage, accessibleByRace);
     }
 }

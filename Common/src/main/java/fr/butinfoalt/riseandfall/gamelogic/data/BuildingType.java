@@ -29,7 +29,8 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
     /**
      * Prix du bâtiment en pièces d'or.
      */
-    private final int price;
+    private final int priceGold;
+    private final int priceIntelligence;
     /**
      * Production d'or du bâtiment par tour.
      */
@@ -59,17 +60,18 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      *
      * @param name             Le nom d'affichage du type de bâtiment.
      * @param description      La description du bâtiment.
-     * @param price            Le prix du bâtiment en pièces d'or.
+     * @param priceGold            Le prix du bâtiment en pièces d'or.
      * @param goldProduction   La production d'or du bâtiment par tour.
      * @param maxUnits         Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      * @param initialAmount    Le nombre initial de bâtiments de ce type.
      * @param accessibleByRace La race qui peut construire ce bâtiment.
      */
-    public BuildingType(int id, String name, String description, int price, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
+    public BuildingType(int id, String name, String description, int priceGold,int priceIntelligence, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.price = price;
+        this.priceGold = priceGold;
+        this.priceIntelligence = priceIntelligence;
         this.goldProduction = goldProduction;
         this.intelligenceProduction = intelligenceProduction;
         this.maxUnits = maxUnits;
@@ -81,7 +83,8 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
         this.description = readHelper.readString();
-        this.price = readHelper.readInt();
+        this.priceGold = readHelper.readInt();
+        this.priceIntelligence = readHelper.readInt();
         this.goldProduction = readHelper.readInt();
         this.intelligenceProduction = readHelper.readInt();
         this.maxUnits = readHelper.readInt();
@@ -110,14 +113,24 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         return this.name;
     }
 
+    public String getDescription() {
+        return description;
+    }
     /**
      * Méthode pour obtenir le prix du bâtiment en pièces d'or.
      *
      * @return Le prix du bâtiment en pièces d'or.
      */
     @Override
-    public int getPrice() {
-        return this.price;
+
+    public int getPriceGold() {
+        return this.priceGold;
+    }
+
+
+
+    public int getPriceIntelligence() {
+        return priceIntelligence;
     }
 
     /**
@@ -166,7 +179,8 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         writeHelper.writeInt(this.id);
         writeHelper.writeString(this.name);
         writeHelper.writeString(this.description);
-        writeHelper.writeInt(this.price);
+        writeHelper.writeInt(this.priceGold);
+        writeHelper.writeInt(this.priceIntelligence);
         writeHelper.writeInt(this.goldProduction);
         writeHelper.writeInt(this.intelligenceProduction);
         writeHelper.writeInt(this.maxUnits);
@@ -176,6 +190,6 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
 
     @Override
     public String toString() {
-        return "BuildingType{id=%d, name='%s', description='%s', price=%d, goldProduction=%d, intelligenceProduction=%d, maxUnits=%d, initialAmount=%d, accessibleByRace=%s}".formatted(id, name, description, price, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleByRace);
+        return "BuildingType{id=%d, name='%s', description='%s', priceGold=%d,priceIntelligence='%d', goldProduction=%d, intelligenceProduction=%d, maxUnits=%d, initialAmount=%d, accessibleByRace=%s}".formatted(id, name, description, priceGold,priceIntelligence, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleByRace);
     }
 }

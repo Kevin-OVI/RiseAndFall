@@ -10,5 +10,5 @@ public interface PurchasableItem extends NamedItem {
      *
      * @return Le prix de l'objet en or.
      */
-    int getPrice();
+    int getPriceGold();
 }

@@ -49,7 +49,7 @@ public class OrderCreateUnit implements BaseOrder {
      */
     @Override
     public int getPrice() {
-        return this.unitType.getPrice() * this.count;
+        return this.unitType.getPriceGold() * this.count;
     }
 
     /**

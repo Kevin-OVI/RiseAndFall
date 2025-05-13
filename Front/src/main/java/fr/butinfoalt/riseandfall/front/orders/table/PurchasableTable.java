@@ -55,7 +55,7 @@ public class PurchasableTable<T extends PurchasableItem> extends HeightAdaptedTa
         this.getColumns().add(this.quantityColumn);
 
         this.pricePerUnitColumn = new TableColumn<>("Prix unitaire");
-        this.pricePerUnitColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getPrice()));
+        this.pricePerUnitColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getPriceGold()));
         this.getColumns().add(this.pricePerUnitColumn);
     }
 }

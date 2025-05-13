@@ -49,7 +49,7 @@ public class OrderCreateBuilding implements BaseOrder {
      */
     @Override
     public int getPrice() {
-        return this.buildingType.getPrice() * this.count;
+        return this.buildingType.getPriceGold() * this.count;
     }
 
     /**

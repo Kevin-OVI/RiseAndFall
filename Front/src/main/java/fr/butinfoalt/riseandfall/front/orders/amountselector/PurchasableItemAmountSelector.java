@@ -69,7 +69,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
     public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter goldCounter, Function<Integer, Boolean> amountValidator) {
         this.entry = entry;
         this.amountValidator = amountValidator;
-        this.goldModifier = goldCounter.addModifier(-entry.getKey().getPrice() * entry.getValue());
+        this.goldModifier = goldCounter.addModifier(-entry.getKey().getPriceGold() * entry.getValue());
 
         this.setAlignment(Pos.CENTER);
         this.setSpacing(10);
@@ -110,7 +110,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
         if (count > 0) {
             entry.setValue(--count);
             countLabel.setText(String.valueOf(count));
-            this.goldModifier.setDelta(-entry.getKey().getPrice() * count);
+            this.goldModifier.setDelta(-entry.getKey().getPriceGold() * count);
             this.changeDispatcher.dispatch(count);
         }
         this.updateButtonsState();
@@ -123,10 +123,10 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
      */
     private void onIncreaseButtonClicked(ActionEvent actionEvent) {
         int count = entry.getValue();
-        if (this.goldModifier.getCounter().getCurrentValue() >= entry.getKey().getPrice()) {
+        if (this.goldModifier.getCounter().getCurrentValue() >= entry.getKey().getPriceGold()) {
             entry.setValue(++count);
             countLabel.setText(String.valueOf(count));
-            this.goldModifier.setDelta(-entry.getKey().getPrice() * count);
+            this.goldModifier.setDelta(-entry.getKey().getPriceGold() * count);
             this.changeDispatcher.dispatch(count);
         }
         this.updateButtonsState();
@@ -142,7 +142,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
 
     private void updateIncreaseButtonState() {
         int count = entry.getValue();
-        increaseButton.setDisable(this.goldModifier.getCounter().getCurrentValue() < entry.getKey().getPrice() || !this.isAmountValid(count + 1));
+        increaseButton.setDisable(this.goldModifier.getCounter().getCurrentValue() < entry.getKey().getPriceGold() || !this.isAmountValid(count + 1));
     }
 
     /**
