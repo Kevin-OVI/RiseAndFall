@@ -18,7 +18,7 @@ public interface BaseOrder extends ISerializable {
     /**
      * Obtient le prix de l'ordre en or.
      *
-     * @return Le prix de l'ordre en or.²
+     * @return Le prix de l'ordre en or.
      */
     int getPrice();
 }

@@ -66,7 +66,10 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param packet Le paquet reçu.
      */
     private void onToken(SocketWrapper sender, PacketToken packet) {
-        // TODO
+        // TODO : Sauvegarder le token dans un fichier pour permettre à l'utilisateur de se reconnecter au serveur sans devoir taper à nous ses identifiants.
+        Platform.runLater(() -> {
+            RiseAndFallApplication.switchToView(View.WELCOME, true);
+        });
     }
 
     /**
@@ -78,7 +81,7 @@ public class RiseAndFallClient extends BaseSocketClient {
      */
     private void onServerData(SocketWrapper sender, PacketServerData packet) {
         ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes());
-        Platform.runLater(() -> RiseAndFallApplication.switchToView(View.WELCOME, true));
+        Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOGIN, true));
     }
 
     /**

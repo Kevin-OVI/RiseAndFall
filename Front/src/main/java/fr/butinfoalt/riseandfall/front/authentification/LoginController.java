@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front.authentification;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
+import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
@@ -54,13 +55,14 @@ public class LoginController {
         try {
             String username = this.username.getText();
             String password = this.password.getText();
+            System.out.println("Login : " + username + " / " + password);
 
             client.sendPacket(new PacketAuthentification(username, password));
         } catch (IOException e) {
             System.err.println("Erreur lors de l'envoi du paquet de login : ");
             e.printStackTrace();
+            return;
         }
-
-        System.out.println("Login : " + username + " / " + password);
+        RiseAndFallApplication.switchToView(View.LOADING, true);
     }
 }

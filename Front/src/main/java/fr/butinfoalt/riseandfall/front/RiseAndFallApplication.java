@@ -1,7 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
 import fr.butinfoalt.riseandfall.front.authentification.LoadingController;
-import fr.butinfoalt.riseandfall.front.authentification.LoginController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -97,8 +96,8 @@ public class RiseAndFallApplication extends Application {
     public void start(Stage stage) {
         mainWindow = stage;
 
-        Scene scene = new Scene(View.LOGIN.getSceneRoot(), WIDTH, HEIGHT);
-        stage.setTitle(View.LOGIN.getWindowTitle());
+        Scene scene = new Scene(View.LOADING.getSceneRoot(), WIDTH, HEIGHT);
+        stage.setTitle(View.LOADING.getWindowTitle());
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.setOnCloseRequest(this::onCloseRequest);
@@ -106,7 +105,7 @@ public class RiseAndFallApplication extends Application {
 
         RiseAndFall.initSocketClient();
 
-        LoginController controller = View.LOGIN.getController();
+        LoadingController controller = View.LOADING.getController();
         controller.initializeScene(scene);
     }
 

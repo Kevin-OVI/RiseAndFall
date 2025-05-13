@@ -2,7 +2,6 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
-import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
 import fr.butinfoalt.riseandfall.network.packets.PacketInitialGameData;
 import javafx.stage.Stage;
 
