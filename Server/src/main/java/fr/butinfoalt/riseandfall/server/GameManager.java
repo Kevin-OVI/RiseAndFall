@@ -180,14 +180,23 @@ public class GameManager {
         // On vérifie coté serveur que le joueur a bien les ressources nécessaires pour exécuter les ordres
         int goldCapacity = player.getGoldAmount();
         int unitsCapacity = player.getAllowedUnitCount();
+        int playerIntelligence = player.getIntelligence();
         int buildingsCapacity = 5; // Maximum 5 bâtiments par tour
         List<BaseOrder> newOrders = packet.getOrders();
         for (BaseOrder order : newOrders) {
-            goldCapacity -= order.getPriceGold();
+            goldCapacity -= order.getPrice();
             if (order instanceof OrderCreateBuilding orderCreateBuilding) {
                 buildingsCapacity -= orderCreateBuilding.getCount();
+                if (playerIntelligence < orderCreateBuilding.getBuildingType().getRequiredIntelligence()) {
+                    System.err.printf("Le joueur %s n'a pas assez d'intelligence pour construire le bâtiment %s.%n", player.getUser().getUsername(), orderCreateBuilding.getBuildingType());
+                    return;
+                }
             } else if (order instanceof OrderCreateUnit orderCreateUnit) {
                 unitsCapacity -= orderCreateUnit.getCount();
+                if (playerIntelligence < orderCreateUnit.getUnitType().getRequiredIntelligence()) {
+                    System.err.printf("Le joueur %s n'a pas assez d'intelligence pour créer l'unité %s.%n", player.getUser().getUsername(), orderCreateUnit.getUnitType());
+                    return;
+                }
             }
         }
         if (goldCapacity < 0 || unitsCapacity < 0 || buildingsCapacity < 0) {

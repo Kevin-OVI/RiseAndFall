@@ -45,9 +45,9 @@ public class ServerPlayer extends Player {
         }
 
         for (BaseOrder order : this.pendingOrders) {
-            if (this.goldAmount >= order.getPriceGold()) {
+            if (this.goldAmount >= order.getPrice()) {
                 order.execute(this);
-                this.removeGoldAmount(order.getPriceGold());
+                this.removeGoldAmount(order.getPrice());
             }
         }
         this.pendingOrders.clear();

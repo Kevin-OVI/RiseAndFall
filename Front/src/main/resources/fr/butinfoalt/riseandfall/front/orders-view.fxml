@@ -18,7 +18,8 @@
     <VBox alignment="CENTER" spacing="10">
         <TitleLabel>Vos ressources :</TitleLabel>
         <Label fx:id="goldField"/>
-        <Label fx:id="unitsField" text="0"/>
+        <Label fx:id="intelligenceField"/>
+        <Label fx:id="unitsField"/>
     </VBox>
 
     <VBox alignment="CENTER" spacing="10">

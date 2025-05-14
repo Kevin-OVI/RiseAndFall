@@ -29,12 +29,12 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
     /**
      * Prix de l'unité en or.
      */
-    private final int priceGold;
+    private final int price;
 
     /**
-     * Le prix de l'unité en intelligence
+     * La quantité d'intelligence requise pour construire l'unité.
      */
-    private final int priceIntelligence;
+    private final int requiredIntelligence;
 
     /**
      * Points de vie de l'unité.
@@ -56,21 +56,21 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      * Constructeur du type UnitType à partir des valeurs de chaque champ.
      * Il est utilisé sur le serveur au moment de charger les données depuis la base de données.
      *
-     * @param id                L'identifiant de l'unité dans la base de données.
-     * @param name              Le nom d'affichage du type d'unité.
-     * @param description       La description de l'unité
-     * @param priceGold         Le prix de l'unité en or.
-     * @param priceIntelligence Le prix de l'unité en intelligence
-     * @param health            Le nombre de points de vie de l'unité
-     * @param damage            La quantité de dégâts qu'inflige l'unité
-     * @param accessibleByRace  La race qui peut construire cette unité.
+     * @param id                   L'identifiant de l'unité dans la base de données.
+     * @param name                 Le nom d'affichage du type d'unité.
+     * @param description          La description de l'unité
+     * @param price                Le prix de l'unité en or.
+     * @param requiredIntelligence La quantité d'intelligence requise pour construire l'unité.
+     * @param health               Le nombre de points de vie de l'unité
+     * @param damage               La quantité de dégâts qu'inflige l'unité
+     * @param accessibleByRace     La race qui peut construire cette unité.
      */
-    public UnitType(int id, String name, String description, int priceGold, int priceIntelligence, int health, int damage, Race accessibleByRace) {
+    public UnitType(int id, String name, String description, int price, int requiredIntelligence, int health, int damage, Race accessibleByRace) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.priceGold = priceGold;
-        this.priceIntelligence = priceIntelligence;
+        this.price = price;
+        this.requiredIntelligence = requiredIntelligence;
         this.health = health;
         this.damage = damage;
         this.accessibleByRace = accessibleByRace;
@@ -88,8 +88,8 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
         this.description = readHelper.readString();
-        this.priceGold = readHelper.readInt();
-        this.priceIntelligence = readHelper.readInt();
+        this.price = readHelper.readInt();
+        this.requiredIntelligence = readHelper.readInt();
         this.health = readHelper.readInt();
         this.damage = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
@@ -131,18 +131,18 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      * @return Le prix de l'unité en or.
      */
     @Override
-    public int getPriceGold() {
-        return this.priceGold;
+    public int getPrice() {
+        return this.price;
     }
 
     /**
-     * Méthode pour obtenir le prix de l'unité en intelligence
+     * Méthode pour obtenir la quantité d'intelligence requise pour construire l'unité.
      *
-     * @return Le prix de l'unité en intelligence
+     * @return La quantité d'intelligence requise pour construire l'unité.
      */
     @Override
-    public int getPriceIntelligence() {
-        return this.priceIntelligence;
+    public int getRequiredIntelligence() {
+        return this.requiredIntelligence;
     }
 
     /**
@@ -177,8 +177,8 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
         writeHelper.writeInt(this.id);
         writeHelper.writeString(this.name);
         writeHelper.writeString(this.description);
-        writeHelper.writeInt(this.priceGold);
-        writeHelper.writeInt(this.priceIntelligence);
+        writeHelper.writeInt(this.price);
+        writeHelper.writeInt(this.requiredIntelligence);
         writeHelper.writeInt(this.health);
         writeHelper.writeInt(this.damage);
         writeHelper.writeInt(this.accessibleByRace != null ? this.accessibleByRace.getId() : -1);
@@ -190,8 +190,8 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
                 .add("id", this.id)
                 .add("name", this.name)
                 .add("description", this.description)
-                .add("priceGold", this.priceGold)
-                .add("priceIntelligence", this.priceIntelligence)
+                .add("price", this.price)
+                .add("requiredIntelligence)", this.requiredIntelligence)
                 .add("health", this.health)
                 .add("damage", this.damage)
                 .add("accessibleByRace", this.accessibleByRace)

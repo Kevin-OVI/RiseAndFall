@@ -28,6 +28,11 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
     protected final ObjectIntMap.Entry<T> entry;
 
     /**
+     * La quantité d'intelligence du joueur.
+     */
+    private int playerIntelligence;
+
+    /**
      * Fonction de validation supplémentaire de la quantité en plus de celle du prix.
      * Si null, aucune validation supplémentaire n'est effectuée.
      */
@@ -62,14 +67,16 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
     /**
      * Constructeur de la classe PurchasableItemAmountSelector.
      *
-     * @param entry           L'entrée de l'élément achetable.
-     * @param goldCounter     Le compteur d'or à modifier.
-     * @param amountValidator Fonction de validation de la quantité.
+     * @param entry              L'entrée de l'élément achetable.
+     * @param goldCounter        Le compteur d'or à modifier.
+     * @param playerIntelligence La quantité d'intelligence du joueur.
+     * @param amountValidator    Fonction de validation de la quantité.
      */
-    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter goldCounter, Function<Integer, Boolean> amountValidator) {
+    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter goldCounter, int playerIntelligence, Function<Integer, Boolean> amountValidator) {
         this.entry = entry;
+        this.playerIntelligence = playerIntelligence;
         this.amountValidator = amountValidator;
-        this.goldModifier = goldCounter.addModifier(-entry.getKey().getPriceGold() * entry.getValue());
+        this.goldModifier = goldCounter.addModifier(-entry.getKey().getPrice() * entry.getValue());
 
         this.setAlignment(Pos.CENTER);
         this.setSpacing(10);
@@ -82,8 +89,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
         this.decreaseButton.setOnAction(this::onDecreaseButtonClicked);
         this.increaseButton.setOnAction(this::onIncreaseButtonClicked);
 
-        this.updateDecreaseButtonState();
-        goldCounter.addListener(goldAmount -> this.updateIncreaseButtonState());
+        goldCounter.addListener(goldAmount -> this.updateButtonsState());
 
         children.add(this.decreaseButton);
         children.add(this.countLabel);
@@ -93,11 +99,12 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
     /**
      * Constructeur de la classe PurchasableItemAmountSelector.
      *
-     * @param entry       L'entrée de l'élément achetable.
-     * @param goldCounter Le compteur d'or à modifier.
+     * @param entry              L'entrée de l'élément achetable.
+     * @param playerIntelligence La quantité d'intelligence du joueur.
+     * @param goldCounter        Le compteur d'or à modifier.
      */
-    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter goldCounter) {
-        this(entry, goldCounter, null);
+    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter goldCounter, int playerIntelligence) {
+        this(entry, goldCounter, playerIntelligence, null);
     }
 
     /**
@@ -106,12 +113,9 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
      * @param actionEvent L'événement d'action.
      */
     private void onDecreaseButtonClicked(ActionEvent actionEvent) {
-        int count = this.entry.getValue();
-        if (count > 0) {
-            entry.setValue(--count);
-            countLabel.setText(String.valueOf(count));
-            this.goldModifier.setDelta(-entry.getKey().getPriceGold() * count);
-            this.changeDispatcher.dispatch(count);
+        int newCount = entry.getValue() - 1;
+        if (this.isAmountValid(newCount)) {
+            this.setValue(newCount);
         }
         this.updateButtonsState();
     }
@@ -122,27 +126,18 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
      * @param actionEvent L'événement d'action.
      */
     private void onIncreaseButtonClicked(ActionEvent actionEvent) {
-        int count = entry.getValue();
-        if (this.goldModifier.getCounter().getCurrentValue() >= entry.getKey().getPriceGold()) {
-            entry.setValue(++count);
-            countLabel.setText(String.valueOf(count));
-            this.goldModifier.setDelta(-entry.getKey().getPriceGold() * count);
-            this.changeDispatcher.dispatch(count);
+        int newCount = entry.getValue() + 1;
+        if (this.isAmountValid(newCount)) {
+            this.setValue(newCount);
         }
         this.updateButtonsState();
     }
 
-    /**
-     * Met à jour l'état du bouton de diminution en fonction de la quantité actuelle.
-     */
-    private void updateDecreaseButtonState() {
-        int count = entry.getValue();
-        decreaseButton.setDisable(count <= 0 || !this.isAmountValid(count - 1));
-    }
-
-    private void updateIncreaseButtonState() {
-        int count = entry.getValue();
-        increaseButton.setDisable(this.goldModifier.getCounter().getCurrentValue() < entry.getKey().getPriceGold() || !this.isAmountValid(count + 1));
+    private void setValue(int newValue) {
+        this.entry.setValue(newValue);
+        this.countLabel.setText(String.valueOf(newValue));
+        this.goldModifier.setDelta(-entry.getKey().getPrice() * newValue);
+        this.changeDispatcher.dispatch(newValue);
     }
 
     /**
@@ -152,10 +147,10 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
      * @return true si la quantité est invalide, false sinon.
      */
     private boolean isAmountValid(int amount) {
-        if (this.amountValidator != null) {
-            return this.amountValidator.apply(amount);
-        }
-        return false;
+        return amount >= 0 &&
+                this.goldModifier.computeWithAlternativeDelta(-entry.getKey().getPrice() * amount) >= 0 &&
+                this.playerIntelligence >= entry.getKey().getRequiredIntelligence() &&
+                (this.amountValidator == null || this.amountValidator.apply(amount));
     }
 
     /**
@@ -202,7 +197,8 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
      * Met à jour l'état des boutons de sélection de quantité.
      */
     public void updateButtonsState() {
-        this.updateDecreaseButtonState();
-        this.updateIncreaseButtonState();
+        int count = this.entry.getValue();
+        this.decreaseButton.setDisable(!this.isAmountValid(count - 1));
+        this.increaseButton.setDisable(!this.isAmountValid(count + 1));
     }
 }
