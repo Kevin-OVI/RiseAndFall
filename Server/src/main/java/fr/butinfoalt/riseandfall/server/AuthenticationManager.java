@@ -29,11 +29,6 @@ public class AuthenticationManager {
     private final RiseAndFallServer server;
 
     /**
-     * Instance de la base de données.
-     */
-    private final Connection db;
-
-    /**
      * Map des connexions des utilisateurs.
      * Utilisée pour associer un socket à un utilisateur.
      */
@@ -46,7 +41,6 @@ public class AuthenticationManager {
      */
     public AuthenticationManager(RiseAndFallServer server) {
         this.server = server;
-        this.db = server.getDb();
     }
 
     /**
@@ -82,7 +76,7 @@ public class AuthenticationManager {
             int randomChar = random.nextInt(26) + 'a';
             token.append((char) randomChar);
         }
-        try (PreparedStatement statement = this.db.prepareStatement("INSERT INTO user_token (user_id, token) VALUES (?, ?)")) {
+        try (PreparedStatement statement = server.getDb().prepareStatement("INSERT INTO user_token (user_id, token) VALUES (?, ?)")) {
             statement.setInt(1, user.getId());
             statement.setString(2, token.toString());
             statement.executeUpdate();
@@ -100,7 +94,7 @@ public class AuthenticationManager {
         String hashedPassword = hashPassword(password);
         System.out.println("Mot de passe haché : " + hashedPassword);
         try {
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ? AND password_hash = ?")) {
+            try (PreparedStatement statement = server.getDb().prepareStatement("SELECT * FROM user WHERE username = ? AND password_hash = ?")) {
                 statement.setString(1, username);
                 statement.setString(2, hashedPassword);
                 ResultSet resultSet = statement.executeQuery();
@@ -157,7 +151,7 @@ public class AuthenticationManager {
      * Fonction pour recuperer un utilisateur à partir d'un token.
      */
     public User getUserFromToken(String token) {
-        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user JOIN user_token ON user.id = user_token.user_id WHERE token = ?")) {
+        try (PreparedStatement statement = server.getDb().prepareStatement("SELECT * FROM user JOIN user_token ON user.id = user_token.user_id WHERE token = ?")) {
             statement.setString(1, token);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -203,7 +197,7 @@ public class AuthenticationManager {
     }
 
     public boolean isUserExist(String username) {
-        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ?")) {
+        try (PreparedStatement statement = server.getDb().prepareStatement("SELECT * FROM user WHERE username = ?")) {
             statement.setString(1, username);
             ResultSet resultSet = statement.executeQuery();
             return resultSet.next();
@@ -214,7 +208,7 @@ public class AuthenticationManager {
     }
 
     public User getUserFromUsername(String username) {
-        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ?")) {
+        try (PreparedStatement statement = server.getDb().prepareStatement("SELECT * FROM user WHERE username = ?")) {
             statement.setString(1, username);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -249,7 +243,7 @@ public class AuthenticationManager {
 
         String hashedPassword = hashPassword(password);
 
-        try (PreparedStatement statement = this.db.prepareStatement("INSERT INTO user (username, password_hash) VALUES (?, ?)")) {
+        try (PreparedStatement statement = server.getDb().prepareStatement("INSERT INTO user (username, password_hash) VALUES (?, ?)")) {
             statement.setString(1, username);
             statement.setString(2, hashedPassword);
             statement.executeUpdate();

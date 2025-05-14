@@ -14,17 +14,15 @@ import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
  * Classe gérant les parties de jeu.
  */
 public class GameManager {
-    /**
-     * Compteur d'identifiant de partie.
-     */
-    // TODO : Récupérer l'identifiant depuis la base de données au lieu d'utiliser un compteur
-    private int gameIdCounter = 0;
     /**
      * Ensemble de toutes les parties crées
      */
@@ -62,6 +60,34 @@ public class GameManager {
             }
         }
         return connections;
+    }
+
+    /**
+     * Fonction pour recuperer la listes des parties en base de données
+     */
+    public ServerGame[] getGames() {
+        try {
+            try (PreparedStatement statement = server.getDb().prepareStatement("SELECT * FROM games")) {
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    int id = resultSet.getInt("id");
+                    String name = resultSet.getString("name");
+                    int turnInterval = resultSet.getInt("turn_interval");
+                    int maxPlayers = resultSet.getInt("max_players");
+                    int currentTurn = resultSet.getInt("current_turn");
+                    boolean isStarted = resultSet.getBoolean("is_started");
+                    GameState state = GameState.valueOf(resultSet.getString("state"));
+                    Timestamp lastTurnTimestamp = resultSet.getTimestamp("last_turn_timestamp");
+
+                    Map<Integer, ServerPlayer> players = new HashMap<>();
+
+                    ServerGame game = new ServerGame(id, name, turnInterval, 3, maxPlayers, false, state, lastTurnTimestamp, 0, lastTurnTimestamp);
+                    this.games.add(game);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

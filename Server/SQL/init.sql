@@ -41,12 +41,10 @@ CREATE TABLE player (
     id SERIAL PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     game_id BIGINT UNSIGNED NOT NULL,
-    race_id BIGINT UNSIGNED NOT NULL,
     gold INT NOT NULL DEFAULT 50,
     intelligence INT NOT NULL DEFAULT 50,
     FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (game_id) REFERENCES game(id),
-    FOREIGN KEY (race_id) REFERENCES race(id)
+    FOREIGN KEY (game_id) REFERENCES game(id)
 );
 
 CREATE TABLE building_type (
@@ -99,11 +97,11 @@ INSERT INTO race (id, name, description, gold_multiplier, intelligence_multiplie
 VALUES
     (1, 'Mort-Vivant', 'Individu mort qui revient à la vie', 1.5, 0.75, 1, 0.75),
     (2, 'Humain', 'Race équilibrée avec des compétences militaires et économiques', 1, 1.5, 0.75, 1),
-    (3, 'Orc', 'Créature verte, de taille humanoïde mais plus musclée et pourvue de crocs implantés au hasard. Il a un goût prononcé pour la violence', 0.75, 0.50, 2, 1.5),
-    (4, 'Elfe', 'Créature Mystique', 1, 2, 1, 0.5),
-    (5, 'Nain', 'Homme de petite taille mais robuste', 1.5, 1, 0.5, 1.5),
+    (3, 'Orc', 'Créature verte, de taille humanoïde mais plus musclée et pourvue de crocs implantés au hasard. Il a un goût prononcé pour la violence mais il est débile', 0.75, 0.50, 2, 1.5),
+    (4, 'Elfe', 'Créature Mystique aux grandes oreilles possèdant une grande intelligence mais faible', 1, 2, 1, 0.5),
+    (5, 'Nain', 'Homme de petite taille,robuste et possèdant ENORMEMENT d''or', 1.5, 1, 0.5, 1.5),
     (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes le problèmes sont leurs économie', 0.5, 1.2, 1.2, 1.5),
-    (7, 'Primotaures', 'Asterion en est fan', 1.7, 1, 0.5, 1.75);
+    (7, 'Primotaures', 'Première créature du monde , les primotaures sont riches mais pacifiques', 1.7, 1, 0.5, 1.75);
 
 INSERT INTO building_type (name, description, price_gold, price_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id)
 VALUES

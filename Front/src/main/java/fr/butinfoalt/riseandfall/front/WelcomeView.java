@@ -72,11 +72,6 @@ public class WelcomeView {
      */
     @FXML
     public void play() {
-        if (this.raceChoiceBox.getValue() == null) {
-            this.instructionsBlinkTransition.play();
-            return;
-        }
-
         try {
             RiseAndFall.getClient().sendPacket(new PacketCreateOrJoinGame(this.raceChoiceBox.getValue()));
         } catch (IOException e) {

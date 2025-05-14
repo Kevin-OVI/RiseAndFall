@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.image.ImageView?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="10" padding="10">
+    fx:controller="fr.butinfoalt.riseandfall.front.WelcomeView"
+    <StackPane xmlns:fx="http://javafx.com/fxml/1" VBox.vgrow="ALWAYS">
+    <!-- Image en arrière-plan -->
+    <ImageView fx:id="backgroundImageView" opacity="0.2" managed="false"/>
+    <!-- Texte en avant-plan -->
+    <ScrollPane fitToWidth="true" styleClass="text-scroll-pane" fx:id="textScrollPane">
+<TableView fx:id="tableParties" prefHeight="400" prefWidth="800">
+    <columns>
+        <TableColumn fx:id="nomColumn" text="Nom" />
+        <TableColumn fx:id="intervalleColumn" text="Intervalle de tour (s)" />
+        <TableColumn fx:id="maxPlayersColumn" text="Joueurs max." />
+        <TableColumn fx:id="etatColumn" text="État" />
+    </columns>
+</TableView>
+
+</VBox>

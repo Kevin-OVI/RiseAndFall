@@ -47,6 +47,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendPacket((byte) 7, PacketGameAction.class);
         this.registerReceivePacket((byte) 8, PacketError.class, this.errorManager::onError, PacketError::new);
         this.registerSendPacket((byte) 9, PacketRegister.class);
+        this.registerReceivePacket((byte) 10, PacketGameList.class, this::onGameListReceived, PacketGameList::new);
     }
 
     /**
