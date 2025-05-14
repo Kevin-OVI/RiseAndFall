@@ -15,10 +15,17 @@
         Bienvenue sur Rise &amp; Fall futur empereur.
     </TitleLabel>
     <Label text="Connexion" style="-fx-font-size: 24px; -fx-text-fill: #333;"/>
-    <TextField fx:id="username" promptText="Nom d'utilisateur"/>
-    <PasswordField fx:id="password" promptText="Mot de passe"/>
+
+    <TextField fx:id="username" promptText="Nom d'utilisateur" maxWidth="400.0"/>
+    <PasswordField fx:id="password" promptText="Mot de passe" maxWidth="400.0"/>
+
+
+    <Label fx:id="errorMessage" text="" style="-fx-text-fill: red;" visible="false"/>
+
     <VBox.margin>
         <Insets bottom="40"/>
     </VBox.margin>
+
     <Button text="Se connecter" style="-fx-background-color: #0078D7; -fx-text-fill: white;" onAction="#login"/>
+    <Hyperlink text="Créer un compte" onAction="#register"/>
 </VBox>

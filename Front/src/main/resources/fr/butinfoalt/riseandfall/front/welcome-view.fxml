@@ -21,5 +21,4 @@
         <Insets bottom="40"/>
     </VBox.margin>
     <Button text="Jouer" onAction="#play"/>
-    <Button text="Login" onAction="#login"/>
 </VBox>

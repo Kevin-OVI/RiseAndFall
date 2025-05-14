@@ -7,6 +7,7 @@ import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
@@ -24,7 +25,7 @@ public class LoginController {
     public ImageView backgroundImageView;
 
     /**
-     * Champ pour le composant de username
+     * Champ pour le composant du nom d'utilisateur.
      */
     public TextField username;
 
@@ -32,6 +33,11 @@ public class LoginController {
      * Champ pour le composant de password.
      */
     public PasswordField password;
+
+    /**
+     * Champ pour le message d'erreur.
+     */
+    public Label errorMessage;
 
     /**
      * Instance du client socket.
@@ -44,7 +50,7 @@ public class LoginController {
      * On ne peut pas utiliser la méthode internalize() car elle est appelée avant que la scène soit instanciée.
      * Cette méthode est donc appelée manuellement par {@link RiseAndFallApplication#start(Stage)}
      */
-    public void initializeScene(Scene scene) {
+    public void initialize(Scene scene) {
         UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
     }
 
@@ -64,5 +70,18 @@ public class LoginController {
             return;
         }
         RiseAndFallApplication.switchToView(View.LOADING, true);
+    }
+
+    @FXML
+    public void register() {
+        RiseAndFallApplication.switchToView(View.REGISTER, false);
+    }
+
+    /**
+     * Methode pour afficher une erreur de login
+     */
+    public void showError(String error) {
+        errorMessage.setText(error);
+        errorMessage.setVisible(true);
     }
 }

@@ -1,10 +1,20 @@
 package fr.butinfoalt.riseandfall.server;
 
+import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
+import fr.butinfoalt.riseandfall.network.packets.PacketError;
+import fr.butinfoalt.riseandfall.network.packets.PacketRegister;
 import fr.butinfoalt.riseandfall.network.packets.PacketToken;
 import fr.butinfoalt.riseandfall.server.data.User;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 
 /**
@@ -19,10 +29,9 @@ public class AuthenticationManager {
     private final RiseAndFallServer server;
 
     /**
-     * Ensemble des utilisateurs
-     * TODO : Utiliser la base de données en temps voulu, pour le moment l'ensemble des joueurs est éphémère.
+     * Instance de la base de données.
      */
-    private final Set<User> users = new HashSet<>();
+    private final Connection db;
 
     /**
      * Map des connexions des utilisateurs.
@@ -37,6 +46,74 @@ public class AuthenticationManager {
      */
     public AuthenticationManager(RiseAndFallServer server) {
         this.server = server;
+        this.db = server.getDb();
+    }
+
+    /**
+     * Fonction pour hacher un mot de passe.
+     * @param password
+     * @return
+     */
+    public static String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes());
+            StringBuilder hexString = new StringBuilder();
+
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Fonction pour generer un token d'authentification.
+     */
+    public String generateTokenToUser(User user) {
+        StringBuilder token = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 32; i++) {
+            int randomChar = random.nextInt(26) + 'a';
+            token.append((char) randomChar);
+        }
+        try (PreparedStatement statement = this.db.prepareStatement("INSERT INTO user_token (user_id, token) VALUES (?, ?)")) {
+            statement.setInt(1, user.getId());
+            statement.setString(2, token.toString());
+            statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return token.toString();
+    }
+
+    /**
+     * Fonction pour recuperer la liste des utilisateurs et leurs passwords.
+     */
+    public int isValidUser(String username, String password) {
+
+        String hashedPassword = hashPassword(password);
+        System.out.println("Mot de passe haché : " + hashedPassword);
+        try {
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ? AND password_hash = ?")) {
+                statement.setString(1, username);
+                statement.setString(2, hashedPassword);
+                ResultSet resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    return resultSet.getInt("id");
+                } else {
+                    return -1;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
     /**
@@ -46,28 +123,50 @@ public class AuthenticationManager {
      * @param packet Le paquet d'authentification reçu.
      */
     public synchronized void onAuthentification(SocketWrapper sender, PacketAuthentification packet) {
-        System.out.println("Tentative de connexion");
         if (this.userConnections.containsKey(sender)) {
-            System.out.printf("Le client %s est déjà authentifié.%n", sender.getName());
+            try {
+                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Authentification"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             return;
         }
         String username = packet.getUsername();
         String password = packet.getPasswordHash();
-        User foundUser = null;
-        System.out.println("Username : " + username + " Password : " + password );
+        int userId = isValidUser(username, password);
+        if (userId != -1)
+        {
+            User user = new User(userId, username);
 
-        for (User user : users) {
-            System.out.println("User trouvé : " + user.getUsername());
-            if (user.getUsername().equals(username)) {
-                foundUser = user;
-                break;
+            this.userConnections.put(sender, user);
+            try {
+                sender.sendPacket(new PacketToken(generateTokenToUser(user)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                sender.sendPacket(new PacketError("Identifiant ou Mot de passe incorrect", "Authentification"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
-        if (foundUser == null) {
-            foundUser = new User(this.users.size(), username);
-            this.users.add(foundUser);
+    }
+
+    /**
+     * Fonction pour recuperer un utilisateur à partir d'un token.
+     */
+    public User getUserFromToken(String token) {
+        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user JOIN user_token ON user.id = user_token.user_id WHERE token = ?")) {
+            statement.setString(1, token);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new User(resultSet.getInt("user.id"), resultSet.getString("user.username"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        this.userConnections.put(sender, foundUser);
+        return null;
     }
 
     /**
@@ -77,7 +176,102 @@ public class AuthenticationManager {
      * @param packet Le paquet de token reçu.
      */
     public void onTokenAuthentification(SocketWrapper sender, PacketToken packet) {
+        if (this.userConnections.containsKey(sender)) {
+            try {
+                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Authentification"));
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+            return;
+        }
 
+        String token = packet.getToken();
+        User user = getUserFromToken(token);
+        if (user == null) {
+            try {
+                sender.sendPacket(new PacketError("Identifiant ou Mot de passe incorrect", "Authentification"));
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        this.userConnections.put(sender, user);
+        try {
+            sender.sendPacket(packet);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public boolean isUserExist(String username) {
+        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ?")) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            return resultSet.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public User getUserFromUsername(String username) {
+        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ?")) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new User(resultSet.getInt("id"), resultSet.getString("username"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void onRegister(SocketWrapper sender, PacketRegister packetRegister) {
+        if (this.userConnections.containsKey(sender)) {
+            try {
+                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Register"));
+                return;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        String username = packetRegister.getUsername();
+        String password = packetRegister.getPasswordHash();
+
+        if (isUserExist(username)) {
+            try {
+                sender.sendPacket(new PacketError("Ce nom d'utilisateur existe déjà", "Register"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return;
+        }
+
+        String hashedPassword = hashPassword(password);
+
+        try (PreparedStatement statement = this.db.prepareStatement("INSERT INTO user (username, password_hash) VALUES (?, ?)")) {
+            statement.setString(1, username);
+            statement.setString(2, hashedPassword);
+            statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        User user = getUserFromUsername(username);
+        if (user == null) {
+            try {
+                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Register"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return;
+        }
+        this.userConnections.put(sender, user);
+        try {
+            sender.sendPacket(new PacketToken(generateTokenToUser(user)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

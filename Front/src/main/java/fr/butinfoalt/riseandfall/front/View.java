@@ -40,6 +40,11 @@ public enum View {
      * Vue du LOGIN.
      */
     LOGIN("authentification/login-view.fxml", "Rise & Fall - Login"),
+
+    /**
+     * Vue de l'inscription.
+     */
+    REGISTER("authentification/register-view.fxml", "Rise & Fall - Inscription"),
     ;
 
     private static final String GENERAL_STYLESHEET = Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/style.css")).toExternalForm();

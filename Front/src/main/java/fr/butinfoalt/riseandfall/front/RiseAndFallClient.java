@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
+import fr.butinfoalt.riseandfall.front.authentification.LoginController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
@@ -12,7 +13,10 @@ import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import javafx.application.Platform;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 
 /**
@@ -34,6 +38,16 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendPacket((byte) 5, PacketUpdateOrders.class);
         this.registerReceivePacket((byte) 6, PacketUpdateGameData.class, this::onNextTurnData);
         this.registerSendPacket((byte) 7, PacketGameAction.class);
+        this.registerReceivePacket((byte) 8, PacketError.class, this::onError, PacketError::new);
+        this.registerSendPacket((byte) 9, PacketRegister.class);
+    }
+
+    private void onError(SocketWrapper socketWrapper, PacketError packetError) {
+        System.err.println("Erreur reçue du serveur : " + packetError.getError());
+        Platform.runLater(() -> {
+            RiseAndFallApplication.switchToView(View.LOGIN, true);
+            ((LoginController) View.LOGIN.getController()).showError(packetError.getError());
+        });
     }
 
     /**
@@ -66,7 +80,11 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param packet Le paquet reçu.
      */
     private void onToken(SocketWrapper sender, PacketToken packet) {
-        // TODO : Sauvegarder le token dans un fichier pour permettre à l'utilisateur de se reconnecter au serveur sans devoir taper à nous ses identifiants.
+        try (FileWriter writer = new FileWriter("auth_token.txt")) {
+            writer.write(packet.getToken());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Platform.runLater(() -> {
             RiseAndFallApplication.switchToView(View.WELCOME, true);
         });
@@ -82,6 +100,15 @@ public class RiseAndFallClient extends BaseSocketClient {
     private void onServerData(SocketWrapper sender, PacketServerData packet) {
         ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes());
         Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOGIN, true));
+
+        try {
+            String token = new String(Files.readAllBytes(Paths.get("auth_token.txt")));
+            System.out.println("Token récupéré : " + token);
+            sender.sendPacket(new PacketToken(token));
+        } catch (IOException e) {
+            System.err.println("Erreur lors de la lecture du fichier auth_token.txt : ");
+            e.printStackTrace();
+        }
     }
 
     /**

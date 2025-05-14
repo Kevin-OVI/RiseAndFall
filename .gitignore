@@ -42,3 +42,4 @@ build/
 *.jar
 
 *.env
+/auth_token.txt
