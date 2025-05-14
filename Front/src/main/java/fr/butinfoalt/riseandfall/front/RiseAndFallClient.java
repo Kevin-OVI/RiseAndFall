@@ -25,11 +25,18 @@ import java.sql.Timestamp;
  */
 public class RiseAndFallClient extends BaseSocketClient {
     /**
+     * Gestionnaire d'erreurs pour le client.
+     */
+    private final ErrorManager errorManager;
+
+    /**
      * Constructeur du client.
      * Il initialise le client avec l'hôte et le port du serveur et enregistre les paquets à envoyer et à recevoir.
      */
     public RiseAndFallClient() {
         super(Environment.SERVER_HOST, Environment.SERVER_PORT);
+
+        this.errorManager = new ErrorManager(this);
         this.registerSendPacket((byte) 0, PacketAuthentification.class);
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this::onToken, PacketToken::new);
         this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, PacketServerData::new);
@@ -38,16 +45,8 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendPacket((byte) 5, PacketUpdateOrders.class);
         this.registerReceivePacket((byte) 6, PacketUpdateGameData.class, this::onNextTurnData);
         this.registerSendPacket((byte) 7, PacketGameAction.class);
-        this.registerReceivePacket((byte) 8, PacketError.class, this::onError, PacketError::new);
+        this.registerReceivePacket((byte) 8, PacketError.class, this.errorManager::onError, PacketError::new);
         this.registerSendPacket((byte) 9, PacketRegister.class);
-    }
-
-    private void onError(SocketWrapper socketWrapper, PacketError packetError) {
-        System.err.println("Erreur reçue du serveur : " + packetError.getError());
-        Platform.runLater(() -> {
-            RiseAndFallApplication.switchToView(View.LOGIN, true);
-            ((LoginController) View.LOGIN.getController()).showError(packetError.getError());
-        });
     }
 
     /**

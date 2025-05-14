@@ -97,13 +97,13 @@ CREATE TABLE unit_creation_order (
 -- Insertion des données statiques
 INSERT INTO race (id, name, description, gold_multiplier, intelligence_multiplier, damage_multiplier, health_multiplier)
 VALUES
-    (1, 'Mort-Vivant', 'Individu mort qui revient à la vie', 1.25, 0.75, 1, 1),
-    (2, 'Humain', 'Race équilibrée avec des compétences militaires et économiques', 1, 1.5, 1, 1),
-    (3, 'Orc', 'Créature verte, de taille humanoïde mais plus musclée et pourvue de crocs implantés au hasard. Il a un goût prononcé pour la violence', 1, 0.50, 1.25, 1),
+    (1, 'Mort-Vivant', 'Individu mort qui revient à la vie', 1.5, 0.75, 1, 0.75),
+    (2, 'Humain', 'Race équilibrée avec des compétences militaires et économiques', 1, 1.5, 0.75, 1),
+    (3, 'Orc', 'Créature verte, de taille humanoïde mais plus musclée et pourvue de crocs implantés au hasard. Il a un goût prononcé pour la violence', 0.75, 0.50, 2, 1.5),
     (4, 'Elfe', 'Créature Mystique', 1, 2, 1, 0.5),
     (5, 'Nain', 'Homme de petite taille mais robuste', 1.5, 1, 0.5, 1.5),
-    (6, 'Nerlk', 'Connais pas...', 1, 1, 1, 1),
-    (7, 'Primotaures', 'Asterion en est fan', 1, 1, 1, 1.75);
+    (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes le problèmes sont leurs économie', 0.5, 1.2, 1.2, 1.5),
+    (7, 'Primotaures', 'Asterion en est fan', 1.7, 1, 0.5, 1.75);
 
 INSERT INTO building_type (name, description, price_gold, price_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id)
 VALUES
