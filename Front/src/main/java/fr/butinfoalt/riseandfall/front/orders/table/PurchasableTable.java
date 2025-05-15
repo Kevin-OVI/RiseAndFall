@@ -36,6 +36,8 @@ public class PurchasableTable<T extends PurchasableItem> extends HeightAdaptedTa
     public PurchasableTable() {
         this.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         this.setEditable(false);
+        // On empêche la sélection d'une ligne en forçant la sélection à null
+        this.selectionModelProperty().bind(new ReadOnlyObjectWrapper<>(null));
         this.getStyleClass().add("purchasable-table");
 
         this.getColumns().addListener((ListChangeListener<TableColumn<PurchasableTableRow<T>, ?>>) change -> {
