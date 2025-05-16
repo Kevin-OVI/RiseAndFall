@@ -2,6 +2,7 @@ module fr.butinfoalt.riseandfall {
     requires io.github.cdimascio.dotenv.java;
     requires java.sql;
     exports fr.butinfoalt.riseandfall.util.counter;
+    exports fr.butinfoalt.riseandfall.util.logging;
     exports fr.butinfoalt.riseandfall.util;
     exports fr.butinfoalt.riseandfall.gamelogic.order;
     exports fr.butinfoalt.riseandfall.gamelogic;

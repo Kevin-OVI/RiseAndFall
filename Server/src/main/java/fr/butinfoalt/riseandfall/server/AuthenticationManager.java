@@ -1,27 +1,41 @@
 package fr.butinfoalt.riseandfall.server;
 
-import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
 import fr.butinfoalt.riseandfall.network.packets.PacketError;
+import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
 import fr.butinfoalt.riseandfall.network.packets.PacketRegister;
 import fr.butinfoalt.riseandfall.network.packets.PacketToken;
 import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Classe responsable de la gestion de l'authentification des clients.
  * Elle traite les paquets d'authentification reçus du client et gère les tokens.
  */
 public class AuthenticationManager {
+    /**
+     * Alphabet utilisé pour générer les tokens d'authentification.
+     */
+    private static final char[] TOKEN_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+
+    /**
+     * Générateur de nombres aléatoires sécurisé pour la génération de tokens.
+     */
+    private static final SecureRandom SRNG = new SecureRandom();
+
     /**
      * Instance du serveur.
      * Utilisée pour accéder aux fonctionnalités du serveur.
@@ -51,10 +65,11 @@ public class AuthenticationManager {
 
     /**
      * Fonction pour hacher un mot de passe.
-     * @param password
-     * @return
+     *
+     * @param password Mot de passe à hacher.
+     * @return Le mot de passe haché.
      */
-    public static String hashPassword(String password) {
+    private static String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(password.getBytes());
@@ -73,47 +88,111 @@ public class AuthenticationManager {
     }
 
     /**
-     * Fonction pour generer un token d'authentification.
+     * Génère un token d'authentification pour un utilisateur et l'enregistre dans la base de données.
+     *
+     * @param user L'utilisateur pour lequel le token est généré.
+     * @return Le token généré.
      */
-    public String generateTokenToUser(User user) {
-        StringBuilder token = new StringBuilder();
-        Random random = new Random();
+    private String generateTokenToUser(User user) {
+        StringBuilder tokenBuilder = new StringBuilder(32);
         for (int i = 0; i < 32; i++) {
-            int randomChar = random.nextInt(26) + 'a';
-            token.append((char) randomChar);
+            tokenBuilder.append(TOKEN_ALPHABET[SRNG.nextInt(TOKEN_ALPHABET.length)]);
         }
+        String token = tokenBuilder.toString();
         try (PreparedStatement statement = this.db.prepareStatement("INSERT INTO user_token (user_id, token) VALUES (?, ?)")) {
             statement.setInt(1, user.getId());
-            statement.setString(2, token.toString());
+            statement.setString(2, token);
             statement.executeUpdate();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de la sauvegarde du token en base de données", e);
         }
-        return token.toString();
+        return token;
     }
 
     /**
-     * Fonction pour recuperer la liste des utilisateurs et leurs passwords.
+     * Fonction pour récupérer un utilisateur à partir de son nom d'utilisateur et de son mot de passe.
+     *
+     * @param username Nom d'utilisateur.
+     * @param password Le mot de passe.
+     * @return L'utilisateur associé, ou null si aucun utilisateur n'est trouvé.
      */
-    public int isValidUser(String username, String password) {
-
+    private User getUserFromCredentials(String username, String password) {
         String hashedPassword = hashPassword(password);
         System.out.println("Mot de passe haché : " + hashedPassword);
         try {
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ? AND password_hash = ?")) {
+            try (PreparedStatement statement = this.db.prepareStatement("SELECT id FROM user WHERE username = ? AND password_hash = ?")) {
                 statement.setString(1, username);
                 statement.setString(2, hashedPassword);
                 ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
-                    return resultSet.getInt("id");
-                } else {
-                    return -1;
+                    return new User(resultSet.getInt("id"), username);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de la récupération de l'utilisateur", e);
         }
-        return -1;
+        return null;
+    }
+
+    /**
+     * Fonction pour recuperer un utilisateur à partir d'un token.
+     *
+     * @param token Le token d'authentification.
+     * @return L'utilisateur associé au token, ou null si aucun utilisateur n'est trouvé.
+     */
+    private User getUserFromToken(String token) {
+        try (PreparedStatement statement = this.db.prepareStatement("SELECT user.id, user.username FROM user JOIN user_token ON user.id = user_token.user_id WHERE token = ?")) {
+            statement.setString(1, token);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new User(resultSet.getInt("user.id"), resultSet.getString("user.username"));
+            }
+        } catch (Exception e) {
+            LogManager.logError("Erreur lors de la récupération de l'utilisateur à partir du token", e);
+        }
+        return null;
+    }
+
+    /**
+     * Vérifie si un nom d'utilisateur est déjà utilisé.
+     *
+     * @param username Le nom d'utilisateur à vérifier.
+     * @return true si le nom d'utilisateur est déjà utilisé, false sinon.
+     */
+    private boolean isUsernameInUse(String username) {
+        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ? LIMIT 1")) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            return resultSet.next();
+        } catch (Exception e) {
+            LogManager.logError("Erreur lors de la vérification du nom d'utilisateur", e);
+        }
+        return false;
+    }
+
+    /**
+     * Fonction pour créer un nouvel utilisateur.
+     *
+     * @param username Nom d'utilisateur.
+     * @param password Mot de passe.
+     * @return L'utilisateur créé, ou null si une erreur survient.
+     */
+    private User createUser(String username, String password) {
+        String hashedPassword = hashPassword(password);
+        try (PreparedStatement statement = this.db.prepareStatement("INSERT INTO user(username, password_hash) VALUES (?, ?) RETURNING id")) {
+            statement.setString(1, username);
+            statement.setString(2, hashedPassword);
+            statement.execute();
+            ResultSet resultSet = statement.getResultSet();
+            if (resultSet.next()) {
+                System.out.println(resultSet.getInt("id"));
+                return new User(resultSet.getInt("id"), username);
+            }
+            LogManager.logError("Erreur lors de la création de l'utilisateur, aucun id retourné");
+        } catch (Exception e) {
+            LogManager.logError("Erreur lors de la création de l'utilisateur", e);
+        }
+        return null;
     }
 
     /**
@@ -125,48 +204,29 @@ public class AuthenticationManager {
     public synchronized void onAuthentification(SocketWrapper sender, PacketAuthentification packet) {
         if (this.userConnections.containsKey(sender)) {
             try {
-                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Authentification"));
+                sender.sendPacket(new PacketError(ErrorType.LOGIN_GENERIC_ERROR));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogManager.logError("Erreur lors de l'envoi du message d'erreur", e);
             }
             return;
         }
         String username = packet.getUsername();
         String password = packet.getPasswordHash();
-        int userId = isValidUser(username, password);
-        if (userId != -1)
-        {
-            User user = new User(userId, username);
-
-            this.userConnections.put(sender, user);
+        User user = getUserFromCredentials(username, password);
+        if (user == null) {
             try {
-                sender.sendPacket(new PacketToken(generateTokenToUser(user)));
+                sender.sendPacket(new PacketError(ErrorType.LOGIN_INVALID_CREDENTIALS));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogManager.logError("Erreur lors de l'envoi du message d'erreur", e);
             }
-        } else {
-            try {
-                sender.sendPacket(new PacketError("Identifiant ou Mot de passe incorrect", "Authentification"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            return;
         }
-    }
-
-    /**
-     * Fonction pour recuperer un utilisateur à partir d'un token.
-     */
-    public User getUserFromToken(String token) {
-        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user JOIN user_token ON user.id = user_token.user_id WHERE token = ?")) {
-            statement.setString(1, token);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return new User(resultSet.getInt("user.id"), resultSet.getString("user.username"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        this.userConnections.put(sender, user);
+        try {
+            sender.sendPacket(new PacketToken(generateTokenToUser(user)));
+        } catch (IOException e) {
+            LogManager.logError("Erreur lors de l'envoi du token", e);
         }
-        return null;
     }
 
     /**
@@ -178,9 +238,9 @@ public class AuthenticationManager {
     public void onTokenAuthentification(SocketWrapper sender, PacketToken packet) {
         if (this.userConnections.containsKey(sender)) {
             try {
-                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Authentification"));
+                sender.sendPacket(new PacketError(ErrorType.LOGIN_GENERIC_ERROR));
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                LogManager.logError("Erreur lors de l'envoi du message d'erreur", e);
             }
             return;
         }
@@ -189,88 +249,62 @@ public class AuthenticationManager {
         User user = getUserFromToken(token);
         if (user == null) {
             try {
-                sender.sendPacket(new PacketError("Identifiant ou Mot de passe incorrect", "Authentification"));
+                sender.sendPacket(new PacketError(ErrorType.LOGIN_INVALID_SESSION));
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                LogManager.logError("Erreur lors de l'envoi du message d'erreur", e);
             }
+            return;
         }
         this.userConnections.put(sender, user);
         try {
             sender.sendPacket(packet);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            LogManager.logError("Erreur lors de l'envoi du token", e);
         }
     }
 
-    public boolean isUserExist(String username) {
-        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ?")) {
-            statement.setString(1, username);
-            ResultSet resultSet = statement.executeQuery();
-            return resultSet.next();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public User getUserFromUsername(String username) {
-        try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM user WHERE username = ?")) {
-            statement.setString(1, username);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return new User(resultSet.getInt("id"), resultSet.getString("username"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public void onRegister(SocketWrapper sender, PacketRegister packetRegister) {
+    /**
+     * Méthode appelée lors de la réception d'un paquet d'enregistrement.
+     *
+     * @param sender Le socket du client qui a envoyé le paquet.
+     * @param packet Le paquet d'enregistrement reçu.
+     */
+    public void onRegister(SocketWrapper sender, PacketRegister packet) {
         if (this.userConnections.containsKey(sender)) {
             try {
-                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Register"));
-                return;
+                sender.sendPacket(new PacketError(ErrorType.REGISTER_GENERIC_ERROR));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogManager.logError("Erreur lors de l'envoi du message d'erreur", e);
             }
+            return;
         }
-        String username = packetRegister.getUsername();
-        String password = packetRegister.getPasswordHash();
+        String username = packet.getUsername();
+        String password = packet.getPasswordHash();
 
-        if (isUserExist(username)) {
+        if (isUsernameInUse(username)) {
             try {
-                sender.sendPacket(new PacketError("Ce nom d'utilisateur existe déjà", "Register"));
+                sender.sendPacket(new PacketError(ErrorType.REGISTER_USERNAME_TAKEN));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogManager.logError("Erreur lors de l'envoi du message d'erreur", e);
             }
             return;
         }
 
-        String hashedPassword = hashPassword(password);
-
-        try (PreparedStatement statement = this.db.prepareStatement("INSERT INTO user (username, password_hash) VALUES (?, ?)")) {
-            statement.setString(1, username);
-            statement.setString(2, hashedPassword);
-            statement.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        User user = getUserFromUsername(username);
+        User user = createUser(username, password);
         if (user == null) {
             try {
-                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Register"));
+                sender.sendPacket(new PacketError(ErrorType.REGISTER_GENERIC_ERROR));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogManager.logError("Erreur lors de l'envoi du message d'erreur", e);
             }
             return;
         }
+
         this.userConnections.put(sender, user);
         try {
             sender.sendPacket(new PacketToken(generateTokenToUser(user)));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LogManager.logError("Erreur lors de l'envoi du token", e);
         }
     }
 

@@ -1,10 +1,10 @@
 package fr.butinfoalt.riseandfall.server;
 
-import com.mysql.cj.jdbc.Driver;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
+import org.mariadb.jdbc.Driver;
 
 import java.io.IOException;
 import java.sql.*;
@@ -217,7 +217,7 @@ public class RiseAndFallServer extends BaseSocketServer {
      * @return La connexion à la base de données.
      */
     private static Connection connectToDatabase() {
-        String url = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?serverTimezone=UTC";
+        String url = "jdbc:mariadb://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?serverTimezone=UTC";
 
         try {
             Connection conn = DriverManager.getConnection(url, DB_USER, DB_PASSWORD);
