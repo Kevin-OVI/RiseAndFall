@@ -42,8 +42,9 @@ public class GameManager {
      *
      * @param server Instance du serveur.
      */
-    public GameManager(RiseAndFallServer server) {
+    public GameManager(RiseAndFallServer server, HashSet<ServerGame> games) {
         this.server = server;
+        this.games.addAll(games);
     }
 
     /**
@@ -63,31 +64,10 @@ public class GameManager {
     }
 
     /**
-     * Fonction pour recuperer la listes des parties en base de données
+     * Fonction pour recuperer la listes des parties
      */
     public ServerGame[] getGames() {
-        try {
-            try (PreparedStatement statement = server.getDb().prepareStatement("SELECT * FROM games")) {
-                ResultSet resultSet = statement.executeQuery();
-                while (resultSet.next()) {
-                    int id = resultSet.getInt("id");
-                    String name = resultSet.getString("name");
-                    int turnInterval = resultSet.getInt("turn_interval");
-                    int maxPlayers = resultSet.getInt("max_players");
-                    int currentTurn = resultSet.getInt("current_turn");
-                    boolean isStarted = resultSet.getBoolean("is_started");
-                    GameState state = GameState.valueOf(resultSet.getString("state"));
-                    Timestamp lastTurnTimestamp = resultSet.getTimestamp("last_turn_timestamp");
-
-                    Map<Integer, ServerPlayer> players = new HashMap<>();
-
-                    ServerGame game = new ServerGame(id, name, turnInterval, 3, maxPlayers, false, state, lastTurnTimestamp, 0, lastTurnTimestamp);
-                    this.games.add(game);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return this.games.toArray(new ServerGame[0]);
     }
 
     /**
@@ -98,8 +78,7 @@ public class GameManager {
      */
     public synchronized ServerGame newGame(String name) {
         System.out.println("Création de la partie : " + name);
-        // Création d'une partie temporaire avec un seul joueur pour le moment
-        ServerGame game = new ServerGame(this.gameIdCounter++, name, 15, 1, 30, false, GameState.WAITING, null, 0, new HashMap<>());
+        ServerGame game = new ServerGame(0, name, 15, 1, 30, false, GameState.WAITING, null, 0, new HashMap<>());
         this.games.add(game);
         return game;
     }

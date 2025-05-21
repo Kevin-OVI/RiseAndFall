@@ -41,10 +41,12 @@ CREATE TABLE player (
     id SERIAL PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     game_id BIGINT UNSIGNED NOT NULL,
+    race_id BIGINT UNSIGNED NOT NULL,
     gold INT NOT NULL DEFAULT 50,
     intelligence INT NOT NULL DEFAULT 50,
     FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (game_id) REFERENCES game(id)
+    FOREIGN KEY (game_id) REFERENCES game(id),
+    FOREIGN KEY (race_id) REFERENCES race(id)
 );
 
 CREATE TABLE building_type (

@@ -130,7 +130,7 @@ public class AuthenticationManager {
         int userId = isValidUser(username, password);
         if (userId != -1)
         {
-            User user = new User(userId, username);
+            User user = server.getUserManager().getUser(userId);
 
             this.userConnections.put(sender, user);
             try {
@@ -155,7 +155,7 @@ public class AuthenticationManager {
             statement.setString(1, token);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return new User(resultSet.getInt("user.id"), resultSet.getString("user.username"));
+                return server.getUserManager().getUser(resultSet.getInt("id"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -212,7 +212,7 @@ public class AuthenticationManager {
             statement.setString(1, username);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return new User(resultSet.getInt("id"), resultSet.getString("username"));
+                return server.getUserManager().getUser(resultSet.getInt("id"));
             }
         } catch (Exception e) {
             e.printStackTrace();

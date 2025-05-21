@@ -23,6 +23,16 @@ public class ServerPlayer extends Player {
     private final ServerGame game;
 
     /**
+     * Quantité de gold
+     */
+    private int goldAmount;
+
+    /**
+     * Quantité d'intelligence
+     */
+    private int intelligenceAmount;
+
+    /**
      * Constructeur de la classe Player.
      *
      * @param id   Identifiant du joueur dans la base de données.
