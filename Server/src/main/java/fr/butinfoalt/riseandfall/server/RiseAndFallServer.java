@@ -66,7 +66,6 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerSendPacket((byte) 8, PacketError.class);
         this.registerReceivePacket((byte) 9, PacketRegister.class, this.authManager::onRegister, PacketRegister::new);
-        this.registerSendPacket((byte) 10, PacketGameList.class);
     }
 
     /**
@@ -181,7 +180,7 @@ public class RiseAndFallServer extends BaseSocketServer {
             }
             this.userManager = new UserManager(this, new HashSet<>(Arrays.asList(users)), new HashSet<>(Arrays.asList(players)));
 
-            ServerData.init(races, buildingTypes.toArray(new BuildingType[0]), unitTypes.toArray(new UnitType[0]));
+            ServerData.init(List.of(races), buildingTypes, unitTypes, List.of(games));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -198,7 +197,12 @@ public class RiseAndFallServer extends BaseSocketServer {
         super.onClientConnected(client);
         System.out.println("Client connecté : " + client.getName());
         try {
-            client.sendPacket(new PacketServerData(ServerData.getRaces(), ServerData.getUnitTypes(), ServerData.getBuildingTypes()));
+            client.sendPacket(new PacketServerData(
+                    ServerData.getRaces().toArray(new Race[0]),
+                    ServerData.getUnitTypes().toArray(new UnitType[0]),
+                    ServerData.getBuildingTypes().toArray(new BuildingType[0]),
+                    ServerData.getGames().toArray(new Game[0])
+            ));
         } catch (IOException e) {
             System.err.println("Erreur lors de l'envoi des données du serveur au client : " + e.getMessage());
             try {

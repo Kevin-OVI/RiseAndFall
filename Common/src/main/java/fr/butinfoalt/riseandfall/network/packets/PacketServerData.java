@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.network.packets;
 
+import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
@@ -29,16 +30,22 @@ public class PacketServerData implements IPacket {
     private final BuildingType[] buildingTypes;
 
     /**
+     * Liste des parties de jeu en attente
+     */
+    private final Game[] games;
+
+    /**
      * Constructeur du paquet de données du serveur
      *
      * @param raceList      Liste des races
      * @param unitTypes     Liste des types d'unités
      * @param buildingTypes Liste des types de bâtiments
      */
-    public PacketServerData(Race[] raceList, UnitType[] unitTypes, BuildingType[] buildingTypes) {
+    public PacketServerData(Race[] raceList, UnitType[] unitTypes, BuildingType[] buildingTypes, Game[] games) {
         this.races = raceList;
         this.unitTypes = unitTypes;
         this.buildingTypes = buildingTypes;
+        this.games = games;
     }
 
     /**
@@ -51,6 +58,7 @@ public class PacketServerData implements IPacket {
         this.races = readHelper.readSerializableArray(Race.class, Race::new);
         this.unitTypes = readHelper.readSerializableArray(UnitType.class, UnitType::new, this.races);
         this.buildingTypes = readHelper.readSerializableArray(BuildingType.class, BuildingType::new, this.races);
+        this.games = readHelper.readSerializableArray(Game.class, Game::new);
     }
 
     /**
@@ -64,6 +72,7 @@ public class PacketServerData implements IPacket {
         writeHelper.writeSerializableArray(this.races);
         writeHelper.writeSerializableArray(this.unitTypes);
         writeHelper.writeSerializableArray(this.buildingTypes);
+        writeHelper.writeSerializableArray(this.games);
     }
 
     /**
@@ -91,5 +100,14 @@ public class PacketServerData implements IPacket {
      */
     public BuildingType[] getBuildingTypes() {
         return this.buildingTypes;
+    }
+
+    /**
+     * Récupère la liste des parties de jeu en attente
+     *
+     * @return La liste des parties de jeu en attente
+     */
+    public Game[] getGames() {
+        return this.games;
     }
 }

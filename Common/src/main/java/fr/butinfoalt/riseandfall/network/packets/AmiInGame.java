@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.network.packets;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.network.common.IPacket;
+import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
 
 import java.io.IOException;
@@ -11,17 +12,21 @@ import java.io.IOException;
  * Il contient les données statiques du serveur, c'est-à-dire les races,
  * les types d'unités et les types de bâtiments.
  */
-public class PacketGameList implements IPacket {
+public class AmiInGame implements IPacket {
     /**
-     * Liste des gemes
+     * La partie de jeu en cours.
      */
-    private final Game[] games;
+    private final boolean isInGame;
 
     /**
      * Constructeur de la classe Game.
      */
-    public PacketGameList(Game[] games) {
-        this.games = games;
+    public AmiInGame(boolean isInGame) {
+        this.isInGame = isInGame;
+    }
+
+    public AmiInGame(ReadHelper readHelper) throws IOException {
+        this.isInGame = readHelper.readBoolean();
     }
 
     /**
@@ -32,16 +37,15 @@ public class PacketGameList implements IPacket {
      */
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
-        writeHelper.writeSerializableArray(this.games);
+        writeHelper.writeBoolean(this.isInGame);
     }
 
     /**
-     * Récupère la liste des games
+     * Retourne si le joueur est dans une partie de jeu.
      *
-     * @return La liste des games
+     * @return true si le joueur est dans une partie de jeu, false sinon
      */
-    public Game[] getGames() {
-        return this.games;
+    public boolean isInGame() {
+        return isInGame;
     }
-
 }

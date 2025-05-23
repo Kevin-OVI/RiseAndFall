@@ -23,4 +23,6 @@ module fr.butinfoalt.riseandfall.front {
     opens fr.butinfoalt.riseandfall.front.orders.amountselector to javafx.fxml;
     opens fr.butinfoalt.riseandfall.front.authentification to javafx.fxml;
     exports fr.butinfoalt.riseandfall.front.authentification;
+    opens fr.butinfoalt.riseandfall.front.GameList to javafx.fxml;
+    exports fr.butinfoalt.riseandfall.front.GameList;
 }

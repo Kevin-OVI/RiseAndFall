@@ -2,10 +2,7 @@ package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
-import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
-import fr.butinfoalt.riseandfall.network.packets.PacketError;
-import fr.butinfoalt.riseandfall.network.packets.PacketRegister;
-import fr.butinfoalt.riseandfall.network.packets.PacketToken;
+import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.server.data.User;
 
 import java.io.IOException;
@@ -220,6 +217,19 @@ public class AuthenticationManager {
         return null;
     }
 
+    public Integer getIDFromUsername(String username) {
+        try (PreparedStatement statement = server.getDb().prepareStatement("SELECT * FROM user WHERE username = ?")) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void onRegister(SocketWrapper sender, PacketRegister packetRegister) {
         if (this.userConnections.containsKey(sender)) {
             try {
@@ -250,6 +260,7 @@ public class AuthenticationManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        server.getUserManager().addUser(new User(getIDFromUsername(username), username));
 
         User user = getUserFromUsername(username);
         if (user == null) {

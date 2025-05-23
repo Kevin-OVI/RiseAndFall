@@ -1,26 +1,26 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.image.ImageView?>
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="10" padding="10">
-    fx:controller="fr.butinfoalt.riseandfall.front.WelcomeView"
-    <StackPane xmlns:fx="http://javafx.com/fxml/1" VBox.vgrow="ALWAYS">
-    <!-- Image en arrière-plan -->
-    <ImageView fx:id="backgroundImageView" opacity="0.2" managed="false"/>
-    <!-- Texte en avant-plan -->
-    <ScrollPane fitToWidth="true" styleClass="text-scroll-pane" fx:id="textScrollPane">
-<TableView fx:id="tableParties" prefHeight="400" prefWidth="800">
-    <columns>
-        <TableColumn fx:id="nomColumn" text="Nom" />
-        <TableColumn fx:id="intervalleColumn" text="Intervalle de tour (s)" />
-        <TableColumn fx:id="maxPlayersColumn" text="Joueurs max." />
-        <TableColumn fx:id="etatColumn" text="État" />
-    </columns>
-</TableView>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
 
+<VBox xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx" alignment="CENTER"
+      spacing="20.0" prefHeight="400.0" prefWidth="600.0"
+      fx:controller="fr.butinfoalt.riseandfall.front.GameList.GameListController">
+
+    <ImageView fx:id="backgroundImageView" managed="false"/>
+
+    <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
+        Listes des parties disponibles:
+    </TitleLabel>
+
+    <VBox fx:id="listContainer" alignment="CENTER"
+          maxWidth="Infinity"
+          StackPane.alignment="TOP_CENTER">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+    </VBox>
 </VBox>

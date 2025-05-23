@@ -1,10 +1,11 @@
 package fr.butinfoalt.riseandfall.front;
 
-import fr.butinfoalt.riseandfall.front.authentification.LoginController;
+import fr.butinfoalt.riseandfall.front.GameList.GameListController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.orders.OrderController;
+import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.network.client.BaseSocketClient;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * Client socket pour le jeu Rise and Fall.
@@ -47,7 +49,6 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendPacket((byte) 7, PacketGameAction.class);
         this.registerReceivePacket((byte) 8, PacketError.class, this.errorManager::onError, PacketError::new);
         this.registerSendPacket((byte) 9, PacketRegister.class);
-        this.registerReceivePacket((byte) 10, PacketGameList.class, this::onGameListReceived, PacketGameList::new);
     }
 
     /**
@@ -98,7 +99,7 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param packet Le paquet reçu.
      */
     private void onServerData(SocketWrapper sender, PacketServerData packet) {
-        ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes());
+        ServerData.init(List.of(packet.getRaces()), List.of(packet.getBuildingTypes()), List.of(packet.getUnitTypes()), List.of(packet.getGames()));
         Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOGIN, true));
 
         try {

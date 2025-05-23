@@ -1,15 +1,15 @@
 package fr.butinfoalt.riseandfall.server;
 
+import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
+import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
-import fr.butinfoalt.riseandfall.network.packets.PacketCreateOrJoinGame;
-import fr.butinfoalt.riseandfall.network.packets.PacketInitialGameData;
-import fr.butinfoalt.riseandfall.network.packets.PacketUpdateGameData;
-import fr.butinfoalt.riseandfall.network.packets.PacketUpdateOrders;
+import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 
@@ -92,9 +92,15 @@ public class GameManager {
      * @return Le joueur ajouté à la partie.
      */
     public ServerPlayer addPlayerToGame(User user, ServerGame game, Race race) {
-        // TODO : Récupérer l'identifiant du joueur depuis la base de données.
-        //  Pour le moment l'identifiant est 0 car il y a toujours un seul joueur par partie
-        ServerPlayer player = new ServerPlayer(0, user, game, race);
+        // TODO : Ajouter une variable a la base de donnée et recuperer son id.
+        int maxid = 0;
+        for (ServerPlayer player : server.getUserManager().getPlayers()) {
+            if (player.getId() > maxid) {
+                maxid = player.getId();
+            }
+        }
+        maxid++;
+        ServerPlayer player = new ServerPlayer(maxid, user, game, race);
         game.addPlayer(player);
         return player;
     }
@@ -119,6 +125,57 @@ public class GameManager {
         }
     }
 
+    public ServerGame getServerGameByGame(Game game) {
+        Map<Integer, ServerPlayer> players = new HashMap<>();
+
+        try (PreparedStatement gameStatement = server.getDb().prepareStatement("SELECT * FROM game WHERE id = ?")) {
+            gameStatement.setInt(1, game.getId());
+            ResultSet gameResultSet = gameStatement.executeQuery();
+
+            if (gameResultSet.next()) {
+                try (PreparedStatement playerStatement = server.getDb().prepareStatement("SELECT id FROM player WHERE game_id = ?")) {
+                    playerStatement.setInt(1, game.getId());
+                    ResultSet playerResultSet = playerStatement.executeQuery();
+
+                    while (playerResultSet.next()) {
+                        int playerId = playerResultSet.getInt("id");
+                        Player player = server.getUserManager().getPlayer(playerId);
+
+                        if (player instanceof ServerPlayer) {
+                            players.put(playerId, (ServerPlayer) player);
+                        }
+                    }
+                }
+
+                return new ServerGame(
+                        gameResultSet.getInt("id"),
+                        gameResultSet.getString("name"),
+                        gameResultSet.getInt("turn_interval"),
+                        gameResultSet.getInt("min_players"),
+                        gameResultSet.getInt("max_players"),
+                        false,
+                        GameState.valueOf(gameResultSet.getString("state")),
+                        gameResultSet.getTimestamp("last_turn_at"),
+                        gameResultSet.getInt("current_turn"),
+                        players
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public ServerGame getGameById(int id) {
+        for (ServerGame game : this.games) {
+            if (game.getId() == id) {
+                return game;
+            }
+        }
+        return null;
+    }
+
     /**
      * Méthode appelée lorsqu'un client demande de créer ou de rejoindre une partie.
      * Elle vérifie si le client est authentifié, vérifie si la partie existe déjà, ou en crée une nouvelle si nécessaire.
@@ -134,30 +191,28 @@ public class GameManager {
             return;
         }
 
-        // Temporairement, on crée une partie pour chaque nom de joueur, qui est démarrée immédiatement
-        String gameName = "Partie de " + user.getUsername();
-        Race chosenRace = packet.getChosenRace();
-
-        // TODO : Séparer le fait de créer une partie et de rejoindre une partie. Pour le moment la partie est créée si elle n'existe pas
-        ServerGame game = null;
-        ServerPlayer player;
-        for (ServerGame g : games) {
-            if (g.getName().equals(gameName)) {
-                player = g.getPlayers().stream().filter(p -> p.getUser().equals(user)).findFirst().orElse(null);
-                if (player != null && player.getRace().equals(chosenRace)) {
-                    game = g;
+        ServerGame game = getGameById(packet.getGameId());
+        if (game == null) {
+            Game realGame = null;
+            for (Game g : ServerData.getGames()) {
+                if (g.getId() == packet.getGameId()) {
+                    realGame = g;
                     break;
                 }
             }
+            if (realGame == null) {
+                System.err.printf("La partie %d n'existe pas.%n", packet.getGameId());
+                try {
+                    sender.sendPacket(new PacketError("La partie n'existe pas.", "Joining game"));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return;
+            }
+            game = this.getServerGameByGame(realGame);
         }
-        if (game == null) {
-            game = this.newGame(gameName);
-            player = this.addPlayerToGame(user, game, chosenRace);
-            game.start();
-        } else {
-            System.out.println("La partie " + gameName + " existe déjà. Le joueur va rejoindre cette partie.");
-            player = game.getPlayers().iterator().next(); // TODO : Gérer plusieurs joueurs sur une même partie
-        }
+
+        ServerPlayer player = this.addPlayerToGame(user, game, packet.getChosenRace());
 
         try {
             sender.sendPacket(new PacketInitialGameData<>(game, player));

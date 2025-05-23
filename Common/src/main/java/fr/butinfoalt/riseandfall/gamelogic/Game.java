@@ -13,7 +13,7 @@ import java.sql.Timestamp;
  * Elle contient les informations de base sur la partie, telles que l'identifiant, le nom, l'intervalle entre les tours,
  * l'état de la partie, le timestamp du dernier tour et le tour actuel.
  */
-public abstract class Game implements Identifiable, ISerializable {
+public class Game implements Identifiable, ISerializable {
     /**
      * Identifiant de la partie dans la base de données.
      */
@@ -56,6 +56,16 @@ public abstract class Game implements Identifiable, ISerializable {
         this.state = state;
         this.lastTurnTimestamp = lastTurnTimestamp;
         this.currentTurn = currentTurn;
+    }
+
+    public Game(ReadHelper readHelper) throws IOException {
+        this.id = readHelper.readInt();
+        this.name = readHelper.readString();
+        this.turnInterval = readHelper.readInt();
+        this.state = GameState.values()[readHelper.readInt()];
+        long ts = readHelper.readLong();
+        this.lastTurnTimestamp = ts == -1 ? null : new Timestamp(ts);
+        this.currentTurn = readHelper.readInt();
     }
 
     /**
@@ -161,6 +171,8 @@ public abstract class Game implements Identifiable, ISerializable {
         writeHelper.writeInt(this.id);
         writeHelper.writeString(this.name);
         writeHelper.writeInt(this.turnInterval);
-        this.serializeModifiableData(writeHelper);
+        writeHelper.writeInt(this.state.ordinal());
+        writeHelper.writeLong(this.lastTurnTimestamp == null ? -1 : this.lastTurnTimestamp.getTime());
+        writeHelper.writeInt(this.currentTurn);
     }
 }
