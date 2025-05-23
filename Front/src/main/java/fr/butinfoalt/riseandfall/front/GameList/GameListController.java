@@ -10,6 +10,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.Node;
 import java.io.IOException;
+import java.util.List;
 
 public class GameListController {
     @FXML
@@ -19,7 +20,7 @@ public class GameListController {
     private ImageView backgroundImageView;
 
     @FXML
-    public void initialize(Game[] games) {
+    public void initialize(List<Game> games) {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
         for (Game game : games) {
