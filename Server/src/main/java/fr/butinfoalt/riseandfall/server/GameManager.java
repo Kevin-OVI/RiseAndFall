@@ -14,9 +14,7 @@ import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -92,15 +90,34 @@ public class GameManager {
      * @return Le joueur ajouté à la partie.
      */
     public ServerPlayer addPlayerToGame(User user, ServerGame game, Race race) {
-        // TODO : Ajouter une variable a la base de donnée et recuperer son id.
-        int maxid = 0;
-        for (ServerPlayer player : server.getUserManager().getPlayers()) {
-            if (player.getId() > maxid) {
-                maxid = player.getId();
+        int playerId = -1;
+        try (PreparedStatement statement = server.getDb().prepareStatement(
+                "INSERT INTO player (user_id, game_id, race_id) VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS)) {
+
+            statement.setInt(1, user.getId());
+            statement.setInt(2, game.getId());
+            statement.setInt(3, race.getId());
+
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Creating player failed, no rows affected.");
             }
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    playerId = generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Creating player failed, no ID obtained.");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
-        maxid++;
-        ServerPlayer player = new ServerPlayer(maxid, user, game, race);
+        ServerPlayer player = new ServerPlayer(playerId, user, game, race);
         game.addPlayer(player);
         return player;
     }
@@ -110,7 +127,7 @@ public class GameManager {
      *
      * @param player Le joueur dont les données doivent être mises à jour.
      */
-    private void sendPlayerDataUpdates(ServerPlayer player) {
+    public void sendPlayerDataUpdates(ServerPlayer player) {
         List<SocketWrapper> connections = this.getConnectionsFor(player);
         if (!connections.isEmpty()) {
             PacketUpdateGameData packet = new PacketUpdateGameData(player.getGame(), player);

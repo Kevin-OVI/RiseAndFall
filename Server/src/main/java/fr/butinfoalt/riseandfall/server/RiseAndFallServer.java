@@ -159,13 +159,14 @@ public class RiseAndFallServer extends BaseSocketServer {
                 }
                 users = userList.toArray(new User[0]);
             }
+            ServerData.init(List.of(races), buildingTypes, unitTypes, List.of(games));
 
             try (PreparedStatement statement = this.db.prepareStatement("SELECT * FROM `player`")) {
                 List<ServerPlayer> playerList = new ArrayList<>();
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
-                    User user = Identifiable.getById(users, set.getInt("race_id"));
+                    User user = Identifiable.getById(users, set.getInt("user_id"));
                     ServerGame game = Identifiable.getById(games, set.getInt("game_id"));
                     Race race = Identifiable.getById(races, set.getInt("race_id"));
                     int gold = set.getInt("gold");
@@ -179,8 +180,6 @@ public class RiseAndFallServer extends BaseSocketServer {
                 players = playerList.toArray(new ServerPlayer[0]);
             }
             this.userManager = new UserManager(this, new HashSet<>(Arrays.asList(users)), new HashSet<>(Arrays.asList(players)));
-
-            ServerData.init(List.of(races), buildingTypes, unitTypes, List.of(games));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

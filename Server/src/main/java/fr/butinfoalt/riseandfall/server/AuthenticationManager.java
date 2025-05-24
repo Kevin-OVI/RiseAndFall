@@ -1,8 +1,11 @@
 package fr.butinfoalt.riseandfall.server;
 
+import fr.butinfoalt.riseandfall.gamelogic.Game;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
+import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 
 import java.io.IOException;
@@ -135,6 +138,7 @@ public class AuthenticationManager {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            sendGamePacket(sender);
         } else {
             try {
                 sender.sendPacket(new PacketError("Identifiant ou Mot de passe incorrect", "Authentification"));
@@ -191,6 +195,7 @@ public class AuthenticationManager {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+        sendGamePacket(sender);
     }
 
     public boolean isUserExist(String username) {
@@ -277,6 +282,7 @@ public class AuthenticationManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        sendGamePacket(sender);
     }
 
     /**
@@ -312,5 +318,52 @@ public class AuthenticationManager {
      */
     public synchronized void onClientDisconnected(SocketWrapper client) {
         this.userConnections.remove(client);
+    }
+
+    public ServerPlayer getPlayerFromUser(User user) {
+        ServerGame[] games = server.getGameManager().getGames();
+        for (ServerGame game : games) {
+            Collection<ServerPlayer> players = game.getPlayers();
+            for (ServerPlayer player : players) {
+                if (player.getUser().equals(user)) {
+                    return player;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Game getGameFromUser(User user) {
+        ServerGame[] games = server.getGameManager().getGames();
+        for (ServerGame game : games) {
+            Collection<ServerPlayer> players = game.getPlayers();
+            for (ServerPlayer player : players) {
+                if (player.getUser().equals(user)) {
+                    return game;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void sendGamePacket(SocketWrapper sender) {
+        User user = this.userConnections.get(sender);
+        if (user != null) {
+            ServerPlayer player = getPlayerFromUser(user);
+            Game game = getGameFromUser(user);
+            if (player != null) {
+                try {
+                    sender.sendPacket(new PacketInitialGameData<>(game, player));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } else {
+            try {
+                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Authentification"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
