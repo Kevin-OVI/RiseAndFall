@@ -354,6 +354,8 @@ public class AuthenticationManager {
             if (player != null) {
                 try {
                     sender.sendPacket(new PacketInitialGameData<>(game, player));
+                    sender.sendPacket(new PacketUpdateGameData(player.getGame(), player));
+                    server.getGameManager().addConnectionToGame(player, sender);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

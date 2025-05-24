@@ -89,7 +89,7 @@ public class GameManager {
      * @param race La race choisie par le joueur.
      * @return Le joueur ajouté à la partie.
      */
-    public ServerPlayer addPlayerToGame(User user, ServerGame game, Race race) {
+    private ServerPlayer addPlayerToGame(User user, ServerGame game, Race race) {
         int playerId = -1;
         try (PreparedStatement statement = server.getDb().prepareStatement(
                 "INSERT INTO player (user_id, game_id, race_id) VALUES (?, ?, ?)",
@@ -191,6 +191,10 @@ public class GameManager {
             }
         }
         return null;
+    }
+
+    public void addConnectionToGame(ServerPlayer player, SocketWrapper sender) {
+        this.currentlyPlayingMap.put(sender, player);
     }
 
     /**
