@@ -177,7 +177,7 @@ public class AuthenticationManager {
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
-            return;
+
         }
 
         String token = packet.getToken();
@@ -188,6 +188,7 @@ public class AuthenticationManager {
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
+            return;
         }
         this.userConnections.put(sender, user);
         try {
