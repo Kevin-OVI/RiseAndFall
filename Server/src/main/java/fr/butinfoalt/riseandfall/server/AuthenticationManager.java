@@ -117,14 +117,6 @@ public class AuthenticationManager {
      * @param packet Le paquet d'authentification reçu.
      */
     public synchronized void onAuthentification(SocketWrapper sender, PacketAuthentification packet) {
-        if (this.userConnections.containsKey(sender)) {
-            try {
-                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Authentification"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            return;
-        }
         String username = packet.getUsername();
         String password = packet.getPasswordHash();
         int userId = isValidUser(username, password);
@@ -171,20 +163,11 @@ public class AuthenticationManager {
      * @param packet Le paquet de token reçu.
      */
     public void onTokenAuthentification(SocketWrapper sender, PacketToken packet) {
-        if (this.userConnections.containsKey(sender)) {
-            try {
-                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Authentification"));
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-            }
-
-        }
-
         String token = packet.getToken();
         User user = getUserFromToken(token);
         if (user == null) {
             try {
-                sender.sendPacket(new PacketError("Identifiant ou Mot de passe incorrect", "Authentification"));
+                sender.sendPacket(new PacketError("Votre token a expiré, veuillez vous reconnecter", "Authentification"));
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
@@ -237,14 +220,6 @@ public class AuthenticationManager {
     }
 
     public void onRegister(SocketWrapper sender, PacketRegister packetRegister) {
-        if (this.userConnections.containsKey(sender)) {
-            try {
-                sender.sendPacket(new PacketError("Une erreur est survenu, redémarrez votre application", "Register"));
-                return;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
         String username = packetRegister.getUsername();
         String password = packetRegister.getPasswordHash();
 
