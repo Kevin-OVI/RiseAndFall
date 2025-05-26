@@ -317,4 +317,19 @@ public class GameManager {
     public synchronized void onClientDisconnected(SocketWrapper client) {
         this.currentlyPlayingMap.remove(client);
     }
+
+    public void onClientQuitGame(SocketWrapper client) {
+        ServerPlayer player = this.currentlyPlayingMap.remove(client);
+        if (player == null) {
+            return;
+        }
+        ServerGame serverGame = player.getGame();
+        serverGame.removePlayer(player.getUser());
+        try (PreparedStatement statement = server.getDb().prepareStatement("DELETE FROM player WHERE id = ?")) {
+            statement.setInt(1, player.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

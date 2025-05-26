@@ -2,11 +2,13 @@ package fr.butinfoalt.riseandfall.front.GameList;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
+import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.network.packets.PacketCreateOrJoinGame;
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -14,6 +16,7 @@ import javafx.scene.control.Alert.AlertType;
 import java.io.IOException;
 
 public class GameComponentController {
+
         @FXML
         private Label partyNameLabel;
 
@@ -28,7 +31,6 @@ public class GameComponentController {
 
         private int gameId;
 
-
         public void init(int gameId, String name, int dayDuration, int currentPlayer, int maxPlayer) {
             partyNameLabel.setText(name);
             this.dayDuration.setText(String.valueOf(dayDuration));
@@ -40,7 +42,7 @@ public class GameComponentController {
         @FXML
         private void onJoinClicked() {
             try {
-                RiseAndFall.getClient().sendPacket(new PacketCreateOrJoinGame(ServerData.getRaces().get(1), gameId));
+                RiseAndFall.getClient().sendPacket(new PacketCreateOrJoinGame(((GameListController)View.GAME_LIST.getController()).raceChoiceBox.getValue(), gameId));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

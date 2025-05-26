@@ -234,7 +234,7 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     private void onGameAction(SocketWrapper sender, PacketGameAction packet) {
         switch (packet.getAction()) {
-            case QUIT_GAME -> this.gameManager.onClientDisconnected(sender);
+            case QUIT_GAME -> this.gameManager.onClientQuitGame(sender);
             case LOG_OUT -> {
                 this.gameManager.onClientDisconnected(sender);
                 this.authManager.onClientDisconnected(sender);

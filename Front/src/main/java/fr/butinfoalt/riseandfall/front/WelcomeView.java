@@ -64,7 +64,5 @@ public class WelcomeView {
     @FXML
     public void play() {
         RiseAndFallApplication.switchToView(View.GAME_LIST);
-        GameListController controller = View.GAME_LIST.getController();
-        controller.initialize(ServerData.getGames());
     }
 }
