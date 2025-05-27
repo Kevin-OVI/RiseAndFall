@@ -1,22 +1,21 @@
 package fr.butinfoalt.riseandfall.front.GameList;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
-import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
-import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.NamedItemStringConverter;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-import javafx.scene.Node;
+
 import java.io.IOException;
-import java.util.List;
 
 public class GameListController {
     /**
@@ -56,7 +55,7 @@ public class GameListController {
 
                 listContainer.getChildren().add(partyNode);
             } catch (IOException e) {
-                e.printStackTrace();
+                LogManager.logError("Erreur lors du chargement du composant de jeu :", e);
             }
         }
     }

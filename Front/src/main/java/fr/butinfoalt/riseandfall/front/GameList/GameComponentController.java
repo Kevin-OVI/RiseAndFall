@@ -1,17 +1,11 @@
 package fr.butinfoalt.riseandfall.front.GameList;
 
-import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
-import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.gamelogic.data.Race;
-import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.network.packets.PacketCreateOrJoinGame;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 
 import java.io.IOException;
 
@@ -44,7 +38,7 @@ public class GameComponentController {
             try {
                 RiseAndFall.getClient().sendPacket(new PacketCreateOrJoinGame(((GameListController)View.GAME_LIST.getController()).raceChoiceBox.getValue(), gameId));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogManager.logError("Erreur lors de l'envoi du paquet de création ou de jointure de partie : ", e);
             }
         }
     }

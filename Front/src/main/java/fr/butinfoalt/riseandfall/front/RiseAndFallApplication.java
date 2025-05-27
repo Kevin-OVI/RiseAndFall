@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front;
 
 import fr.butinfoalt.riseandfall.front.authentification.LoadingController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -114,7 +115,7 @@ public class RiseAndFallApplication extends Application {
             try {
                 RiseAndFall.getClient().close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogManager.logError("Erreur lors de la fermeture du client", e);
             }
         }
     }

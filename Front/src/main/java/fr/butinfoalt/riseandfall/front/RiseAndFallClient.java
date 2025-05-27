@@ -82,7 +82,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         try (FileWriter writer = new FileWriter("auth_token.txt")) {
             writer.write(packet.getToken());
         } catch (IOException e) {
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de l'écriture du token d'authentification dans le fichier", e);
         }
         Platform.runLater(() -> {
             RiseAndFallApplication.switchToView(View.WELCOME, true);

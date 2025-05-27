@@ -175,7 +175,7 @@ public class RiseAndFallServer extends BaseSocketServer {
             }
             this.userManager = new UserManager(this, users, players);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Erreur lors du chargement des données initiales", e);
         }
     }
 
@@ -300,7 +300,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                     try {
                         server.close();
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        LogManager.logError("Erreur lors de l'arrêt du serveur :", e);
                     }
                 });
                 LogManager.logMessage("Serveur démarré sur le port " + SERVER_PORT);
@@ -311,7 +311,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                 }
                 LogManager.logMessage("Serveur arrêté.");
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogManager.logError("Erreur lors de l'exécution du serveur :", e);
             }
         }
     }

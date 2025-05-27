@@ -94,7 +94,7 @@ public class GameManager {
      * @return Le joueur ajouté à la partie.
      */
     private ServerPlayer addPlayerToGame(User user, ServerGame game, Race race) {
-        int playerId = -1;
+        int playerId;
         try (PreparedStatement statement = server.getDb().prepareStatement(
                 "INSERT INTO player (user_id, game_id, race_id) VALUES (?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS)) {
@@ -118,7 +118,7 @@ public class GameManager {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de l'ajout du joueur à la partie " + game.getName() + " pour l'utilisateur " + user.getUsername(), e);
             return null;
         }
         ServerPlayer player = new ServerPlayer(playerId, user, game, race);
@@ -228,7 +228,7 @@ public class GameManager {
                 try {
                     sender.sendPacket(new PacketError(ErrorType.JOINING_GAME_GAME_NOT_FOUND));
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
                 }
                 return;
             }
@@ -236,6 +236,14 @@ public class GameManager {
         }
 
         ServerPlayer player = this.addPlayerToGame(user, game, packet.getChosenRace());
+        if (player == null) {
+            try {
+                sender.sendPacket(new PacketError(ErrorType.JOINING_GAME_FAILED));
+            } catch (IOException e) {
+                LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
+            }
+            return;
+        }
         this.currentlyPlayingMap.put(sender, player);
         try {
             sender.sendPacket(new PacketInitialGameData<>(game, player));
@@ -307,7 +315,7 @@ public class GameManager {
         try {
             game.nextTurn();
         } catch (IllegalStateException e) {
-            LogManager.logError("Erreur lors du passage au tour suivant pour le joueur " + player.getUser().getUsername() + " dans la partie " + game.getName() + ": ", e);            e.printStackTrace();
+            LogManager.logError("Erreur lors du passage au tour suivant pour le joueur " + player.getUser().getUsername() + " dans la partie " + game.getName() + ": ", e);
             return;
         }
 
@@ -337,7 +345,12 @@ public class GameManager {
             statement.setInt(1, player.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de la suppression du joueur " + player.getUser().getUsername() + " de la base de données.", e);
+            try {
+                client.sendPacket(new PacketError(ErrorType.QUIT_GAME_FAILED));
+            } catch (IOException ioException) {
+                LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + client.getName(), ioException);
+            }
         }
     }
 }
