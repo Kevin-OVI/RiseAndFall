@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import static fr.butinfoalt.riseandfall.server.Environment.SERVER_PORT;
@@ -43,6 +42,8 @@ public class RiseAndFallServer extends BaseSocketServer {
      * Le gestionnaire de jeu pour gérer les utilisateurs et les joueurs.
      */
     private UserManager userManager;
+
+    private ServerData<ServerGame> data;
 
     /**
      * Constructeur de la classe BaseSocketServer.
@@ -145,8 +146,11 @@ public class RiseAndFallServer extends BaseSocketServer {
                     GameState state = GameState.valueOf(set.getString("state"));
                     games.add(new ServerGame(id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, null, 0, new HashMap<>()));
                 }
-                this.gameManager = new GameManager(this, new HashSet<>(games));
             }
+            // Nécessaire pour charger les joueurs juste après
+            this.data = new ServerData<>(races, buildingTypes, unitTypes, games);
+            this.gameManager = new GameManager(this);
+
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM `user`")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
@@ -155,8 +159,6 @@ public class RiseAndFallServer extends BaseSocketServer {
                     users.add(new User(id, username));
                 }
             }
-            ServerData.init(races, buildingTypes, unitTypes, games);
-
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM `player`")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
@@ -170,7 +172,8 @@ public class RiseAndFallServer extends BaseSocketServer {
                     player.setGoldAmount(gold);
                     player.setIntelligence(intelligence);
                     players.add(player);
-                    game.addPlayer(player);
+                    // Ajout forcé car la partie peut avoir déjà démarré, mais on est dans un cas particulier car les données ne sont pas encore chargées
+                    game.forceAddPlayer(player);
                 }
             }
             this.userManager = new UserManager(this, users, players);
@@ -190,11 +193,11 @@ public class RiseAndFallServer extends BaseSocketServer {
         super.onClientConnected(client);
         LogManager.logMessage("Client connecté : " + client.getName());
         try {
-            client.sendPacket(new PacketServerData(
-                    ServerData.getRaces(),
-                    ServerData.getUnitTypes(),
-                    ServerData.getBuildingTypes(),
-                    ServerData.getGames()
+            client.sendPacket(new PacketServerData<>(
+                    this.data.races(),
+                    this.data.unitTypes(),
+                    this.data.buildingTypes(),
+                    this.data.games()
             ));
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi des données du serveur au client :", e);
@@ -271,6 +274,15 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     public UserManager getUserManager() {
         return this.userManager;
+    }
+
+    /**
+     * Méthode pour obtenir les données du serveur.
+     *
+     * @return Les données du serveur.
+     */
+    public ServerData<ServerGame> getData() {
+        return this.data;
     }
 
     /**

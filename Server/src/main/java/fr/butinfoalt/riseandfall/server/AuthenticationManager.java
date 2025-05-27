@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.server;
 
+import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
@@ -13,7 +14,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Classe responsable de la gestion de l'authentification des clients.
@@ -319,21 +323,23 @@ public class AuthenticationManager {
         this.userConnections.remove(client);
     }
 
-    public ServerPlayer getPlayerFromUser(User user) {
-        ServerGame[] games = server.getGameManager().getGames();
+    public ServerPlayer getPlayerInRunningGameForUser(User user) {
+        List<ServerGame> games = this.server.getData().games();
         for (ServerGame game : games) {
-            Collection<ServerPlayer> players = game.getPlayers();
-            for (ServerPlayer player : players) {
-                if (player.getUser().getId() == user.getId()) {
-                    return player;
-                }
+            // On ignore les parties qui sont terminées
+            if (game.getState() == GameState.ENDED) {
+                continue;
+            }
+            ServerPlayer player = game.getPlayerFor(user);
+            if (player != null) {
+                return player;
             }
         }
         return null;
     }
 
     public void sendGamePacket(SocketWrapper sender, User user) {
-        ServerPlayer player = getPlayerFromUser(user);
+        ServerPlayer player = getPlayerInRunningGameForUser(user);
         if (player != null) {
             ServerGame game = player.getGame();
             try {

@@ -1,10 +1,12 @@
 package fr.butinfoalt.riseandfall.front;
 
+import fr.butinfoalt.riseandfall.front.GameList.GameListController;
+import fr.butinfoalt.riseandfall.front.authentification.LoginController;
+import fr.butinfoalt.riseandfall.front.authentification.RegisterController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.orders.OrderController;
-import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.network.client.BaseSocketClient;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
@@ -17,7 +19,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 
 /**
  * Client socket pour le jeu Rise and Fall.
@@ -25,27 +26,21 @@ import java.sql.Timestamp;
  */
 public class RiseAndFallClient extends BaseSocketClient {
     /**
-     * Gestionnaire d'erreurs pour le client.
-     */
-    private final ErrorManager errorManager;
-
-    /**
      * Constructeur du client.
      * Il initialise le client avec l'hôte et le port du serveur et enregistre les paquets à envoyer et à recevoir.
      */
     public RiseAndFallClient() {
         super(Environment.SERVER_HOST, Environment.SERVER_PORT);
 
-        this.errorManager = new ErrorManager(this);
         this.registerSendPacket((byte) 0, PacketAuthentification.class);
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this::onToken, PacketToken::new);
-        this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, PacketServerData::new);
+        this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, readHelper -> new PacketServerData<>(readHelper, ClientGame::new));
         this.registerSendPacket((byte) 3, PacketCreateOrJoinGame.class);
         this.registerReceivePacket((byte) 4, PacketInitialGameData.class, this::onInitialGameData, this::decodeInitialGameData);
         this.registerSendPacket((byte) 5, PacketUpdateOrders.class);
         this.registerReceivePacket((byte) 6, PacketUpdateGameData.class, this::onNextTurnData);
         this.registerSendPacket((byte) 7, PacketGameAction.class);
-        this.registerReceivePacket((byte) 8, PacketError.class, this.errorManager::onError, PacketError::new);
+        this.registerReceivePacket((byte) 8, PacketError.class, this::onError, PacketError::new);
         this.registerSendPacket((byte) 9, PacketRegister.class);
     }
 
@@ -57,17 +52,8 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
     private PacketInitialGameData<ClientGame, ClientPlayer> decodeInitialGameData(ReadHelper readHelper) throws IOException {
-        int id = readHelper.readInt();
-        String name = readHelper.readString();
-        int turnInterval = readHelper.readInt();
-        GameState state = GameState.values()[readHelper.readInt()];
-        long lastTurnTimestampValue = readHelper.readLong();
-        Timestamp lastTurnTimestamp = lastTurnTimestampValue == -1 ? null : new Timestamp(lastTurnTimestampValue);
-        int currentTurn = readHelper.readInt();
-        ClientGame clientGame = new ClientGame(id, name, turnInterval, state, lastTurnTimestamp, currentTurn);
-
+        ClientGame clientGame = new ClientGame(readHelper);
         ClientPlayer player = new ClientPlayer(readHelper);
-
         return new PacketInitialGameData<>(clientGame, player);
     }
 
@@ -84,9 +70,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'écriture du token d'authentification dans le fichier", e);
         }
-        Platform.runLater(() -> {
-            RiseAndFallApplication.switchToView(View.WELCOME, true);
-        });
+        Platform.runLater(() -> RiseAndFallApplication.switchToView(View.WELCOME, true));
     }
 
     /**
@@ -96,8 +80,8 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param sender Le socket connecté au serveur.
      * @param packet Le paquet reçu.
      */
-    private void onServerData(SocketWrapper sender, PacketServerData packet) {
-        ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes(), packet.getGames());
+    private void onServerData(SocketWrapper sender, PacketServerData<ClientGame> packet) {
+        RiseAndFall.initServerData(new ServerData<>(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes(), packet.getGames()));
         try {
             String token = new String(Files.readAllBytes(Paths.get("auth_token.txt")));
             LogManager.logMessage("Envoi du token d'authentification...");
@@ -144,6 +128,38 @@ public class RiseAndFallClient extends BaseSocketClient {
             mainController.updateFields();
             OrderController orderController = View.ORDERS.getController();
             orderController.loadPendingOrders();
+        });
+    }
+
+    /**
+     * Méthode appelée lorsque le paquet {@link PacketError} est reçu.
+     * Elle gère les erreurs en fonction du type d'erreur et change la vue de l'application si nécessaire.
+     *
+     * @param sender      Le socket connecté au serveur.
+     * @param packetError Le paquet d'erreur reçu.
+     */
+    private void onError(SocketWrapper sender, PacketError packetError) {
+        PacketError.ErrorType errorType = packetError.getErrorType();
+        Platform.runLater(() -> {
+            switch (errorType) {
+                case LOGIN_GENERIC_ERROR, LOGIN_INVALID_CREDENTIALS, LOGIN_INVALID_SESSION -> {
+                    RiseAndFallApplication.switchToView(View.LOGIN, true);
+                    ((LoginController) View.LOGIN.getController()).showError(errorType.getMessage());
+                }
+                case REGISTER_GENERIC_ERROR, REGISTER_USERNAME_TAKEN -> {
+                    RiseAndFallApplication.switchToView(View.REGISTER, true);
+                    ((RegisterController) View.REGISTER.getController()).showError(errorType.getMessage());
+                }
+                case JOINING_GAME_FAILED, JOINING_GAME_GAME_NOT_FOUND -> {
+                    RiseAndFallApplication.switchToView(View.GAME_LIST, true);
+                    ((GameListController) View.GAME_LIST.getController()).showError(errorType.getMessage());
+                }
+                case QUIT_GAME_FAILED -> {
+                    RiseAndFallApplication.switchToView(View.MAIN, true);
+                    ((MainController)View.MAIN.getController()).showError(errorType.getMessage());
+                }
+                default -> LogManager.logError("Erreur inconnue : " + errorType.getMessage());
+            }
         });
     }
 }

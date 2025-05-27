@@ -41,7 +41,7 @@ public class PacketCreateOrJoinGame implements IPacket {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
     public PacketCreateOrJoinGame(ReadHelper readHelper) throws IOException {
-        this.chosenRace = Identifiable.getById(ServerData.getRaces(), readHelper.readInt());
+        this.chosenRace = Identifiable.getById(ServerData.getInstance().races(), readHelper.readInt());
         this.gameId = readHelper.readInt();
     }
 

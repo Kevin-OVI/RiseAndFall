@@ -1,9 +1,8 @@
 package fr.butinfoalt.riseandfall.server;
 
-import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
-import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
@@ -26,10 +25,6 @@ import java.util.*;
  */
 public class GameManager {
     /**
-     * Ensemble de toutes les parties crées
-     */
-    private final HashSet<ServerGame> games = new HashSet<>();
-    /**
      * Association entre les connexions et les joueurs actuellement en jeu.
      */
     private final Map<SocketWrapper, ServerPlayer> currentlyPlayingMap = new HashMap<>();
@@ -44,9 +39,8 @@ public class GameManager {
      *
      * @param server Instance du serveur.
      */
-    public GameManager(RiseAndFallServer server, HashSet<ServerGame> games) {
+    public GameManager(RiseAndFallServer server) {
         this.server = server;
-        this.games.addAll(games);
     }
 
     /**
@@ -66,13 +60,6 @@ public class GameManager {
     }
 
     /**
-     * Fonction pour recuperer la listes des parties
-     */
-    public ServerGame[] getGames() {
-        return this.games.toArray(new ServerGame[0]);
-    }
-
-    /**
      * Crée une nouvelle partie de jeu.
      *
      * @param name Le nom de la partie.
@@ -81,7 +68,7 @@ public class GameManager {
     public synchronized ServerGame newGame(String name) {
         LogManager.logMessage("Création de la partie : " + name);
         ServerGame game = new ServerGame(0, name, 15, 1, 30, false, GameState.WAITING, null, 0, new HashMap<>());
-        this.games.add(game);
+        this.server.getData().games().add(game);
         return game;
     }
 
@@ -145,56 +132,6 @@ public class GameManager {
         }
     }
 
-    public ServerGame getServerGameByGame(Game game) {
-        Map<Integer, ServerPlayer> players = new HashMap<>();
-
-        try (PreparedStatement gameStatement = server.getDb().prepareStatement("SELECT * FROM game WHERE id = ?")) {
-            gameStatement.setInt(1, game.getId());
-            ResultSet gameResultSet = gameStatement.executeQuery();
-
-            if (gameResultSet.next()) {
-                try (PreparedStatement playerStatement = server.getDb().prepareStatement("SELECT id FROM player WHERE game_id = ?")) {
-                    playerStatement.setInt(1, game.getId());
-                    ResultSet playerResultSet = playerStatement.executeQuery();
-
-                    while (playerResultSet.next()) {
-                        int playerId = playerResultSet.getInt("id");
-                        ServerPlayer player = server.getUserManager().getPlayer(playerId);
-                        if (player != null) {
-                            players.put(playerId, player);
-                        }
-                    }
-                }
-
-                return new ServerGame(
-                        gameResultSet.getInt("id"),
-                        gameResultSet.getString("name"),
-                        gameResultSet.getInt("turn_interval"),
-                        gameResultSet.getInt("min_players"),
-                        gameResultSet.getInt("max_players"),
-                        false,
-                        GameState.valueOf(gameResultSet.getString("state")),
-                        gameResultSet.getTimestamp("last_turn_at"),
-                        gameResultSet.getInt("current_turn"),
-                        players
-                );
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    public ServerGame getGameById(int id) {
-        for (ServerGame game : this.games) {
-            if (game.getId() == id) {
-                return game;
-            }
-        }
-        return null;
-    }
-
     public void addConnectionToGame(ServerPlayer player, SocketWrapper sender) {
         this.currentlyPlayingMap.put(sender, player);
     }
@@ -214,27 +151,17 @@ public class GameManager {
             return;
         }
 
-        ServerGame game = getGameById(packet.getGameId());
-        if (game == null) {
-            Game realGame = null;
-            for (Game g : ServerData.getGames()) {
-                if (g.getId() == packet.getGameId()) {
-                    realGame = g;
-                    break;
-                }
+        Optional<ServerGame> optionalGame = Identifiable.getOptionalById(this.server.getData().games(), packet.getGameId());
+        if (optionalGame.isEmpty()) {
+            LogManager.logError("La partie " + packet.getGameId() + " n'existe pas.");
+            try {
+                sender.sendPacket(new PacketError(ErrorType.JOINING_GAME_GAME_NOT_FOUND));
+            } catch (IOException e) {
+                LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
             }
-            if (realGame == null) {
-                LogManager.logError("La partie " + packet.getGameId() + " n'existe pas.");
-                try {
-                    sender.sendPacket(new PacketError(ErrorType.JOINING_GAME_GAME_NOT_FOUND));
-                } catch (IOException e) {
-                    LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
-                }
-                return;
-            }
-            game = this.getServerGameByGame(realGame);
+            return;
         }
-
+        ServerGame game = optionalGame.get();
         ServerPlayer player = this.addPlayerToGame(user, game, packet.getChosenRace());
         if (player == null) {
             try {

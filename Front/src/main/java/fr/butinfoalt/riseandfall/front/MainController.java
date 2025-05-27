@@ -125,4 +125,8 @@ public class MainController {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
     }
+
+    public void showError(String message) {
+        // TODO : implémenter une méthode pour afficher les erreurs à l'utilisateur
+    }
 }

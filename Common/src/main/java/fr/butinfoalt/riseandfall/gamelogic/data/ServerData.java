@@ -9,31 +9,19 @@ import java.util.List;
  * Classe qui contient les données statiques du serveur.
  * Ces données sont envoyées au client lors de la connexion.
  * Elles contiennent les races, les types d'unités et les types de bâtiments.
+ *
+ * @param races         Liste des races
+ * @param buildingTypes Liste des types de bâtiments
+ * @param unitTypes     Liste des types d'unités
+ * @param games         Liste des games en attente
  */
-public final class ServerData {
+public record ServerData<G extends Game>(List<Race> races, List<BuildingType> buildingTypes, List<UnitType> unitTypes,
+                                         List<G> games) {
     /**
-     * Liste des races
+     * Instance unique de ServerData.
+     * Utilisée pour accéder aux données statiques du serveur depuis n'importe où dans le code, mais n'a pas de type spécifique pour <G>.
      */
-    private static List<Race> races;
-    /**
-     * Liste des types de bâtiments
-     */
-    private static List<BuildingType> buildingTypes;
-    /**
-     * Liste des types d'unités
-     */
-    private static List<UnitType> unitTypes;
-
-    /**
-     * Liste des games en attente
-     */
-    private static List<? extends Game> games;
-
-    /**
-     * Constructeur privé pour empêcher l'instanciation de cette classe.
-     */
-    private ServerData() {
-    }
+    private static ServerData<?> instance;
 
     /**
      * Initialise les données statiques du serveur.
@@ -43,41 +31,19 @@ public final class ServerData {
      * @param races         Liste des races
      * @param buildingTypes Liste des types de bâtiments
      * @param unitTypes     Liste des types d'unités
+     * @param games         Liste des parties
      */
-    public static void init(List<Race> races, List<BuildingType> buildingTypes, List<UnitType> unitTypes, List<? extends Game> games) {
-        ServerData.races = races;
-        ServerData.buildingTypes = buildingTypes;
-        ServerData.unitTypes = unitTypes;
-        ServerData.games = games;
+    public ServerData(List<Race> races, List<BuildingType> buildingTypes, List<UnitType> unitTypes, List<G> games) {
+        this.races = races;
+        this.buildingTypes = buildingTypes;
+        this.unitTypes = unitTypes;
+        this.games = games;
+        instance = this;
 
         LogManager.logMessage("%d races, %d types de bâtiments, %d types d'unités et %d parties chargées".formatted(races.size(), buildingTypes.size(), unitTypes.size(), games.size()));
     }
 
-    /**
-     * Récupère la liste des races
-     */
-    public static List<Race> getRaces() {
-        return races;
-    }
-
-    /**
-     * Récupère la liste des types de bâtiments
-     */
-    public static List<BuildingType> getBuildingTypes() {
-        return buildingTypes;
-    }
-
-    /**
-     * Récupère la liste des types d'unités
-     */
-    public static List<UnitType> getUnitTypes() {
-        return unitTypes;
-    }
-
-    /**
-     * Récupère la liste des games
-     */
-    public static List<? extends Game> getGames() {
-        return games;
+    public static ServerData<?> getInstance() {
+        return instance;
     }
 }

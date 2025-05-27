@@ -4,6 +4,7 @@ import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
+import fr.butinfoalt.riseandfall.network.common.IDeserializer;
 import fr.butinfoalt.riseandfall.network.common.IPacket;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
@@ -16,7 +17,7 @@ import java.util.List;
  * Il contient les données statiques du serveur, c'est-à-dire les races,
  * les types d'unités et les types de bâtiments.
  */
-public class PacketServerData implements IPacket {
+public class PacketServerData<G extends Game> implements IPacket {
     /**
      * Liste des races
      */
@@ -33,7 +34,7 @@ public class PacketServerData implements IPacket {
     /**
      * Liste des parties de jeu en attente
      */
-    private final List<? extends Game> games;
+    private final List<G> games;
 
     /**
      * Constructeur du paquet de données du serveur
@@ -42,7 +43,7 @@ public class PacketServerData implements IPacket {
      * @param unitTypes     Liste des types d'unités
      * @param buildingTypes Liste des types de bâtiments
      */
-    public PacketServerData(List<Race> raceList, List<UnitType> unitTypes, List<BuildingType> buildingTypes, List<? extends Game> games) {
+    public PacketServerData(List<Race> raceList, List<UnitType> unitTypes, List<BuildingType> buildingTypes, List<G> games) {
         this.races = raceList;
         this.unitTypes = unitTypes;
         this.buildingTypes = buildingTypes;
@@ -55,11 +56,11 @@ public class PacketServerData implements IPacket {
      * @param readHelper Le helper de lecture pour lire les données du paquet
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation
      */
-    public PacketServerData(ReadHelper readHelper) throws IOException {
+    public PacketServerData(ReadHelper readHelper, IDeserializer<G> gameDeserializer) throws IOException {
         this.races = readHelper.readSerializableList(Race::new);
         this.unitTypes = readHelper.readSerializableList(UnitType::new, this.races);
         this.buildingTypes = readHelper.readSerializableList(BuildingType::new, this.races);
-        this.games = readHelper.readSerializableList(Game::new);
+        this.games = readHelper.readSerializableList(gameDeserializer);
     }
 
     /**
@@ -108,7 +109,7 @@ public class PacketServerData implements IPacket {
      *
      * @return La liste des parties de jeu en attente
      */
-    public List<? extends Game> getGames() {
+    public List<G> getGames() {
         return this.games;
     }
 }

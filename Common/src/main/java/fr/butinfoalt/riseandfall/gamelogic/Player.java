@@ -11,7 +11,6 @@ import fr.butinfoalt.riseandfall.util.ObjectIntMap.Entry;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,12 +61,12 @@ public abstract class Player implements Identifiable, ISerializable {
         this.id = id;
         this.race = race;
         this.buildingMap = new ObjectIntMap<>(
-                ServerData.getBuildingTypes().stream()
+                ServerData.getInstance().buildingTypes().stream()
                         .filter(buildingType -> buildingType.getAccessibleByRace() == null || buildingType.getAccessibleByRace() == this.race)
                         .collect(Collectors.toList())
         );
         this.unitMap = new ObjectIntMap<>(
-                ServerData.getUnitTypes().stream()
+                ServerData.getInstance().unitTypes().stream()
                         .filter(unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race)
                         .collect(Collectors.toList())
         );

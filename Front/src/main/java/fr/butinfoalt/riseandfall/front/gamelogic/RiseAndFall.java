@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
+import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.network.packets.PacketInitialGameData;
 import javafx.stage.Stage;
 
@@ -25,6 +26,11 @@ public class RiseAndFall {
      * Instance du client socket.
      */
     private static RiseAndFallClient client;
+
+    /**
+     * Données du serveur envoyées au client.
+     */
+    private static ServerData<ClientGame> serverData;
 
     /**
      * Méthode pour obtenir le joueur actuel.
@@ -76,6 +82,16 @@ public class RiseAndFall {
     }
 
     /**
+     * Méthode pour obtenir les données du serveur.
+     * Ces données sont envoyées par le serveur lors de la connexion.
+     *
+     * @return Les données du serveur.
+     */
+    public static ServerData<ClientGame> getServerData() {
+        return serverData;
+    }
+
+    /**
      * Méthode pour initialiser la partie.
      * Appelée lors de la réception du paquet {@link PacketInitialGameData}.
      *
@@ -84,5 +100,9 @@ public class RiseAndFall {
     public static void initGame(PacketInitialGameData<ClientGame, ClientPlayer> packet) {
         game = packet.getGame();
         player = packet.getPlayer();
+    }
+
+    public static void initServerData(ServerData<ClientGame> serverData) {
+        RiseAndFall.serverData = serverData;
     }
 }

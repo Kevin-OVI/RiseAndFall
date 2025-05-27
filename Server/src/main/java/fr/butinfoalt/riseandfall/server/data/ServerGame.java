@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.server.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.server.RiseAndFallServer;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
 
 import java.sql.Timestamp;
@@ -169,6 +170,17 @@ public class ServerGame extends Game {
             throw new IllegalStateException("Cannot add player, game is full.");
         }
 
+        this.players.put(player.getUser().getId(), player);
+    }
+
+    /**
+     * Méthode pour ajouter un joueur de manière forcée à la partie, sans vérifier son état.
+     * Cette méthode est utilisée lors du chargement des joueurs d'une partie depuis la base de données, voir {@link RiseAndFallServer#loadServerData()}
+     * Ne pas utiliser en fonctionnement normal pour ajouter des joueurs pendant le jeu, car cela pourrait violer les règles de la partie et causer des incohérences avec les joueurs déjà présents.
+     *
+     * @param player Le joueur à ajouter.
+     */
+    public void forceAddPlayer(ServerPlayer player) {
         this.players.put(player.getUser().getId(), player);
     }
 

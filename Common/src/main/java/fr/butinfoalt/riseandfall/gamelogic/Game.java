@@ -13,7 +13,7 @@ import java.sql.Timestamp;
  * Elle contient les informations de base sur la partie, telles que l'identifiant, le nom, l'intervalle entre les tours,
  * l'état de la partie, le timestamp du dernier tour et le tour actuel.
  */
-public class Game implements Identifiable, ISerializable {
+public abstract class Game implements Identifiable, ISerializable {
     /**
      * Identifiant de la partie dans la base de données.
      */
