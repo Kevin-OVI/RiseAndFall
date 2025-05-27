@@ -2,7 +2,6 @@ package fr.butinfoalt.riseandfall.gamelogic.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,7 +26,7 @@ public final class ServerData {
     /**
      * Liste des games en attente
      */
-    private static List<Game> games;
+    private static List<? extends Game> games;
 
     /**
      * Constructeur privé pour empêcher l'instanciation de cette classe.
@@ -44,7 +43,7 @@ public final class ServerData {
      * @param buildingTypes Liste des types de bâtiments
      * @param unitTypes     Liste des types d'unités
      */
-    public static void init(List<Race> races, List<BuildingType> buildingTypes, List<UnitType> unitTypes, List<Game> games) {
+    public static void init(List<Race> races, List<BuildingType> buildingTypes, List<UnitType> unitTypes, List<? extends Game> games) {
         ServerData.races = races;
         ServerData.buildingTypes = buildingTypes;
         ServerData.unitTypes = unitTypes;
@@ -80,7 +79,7 @@ public final class ServerData {
     /**
      * Récupère la liste des games
      */
-    public static List<Game> getGames() {
+    public static List<? extends Game> getGames() {
         return games;
     }
 }

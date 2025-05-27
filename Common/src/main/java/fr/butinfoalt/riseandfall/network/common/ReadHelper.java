@@ -4,10 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Classe utilitaire pour lire des données à partir d'un flux d'entrée.
@@ -278,15 +279,14 @@ public class ReadHelper {
      * @return Le tableau d'objets sérialisables lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public <T extends ISerializable> T[] readSerializableArray(Class<T> arrayComponentType, IDeserializer<T> deserializer) throws IOException {
+    public <T extends ISerializable> List<T> readSerializableList(IDeserializer<T> deserializer) throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
-        @SuppressWarnings("unchecked")
-        T[] array = (T[]) Array.newInstance(arrayComponentType, size);
+        List<T> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            array[i] = deserializer.deserialize(this);
+            list.add(deserializer.deserialize(this));
         }
-        return array;
+        return list;
     }
 
     /**
@@ -299,15 +299,14 @@ public class ReadHelper {
      * @return Le tableau d'objets sérialisables lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public <T extends ISerializable, U> T[] readSerializableArray(Class<T> arrayComponentType,  IContextDeserializer<T, U> deserializer, U context) throws IOException {
+    public <T extends ISerializable, U> List<T> readSerializableList(IContextDeserializer<T, U> deserializer, U context) throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
-        @SuppressWarnings("unchecked")
-        T[] array = (T[]) Array.newInstance(arrayComponentType, size);
+        List<T> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            array[i] = deserializer.deserialize(this, context);
+            list.add(deserializer.deserialize(this, context));
         }
-        return array;
+        return list;
     }
 
     /**

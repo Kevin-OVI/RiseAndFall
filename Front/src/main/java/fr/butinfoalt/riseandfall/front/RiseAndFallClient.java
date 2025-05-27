@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * Client socket pour le jeu Rise and Fall.
@@ -97,7 +96,7 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param packet Le paquet reçu.
      */
     private void onServerData(SocketWrapper sender, PacketServerData packet) {
-        ServerData.init(List.of(packet.getRaces()), List.of(packet.getBuildingTypes()), List.of(packet.getUnitTypes()), List.of(packet.getGames()));
+        ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes(), packet.getGames());
         try {
             String token = new String(Files.readAllBytes(Paths.get("auth_token.txt")));
             System.out.println("Token récupéré : " + token);

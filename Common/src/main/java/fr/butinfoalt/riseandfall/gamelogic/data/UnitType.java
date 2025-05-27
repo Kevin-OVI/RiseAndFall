@@ -6,6 +6,7 @@ import fr.butinfoalt.riseandfall.network.common.WriteHelper;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Représente un type d'unité disponible dans le jeu.
@@ -84,7 +85,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      * @param races      Un tableau contenant les races déjà désérialisées
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
-    public UnitType(ReadHelper readHelper, Race[] races) throws IOException {
+    public UnitType(ReadHelper readHelper, List<Race> races) throws IOException {
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
         this.description = readHelper.readString();

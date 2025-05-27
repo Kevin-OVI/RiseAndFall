@@ -1,6 +1,5 @@
 package fr.butinfoalt.riseandfall.server;
 
-import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
@@ -15,7 +14,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 import static fr.butinfoalt.riseandfall.server.Environment.SERVER_PORT;
 
@@ -74,16 +76,16 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     private void loadServerData() {
         try {
-            Race[] races;
-            User[] users;
-            ServerPlayer[] players;
-            ServerGame[] games;
+            List<Race> races = new ArrayList<>();
+            List<User> users = new ArrayList<>();
+            List<ServerPlayer> players = new ArrayList<>();
+            List<ServerGame> games = new ArrayList<>();
 
             List<BuildingType> buildingTypes = new ArrayList<>();
             List<UnitType> unitTypes = new ArrayList<>();
 
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, gold_multiplier, intelligence_multiplier, damage_multiplier, health_multiplier FROM race ORDER BY id")) {
-                List<Race> racesList = new ArrayList<>();
+
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
@@ -93,9 +95,8 @@ public class RiseAndFallServer extends BaseSocketServer {
                     float intelligenceMultiplier = set.getFloat("intelligence_multiplier");
                     float damageMultiplier = set.getFloat("damage_multiplier");
                     float healthMultiplier = set.getFloat("health_multiplier");
-                    racesList.add(new Race(id, name, description, goldMultiplier, intelligenceMultiplier, damageMultiplier, healthMultiplier));
+                    races.add(new Race(id, name, description, goldMultiplier, intelligenceMultiplier, damageMultiplier, healthMultiplier));
                 }
-                races = racesList.toArray(new Race[0]);
             }
 
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, price, required_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type ORDER BY id")) {
@@ -133,7 +134,6 @@ public class RiseAndFallServer extends BaseSocketServer {
                 }
             }
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM game")) {
-                List<ServerGame> gameList = new ArrayList<>();
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
@@ -143,25 +143,21 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int maxPlayers = set.getInt("max_players");
                     boolean isPrivate = false;
                     GameState state = GameState.valueOf(set.getString("state"));
-                    gameList.add(new ServerGame(id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, null, 0, new HashMap<>()));
+                    games.add(new ServerGame(id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, null, 0, new HashMap<>()));
                 }
-                games = gameList.toArray(new ServerGame[0]);
-                this.gameManager = new GameManager(this, new HashSet<>(gameList));
+                this.gameManager = new GameManager(this, new HashSet<>(games));
             }
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM `user`")) {
-                List<User> userList = new ArrayList<>();
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
                     String username = set.getString("username");
-                    userList.add(new User(id, username));
+                    users.add(new User(id, username));
                 }
-                users = userList.toArray(new User[0]);
             }
-            ServerData.init(List.of(races), buildingTypes, unitTypes, List.of(games));
+            ServerData.init(races, buildingTypes, unitTypes, games);
 
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM `player`")) {
-                List<ServerPlayer> playerList = new ArrayList<>();
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
@@ -173,12 +169,11 @@ public class RiseAndFallServer extends BaseSocketServer {
                     ServerPlayer player = new ServerPlayer(id, user, game, race);
                     player.setGoldAmount(gold);
                     player.setIntelligence(intelligence);
-                    playerList.add(player);
+                    players.add(player);
                     game.addPlayer(player);
                 }
-                players = playerList.toArray(new ServerPlayer[0]);
             }
-            this.userManager = new UserManager(this, new HashSet<>(Arrays.asList(users)), new HashSet<>(Arrays.asList(players)));
+            this.userManager = new UserManager(this, users, players);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -196,10 +191,10 @@ public class RiseAndFallServer extends BaseSocketServer {
         System.out.println("Client connecté : " + client.getName());
         try {
             client.sendPacket(new PacketServerData(
-                    ServerData.getRaces().toArray(new Race[0]),
-                    ServerData.getUnitTypes().toArray(new UnitType[0]),
-                    ServerData.getBuildingTypes().toArray(new BuildingType[0]),
-                    ServerData.getGames().toArray(new Game[0])
+                    ServerData.getRaces(),
+                    ServerData.getUnitTypes(),
+                    ServerData.getBuildingTypes(),
+                    ServerData.getGames()
             ));
         } catch (IOException e) {
             System.err.println("Erreur lors de l'envoi des données du serveur au client : " + e.getMessage());

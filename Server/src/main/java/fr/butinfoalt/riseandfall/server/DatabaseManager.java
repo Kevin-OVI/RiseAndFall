@@ -92,6 +92,9 @@ public class DatabaseManager implements AutoCloseable {
         return this.db = connectToDatabase();
     }
 
+    /**
+     * Méthode pour fermer la connexion à la base de données.
+     */
     public void close() {
         if (this.db != null) {
             try {

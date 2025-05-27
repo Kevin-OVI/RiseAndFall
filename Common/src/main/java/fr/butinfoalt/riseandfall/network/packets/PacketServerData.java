@@ -9,6 +9,7 @@ import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Un paquet envoyé au client lors de sa connexion au serveur.
@@ -19,20 +20,20 @@ public class PacketServerData implements IPacket {
     /**
      * Liste des races
      */
-    private final Race[] races;
+    private final List<Race> races;
     /**
      * Liste des types d'unités
      */
-    private final UnitType[] unitTypes;
+    private final List<UnitType> unitTypes;
     /**
      * Liste des types de bâtiments
      */
-    private final BuildingType[] buildingTypes;
+    private final List<BuildingType> buildingTypes;
 
     /**
      * Liste des parties de jeu en attente
      */
-    private final Game[] games;
+    private final List<? extends Game> games;
 
     /**
      * Constructeur du paquet de données du serveur
@@ -41,7 +42,7 @@ public class PacketServerData implements IPacket {
      * @param unitTypes     Liste des types d'unités
      * @param buildingTypes Liste des types de bâtiments
      */
-    public PacketServerData(Race[] raceList, UnitType[] unitTypes, BuildingType[] buildingTypes, Game[] games) {
+    public PacketServerData(List<Race> raceList, List<UnitType> unitTypes, List<BuildingType> buildingTypes, List<? extends Game> games) {
         this.races = raceList;
         this.unitTypes = unitTypes;
         this.buildingTypes = buildingTypes;
@@ -55,10 +56,10 @@ public class PacketServerData implements IPacket {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation
      */
     public PacketServerData(ReadHelper readHelper) throws IOException {
-        this.races = readHelper.readSerializableArray(Race.class, Race::new);
-        this.unitTypes = readHelper.readSerializableArray(UnitType.class, UnitType::new, this.races);
-        this.buildingTypes = readHelper.readSerializableArray(BuildingType.class, BuildingType::new, this.races);
-        this.games = readHelper.readSerializableArray(Game.class, Game::new);
+        this.races = readHelper.readSerializableList(Race::new);
+        this.unitTypes = readHelper.readSerializableList(UnitType::new, this.races);
+        this.buildingTypes = readHelper.readSerializableList(BuildingType::new, this.races);
+        this.games = readHelper.readSerializableList(Game::new);
     }
 
     /**
@@ -69,10 +70,10 @@ public class PacketServerData implements IPacket {
      */
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
-        writeHelper.writeSerializableArray(this.races);
-        writeHelper.writeSerializableArray(this.unitTypes);
-        writeHelper.writeSerializableArray(this.buildingTypes);
-        writeHelper.writeSerializableArray(this.games);
+        writeHelper.writeSerializableList(this.races);
+        writeHelper.writeSerializableList(this.unitTypes);
+        writeHelper.writeSerializableList(this.buildingTypes);
+        writeHelper.writeSerializableList(this.games);
     }
 
     /**
@@ -80,7 +81,7 @@ public class PacketServerData implements IPacket {
      *
      * @return La liste des races
      */
-    public Race[] getRaces() {
+    public List<Race> getRaces() {
         return this.races;
     }
 
@@ -89,7 +90,7 @@ public class PacketServerData implements IPacket {
      *
      * @return La liste des types d'unités
      */
-    public UnitType[] getUnitTypes() {
+    public List<UnitType> getUnitTypes() {
         return this.unitTypes;
     }
 
@@ -98,7 +99,7 @@ public class PacketServerData implements IPacket {
      *
      * @return La liste des types de bâtiments
      */
-    public BuildingType[] getBuildingTypes() {
+    public List<BuildingType> getBuildingTypes() {
         return this.buildingTypes;
     }
 
@@ -107,7 +108,7 @@ public class PacketServerData implements IPacket {
      *
      * @return La liste des parties de jeu en attente
      */
-    public Game[] getGames() {
+    public List<? extends Game> getGames() {
         return this.games;
     }
 }

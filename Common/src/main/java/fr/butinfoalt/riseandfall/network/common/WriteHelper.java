@@ -3,6 +3,7 @@ package fr.butinfoalt.riseandfall.network.common;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 
 /**
  * Classe utilitaire pour écrire des données dans un flux de sortie.
@@ -267,17 +268,17 @@ public class WriteHelper {
     }
 
     /**
-     * Écris un tableau d'objets sérialisables dans le flux de sortie.
+     * Écris une collection d'objets sérialisables dans le flux de sortie.
      *
      * @param serializables Le tableau d'objets sérialisables à écrire.
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
-    public void writeSerializableArray(ISerializable[] serializables) throws IOException {
+    public void writeSerializableList(Collection<? extends ISerializable> serializables) throws IOException {
         if (serializables == null) {
             this.writeInt(-1);
             return;
         }
-        this.writeInt(serializables.length);
+        this.writeInt(serializables.size());
         for (ISerializable serializable : serializables) {
             serializable.toBytes(this);
         }

@@ -1,9 +1,11 @@
 package fr.butinfoalt.riseandfall.server;
 
-import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class UserManager {
     /**
@@ -13,24 +15,24 @@ public class UserManager {
     private final RiseAndFallServer server;
 
     /**
-     * Ensemble de toutes les utilisateurs
+     * Ensemble de tous les utilisateurs
      */
-    private final HashSet<User> users = new HashSet<>();
+    private final Map<Integer, User> users;
 
     /**
      * Ensemble de toutes les players
      */
-    private final HashSet<ServerPlayer> players = new HashSet<>();
+    private final Map<Integer, ServerPlayer> players;
 
     /**
      * Constructeur de la classe UserManager.
      *
      * @param server Instance du serveur.
      */
-    public UserManager(RiseAndFallServer server, HashSet<User> users, HashSet<ServerPlayer> players) {
+    public UserManager(RiseAndFallServer server, List<User> users, List<ServerPlayer> players) {
         this.server = server;
-        this.users.addAll(users);
-        this.players.addAll(players);
+        this.users = users.stream().collect(Collectors.toMap(User::getId, user -> user));
+        this.players = players.stream().collect(Collectors.toMap(ServerPlayer::getId, p -> p));
     }
 
     /**
@@ -39,7 +41,7 @@ public class UserManager {
      * @param user Utilisateur à ajouter.
      */
     public void addUser(User user) {
-        this.users.add(user);
+        this.users.put(user.getId(), user);
     }
 
     /**
@@ -48,7 +50,7 @@ public class UserManager {
      * @param user Utilisateur à supprimer.
      */
     public void removeUser(User user) {
-        this.users.remove(user);
+        this.users.remove(user.getId());
     }
 
     /**
@@ -57,7 +59,7 @@ public class UserManager {
      * @param player Joueur à ajouter.
      */
     public void addPlayer(ServerPlayer player) {
-        this.players.add(player);
+        this.players.put(player.getId(), player);
     }
 
     /**
@@ -66,7 +68,7 @@ public class UserManager {
      * @param player Joueur à supprimer.
      */
     public void removePlayer(ServerPlayer player) {
-        this.players.remove(player);
+        this.players.remove(player.getId());
     }
 
     /**
@@ -74,8 +76,8 @@ public class UserManager {
      *
      * @return Ensemble de tous les utilisateurs.
      */
-    public HashSet<User> getUsers() {
-        return this.users;
+    public Collection<User> getUsers() {
+        return this.users.values();
     }
 
     /**
@@ -83,8 +85,8 @@ public class UserManager {
      *
      * @return Ensemble de tous les joueurs.
      */
-    public HashSet<ServerPlayer> getPlayers() {
-        return this.players;
+    public Collection<ServerPlayer> getPlayers() {
+        return this.players.values();
     }
 
     /**
@@ -94,12 +96,7 @@ public class UserManager {
      * @return le joueur
      */
     public ServerPlayer getPlayer(int id) {
-        for (ServerPlayer player : this.players) {
-            if (player.getId() == id) {
-                return player;
-            }
-        }
-        return null;
+        return this.players.get(id);
     }
 
     /**
@@ -109,11 +106,6 @@ public class UserManager {
      * @return L'utilisateur correspondant à l'identifiant, ou null si aucun utilisateur ne correspond.
      */
     public User getUser(int id) {
-        for (User user : this.users) {
-            if (user.getId() == id) {
-                return user;
-            }
-        }
-        return null;
+        return this.getUser(id);
     }
 }
