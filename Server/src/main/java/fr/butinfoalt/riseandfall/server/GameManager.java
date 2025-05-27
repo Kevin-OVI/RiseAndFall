@@ -2,7 +2,6 @@ package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
-import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
@@ -13,9 +12,13 @@ import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -76,7 +79,7 @@ public class GameManager {
      * @return La nouvelle partie créée.
      */
     public synchronized ServerGame newGame(String name) {
-        System.out.println("Création de la partie : " + name);
+        LogManager.logMessage("Création de la partie : " + name);
         ServerGame game = new ServerGame(0, name, 15, 1, 30, false, GameState.WAITING, null, 0, new HashMap<>());
         this.games.add(game);
         return game;
@@ -136,8 +139,7 @@ public class GameManager {
                 try {
                     connection.sendPacket(packet);
                 } catch (IOException e) {
-                    System.err.printf("Erreur lors de l'envoi du paquet de mise à jour des données du joueur %s à la connexion %s :%n", player.getUser().getUsername(), connection.getName());
-                    e.printStackTrace();
+                    LogManager.logError("Erreur lors de l'envoi du paquet de mise à jour des données du joueur " + player.getUser().getUsername() + " à la connexion " + connection.getName(), e);
                 }
             }
         }
@@ -157,10 +159,9 @@ public class GameManager {
 
                     while (playerResultSet.next()) {
                         int playerId = playerResultSet.getInt("id");
-                        Player player = server.getUserManager().getPlayer(playerId);
-
-                        if (player instanceof ServerPlayer) {
-                            players.put(playerId, (ServerPlayer) player);
+                        ServerPlayer player = server.getUserManager().getPlayer(playerId);
+                        if (player != null) {
+                            players.put(playerId, player);
                         }
                     }
                 }
@@ -209,7 +210,7 @@ public class GameManager {
     public synchronized void onCreateOrJoinGame(SocketWrapper sender, PacketCreateOrJoinGame packet) {
         User user = this.server.getAuthManager().getUser(sender);
         if (user == null) {
-            System.err.printf("La connexion %s n'est pas authentifié. Impossible de créer une partie.%n", sender.getName());
+            LogManager.logError("La connexion " + sender.getName() + " n'est pas authentifiée. Impossible de créer une partie.");
             return;
         }
 
@@ -223,7 +224,7 @@ public class GameManager {
                 }
             }
             if (realGame == null) {
-                System.err.printf("La partie %d n'existe pas.%n", packet.getGameId());
+                LogManager.logError("La partie " + packet.getGameId() + " n'existe pas.");
                 try {
                     sender.sendPacket(new PacketError(ErrorType.JOINING_GAME_GAME_NOT_FOUND));
                 } catch (IOException e) {
@@ -235,14 +236,12 @@ public class GameManager {
         }
 
         ServerPlayer player = this.addPlayerToGame(user, game, packet.getChosenRace());
-
+        this.currentlyPlayingMap.put(sender, player);
         try {
             sender.sendPacket(new PacketInitialGameData<>(game, player));
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi du paquet de connexion à la partie : ");
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de l'envoi des données initiales de la partie au client " + sender.getName(), e);
         }
-        this.currentlyPlayingMap.put(sender, player);
     }
 
     /**
@@ -255,7 +254,7 @@ public class GameManager {
     public synchronized void onUpdateOrders(SocketWrapper sender, PacketUpdateOrders packet) {
         ServerPlayer player = this.currentlyPlayingMap.get(sender);
         if (player == null) {
-            System.err.printf("La connexion %s n'est pas dans une partie. Impossible de mettre à jour les ordres.%n", sender.getName());
+            LogManager.logError("La connexion " + sender.getName() + " n'est pas dans une partie. Impossible de mettre à jour les ordres.");
             return;
         }
 
@@ -270,19 +269,19 @@ public class GameManager {
             if (order instanceof OrderCreateBuilding orderCreateBuilding) {
                 buildingsCapacity -= orderCreateBuilding.getCount();
                 if (playerIntelligence < orderCreateBuilding.getBuildingType().getRequiredIntelligence()) {
-                    System.err.printf("Le joueur %s n'a pas assez d'intelligence pour construire le bâtiment %s.%n", player.getUser().getUsername(), orderCreateBuilding.getBuildingType());
+                    LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez d'intelligence pour construire le bâtiment " + orderCreateBuilding.getBuildingType() + ".");
                     return;
                 }
             } else if (order instanceof OrderCreateUnit orderCreateUnit) {
                 unitsCapacity -= orderCreateUnit.getCount();
                 if (playerIntelligence < orderCreateUnit.getUnitType().getRequiredIntelligence()) {
-                    System.err.printf("Le joueur %s n'a pas assez d'intelligence pour créer l'unité %s.%n", player.getUser().getUsername(), orderCreateUnit.getUnitType());
+                    LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez d'intelligence pour créer l'unité " + orderCreateUnit.getUnitType() + ".");
                     return;
                 }
             }
         }
         if (goldCapacity < 0 || unitsCapacity < 0 || buildingsCapacity < 0) {
-            System.err.printf("Le joueur %s n'a pas assez de ressources pour exécuter les ordres demandés.%n", player.getUser().getUsername());
+            LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez de ressources pour exécuter les ordres demandés.");
             return;
         }
 
@@ -300,7 +299,7 @@ public class GameManager {
     public synchronized void onNextTurn(SocketWrapper sender) {
         ServerPlayer player = this.currentlyPlayingMap.get(sender);
         if (player == null) {
-            System.err.printf("La connexion %s n'est pas dans une partie. Impossible de passer au tour suivant.%n", sender.getName());
+            LogManager.logError("La connexion " + sender.getName() + " n'est pas dans une partie. Impossible de passer au tour suivant.");
             return;
         }
 
@@ -308,8 +307,7 @@ public class GameManager {
         try {
             game.nextTurn();
         } catch (IllegalStateException e) {
-            System.err.println("Erreur lors du passage au tour suivant : ");
-            e.printStackTrace();
+            LogManager.logError("Erreur lors du passage au tour suivant pour le joueur " + player.getUser().getUsername() + " dans la partie " + game.getName() + ": ", e);            e.printStackTrace();
             return;
         }
 

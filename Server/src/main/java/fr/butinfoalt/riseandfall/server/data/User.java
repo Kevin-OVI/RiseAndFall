@@ -1,6 +1,9 @@
 package fr.butinfoalt.riseandfall.server.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
+
+import java.util.Objects;
 
 /**
  * Classe représentant un utilisateur.
@@ -44,5 +47,25 @@ public class User implements Identifiable {
      */
     public String getUsername() {
         return this.username;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return this.id == user.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.id);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringFormatter("User")
+                .add("id", this.id)
+                .add("username", this.username)
+                .build();
     }
 }

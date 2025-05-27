@@ -188,7 +188,7 @@ public class RiseAndFallServer extends BaseSocketServer {
     @Override
     public void onClientConnected(SocketWrapper client) {
         super.onClientConnected(client);
-        System.out.println("Client connecté : " + client.getName());
+        LogManager.logMessage("Client connecté : " + client.getName());
         try {
             client.sendPacket(new PacketServerData(
                     ServerData.getRaces(),
@@ -197,11 +197,11 @@ public class RiseAndFallServer extends BaseSocketServer {
                     ServerData.getGames()
             ));
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi des données du serveur au client : " + e.getMessage());
+            LogManager.logError("Erreur lors de l'envoi des données du serveur au client :", e);
             try {
                 client.close();
             } catch (IOException ignored) {
-                System.err.println("Erreur lors de la fermeture de la connexion du client : " + client.getName());
+                LogManager.logError("Erreur lors de la fermeture de la connexion du client :", e);
             }
         }
     }
@@ -216,7 +216,7 @@ public class RiseAndFallServer extends BaseSocketServer {
         super.onClientDisconnected(client);
         this.gameManager.onClientDisconnected(client);
         this.authManager.onClientDisconnected(client);
-        System.out.println("Client déconnecté : " + client.getName());
+        LogManager.logMessage("Client déconnecté : " + client.getName());
     }
 
     /**

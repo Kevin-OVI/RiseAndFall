@@ -106,14 +106,15 @@ public class AuthenticationManager {
      */
     private User getUserFromCredentials(String username, String password) {
         String hashedPassword = hashPassword(password);
-        System.out.println("Mot de passe haché : " + hashedPassword);
         try {
             try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT id FROM user WHERE username = ? AND password_hash = ?")) {
                 statement.setString(1, username);
                 statement.setString(2, hashedPassword);
                 ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
-                    return new User(resultSet.getInt("id"), username);
+                    User user = this.server.getUserManager().getUser(resultSet.getInt("id"));
+                    LogManager.logMessage("Utilisateur authentifié : " + user);
+                    return user;
                 }
             }
         } catch (Exception e) {
@@ -129,11 +130,11 @@ public class AuthenticationManager {
      * @return L'utilisateur associé au token, ou null si aucun utilisateur n'est trouvé.
      */
     private User getUserFromToken(String token) {
-        try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT user.id, user.username FROM user JOIN user_token ON user.id = user_token.user_id WHERE token = ?")) {
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT user.id FROM user JOIN user_token ON user.id = user_token.user_id WHERE token = ?")) {
             statement.setString(1, token);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return new User(resultSet.getInt("user.id"), resultSet.getString("user.username"));
+                return this.server.getUserManager().getUser(resultSet.getInt("user.id"));
             }
         } catch (Exception e) {
             LogManager.logError("Erreur lors de la récupération de l'utilisateur à partir du token", e);
@@ -173,8 +174,9 @@ public class AuthenticationManager {
             statement.execute();
             ResultSet resultSet = statement.getResultSet();
             if (resultSet.next()) {
-                System.out.println(resultSet.getInt("id"));
-                return new User(resultSet.getInt("id"), username);
+                User user = new User(resultSet.getInt("id"), username);
+                LogManager.logMessage("Nouvel utilisateur créé : " + user);
+                return user;
             }
             LogManager.logError("Erreur lors de la création de l'utilisateur, aucun id retourné");
         } catch (Exception e) {

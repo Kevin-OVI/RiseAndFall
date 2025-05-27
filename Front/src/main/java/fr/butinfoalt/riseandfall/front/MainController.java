@@ -6,6 +6,7 @@ import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -79,8 +80,7 @@ public class MainController {
         try {
             RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.NEXT_TURN));
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi du paquet de fin de tour :");
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de l'envoi du paquet de fin de tour", e);
         }
     }
 
@@ -92,8 +92,8 @@ public class MainController {
         try {
             RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.QUIT_GAME));
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi du paquet pour quitter la partie :");
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de l'envoi du paquet pour quitter la partie", e);
+            return;
         }
         RiseAndFall.resetPlayer();
         RiseAndFallApplication.switchToView(View.GAME_LIST, true);

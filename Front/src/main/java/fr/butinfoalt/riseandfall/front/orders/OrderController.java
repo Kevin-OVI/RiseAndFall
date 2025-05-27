@@ -17,11 +17,11 @@ import fr.butinfoalt.riseandfall.network.packets.PacketUpdateOrders;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.counter.Counter;
 import fr.butinfoalt.riseandfall.util.counter.Modifier;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -169,8 +169,7 @@ public class OrderController {
         try {
             RiseAndFall.getClient().sendPacket(new PacketUpdateOrders(newOrders));
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi du paquet de mise à jour des ordres : ");
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de l'envoi du paquet de mise à jour des ordres", e);
             return;
         }
         RiseAndFall.getPlayer().updatePendingOrders(newOrders);

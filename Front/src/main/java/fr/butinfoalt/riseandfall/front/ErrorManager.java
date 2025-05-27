@@ -5,6 +5,7 @@ import fr.butinfoalt.riseandfall.front.authentification.RegisterController;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.PacketError;
 import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Platform;
 
 public class ErrorManager {
@@ -16,18 +17,17 @@ public class ErrorManager {
 
     public void onError(SocketWrapper sender, PacketError packetError) {
         ErrorType errorType = packetError.getErrorType();
-        System.err.println("Erreur reçue du serveur : " + errorType);
         Platform.runLater(() -> {
             switch (errorType) {
                 case LOGIN_GENERIC_ERROR, LOGIN_INVALID_CREDENTIALS, LOGIN_INVALID_SESSION -> {
                     RiseAndFallApplication.switchToView(View.LOGIN, true);
-                        ((LoginController) View.LOGIN.getController()).showError(errorType.getMessage());
+                    ((LoginController) View.LOGIN.getController()).showError(errorType.getMessage());
                 }
                 case REGISTER_GENERIC_ERROR, REGISTER_USERNAME_TAKEN -> {
                     RiseAndFallApplication.switchToView(View.REGISTER, true);
                     ((RegisterController) View.REGISTER.getController()).showError(errorType.getMessage());
                 }
-                default -> System.out.println("Erreur inconnue : " + errorType.getMessage());
+                default -> LogManager.logError("Erreur inconnue : " + errorType.getMessage());
             }
         });
     }

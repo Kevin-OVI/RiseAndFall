@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.gamelogic.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.util.List;
 
@@ -49,10 +50,7 @@ public final class ServerData {
         ServerData.unitTypes = unitTypes;
         ServerData.games = games;
 
-        System.out.println("Races: " + races.toString());
-        System.out.println("Building types: " + buildingTypes.toString());
-        System.out.println("Unit types: " + unitTypes.toString());
-        System.out.println("Games: " + games.toString());
+        LogManager.logMessage("%d races, %d types de bâtiments, %d types d'unités et %d parties chargées".formatted(races.size(), buildingTypes.size(), unitTypes.size(), games.size()));
     }
 
     /**

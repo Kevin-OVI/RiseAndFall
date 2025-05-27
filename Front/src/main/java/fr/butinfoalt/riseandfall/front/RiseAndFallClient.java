@@ -10,6 +10,7 @@ import fr.butinfoalt.riseandfall.network.client.BaseSocketClient;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Platform;
 
 import java.io.FileWriter;
@@ -99,12 +100,16 @@ public class RiseAndFallClient extends BaseSocketClient {
         ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes(), packet.getGames());
         try {
             String token = new String(Files.readAllBytes(Paths.get("auth_token.txt")));
-            System.out.println("Token récupéré : " + token);
+            LogManager.logMessage("Envoi du token d'authentification...");
             sender.sendPacket(new PacketToken(token));
+            return;
         } catch (IOException e) {
-            System.err.println("Erreur lors de la lecture du fichier auth_token.txt : ");
-            Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOGIN, true));
+            LogManager.logMessage("Impossible de lire le fichier d'authentification, affichage de la vue de connexion.");
+        } catch (Throwable e) {
+            LogManager.logError("Erreur lors de la lecture du fichier d'authentification, affichage de la vue de connexion.", e);
         }
+
+        Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOGIN, true));
     }
 
     /**
