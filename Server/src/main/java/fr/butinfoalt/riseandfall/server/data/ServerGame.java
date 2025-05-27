@@ -168,6 +168,7 @@ public class ServerGame extends Game {
         if (this.players.size() >= this.maxPlayers) {
             throw new IllegalStateException("Cannot add player, game is full.");
         }
+
         this.players.put(player.getUser().getId(), player);
     }
 
@@ -182,6 +183,7 @@ public class ServerGame extends Game {
         if (this.state != GameState.WAITING) {
             throw new IllegalStateException("Cannot remove player from a game that has already started.");
         }
+
         return this.players.remove(user.getId());
     }
 }

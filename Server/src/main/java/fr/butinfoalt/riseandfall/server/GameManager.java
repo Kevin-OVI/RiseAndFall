@@ -1,30 +1,27 @@
 package fr.butinfoalt.riseandfall.server;
 
+import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
+import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
-import fr.butinfoalt.riseandfall.network.packets.PacketCreateOrJoinGame;
-import fr.butinfoalt.riseandfall.network.packets.PacketInitialGameData;
-import fr.butinfoalt.riseandfall.network.packets.PacketUpdateGameData;
-import fr.butinfoalt.riseandfall.network.packets.PacketUpdateOrders;
+import fr.butinfoalt.riseandfall.network.packets.*;
+import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 
 import java.io.IOException;
+import java.sql.*;
 import java.util.*;
 
 /**
  * Classe gérant les parties de jeu.
  */
 public class GameManager {
-    /**
-     * Compteur d'identifiant de partie.
-     */
-    // TODO : Récupérer l'identifiant depuis la base de données au lieu d'utiliser un compteur
-    private int gameIdCounter = 0;
     /**
      * Ensemble de toutes les parties crées
      */
@@ -44,8 +41,9 @@ public class GameManager {
      *
      * @param server Instance du serveur.
      */
-    public GameManager(RiseAndFallServer server) {
+    public GameManager(RiseAndFallServer server, HashSet<ServerGame> games) {
         this.server = server;
+        this.games.addAll(games);
     }
 
     /**
@@ -65,6 +63,13 @@ public class GameManager {
     }
 
     /**
+     * Fonction pour recuperer la listes des parties
+     */
+    public ServerGame[] getGames() {
+        return this.games.toArray(new ServerGame[0]);
+    }
+
+    /**
      * Crée une nouvelle partie de jeu.
      *
      * @param name Le nom de la partie.
@@ -72,8 +77,7 @@ public class GameManager {
      */
     public synchronized ServerGame newGame(String name) {
         System.out.println("Création de la partie : " + name);
-        // Création d'une partie temporaire avec un seul joueur pour le moment
-        ServerGame game = new ServerGame(this.gameIdCounter++, name, 15, 1, 30, false, GameState.WAITING, null, 0, new HashMap<>());
+        ServerGame game = new ServerGame(0, name, 15, 1, 30, false, GameState.WAITING, null, 0, new HashMap<>());
         this.games.add(game);
         return game;
     }
@@ -86,10 +90,35 @@ public class GameManager {
      * @param race La race choisie par le joueur.
      * @return Le joueur ajouté à la partie.
      */
-    public ServerPlayer addPlayerToGame(User user, ServerGame game, Race race) {
-        // TODO : Récupérer l'identifiant du joueur depuis la base de données.
-        //  Pour le moment l'identifiant est 0 car il y a toujours un seul joueur par partie
-        ServerPlayer player = new ServerPlayer(0, user, game, race);
+    private ServerPlayer addPlayerToGame(User user, ServerGame game, Race race) {
+        int playerId = -1;
+        try (PreparedStatement statement = server.getDb().prepareStatement(
+                "INSERT INTO player (user_id, game_id, race_id) VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS)) {
+
+            statement.setInt(1, user.getId());
+            statement.setInt(2, game.getId());
+            statement.setInt(3, race.getId());
+
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Creating player failed, no rows affected.");
+            }
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    playerId = generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Creating player failed, no ID obtained.");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        ServerPlayer player = new ServerPlayer(playerId, user, game, race);
         game.addPlayer(player);
         return player;
     }
@@ -99,7 +128,7 @@ public class GameManager {
      *
      * @param player Le joueur dont les données doivent être mises à jour.
      */
-    private void sendPlayerDataUpdates(ServerPlayer player) {
+    public void sendPlayerDataUpdates(ServerPlayer player) {
         List<SocketWrapper> connections = this.getConnectionsFor(player);
         if (!connections.isEmpty()) {
             PacketUpdateGameData packet = new PacketUpdateGameData(player.getGame(), player);
@@ -112,6 +141,61 @@ public class GameManager {
                 }
             }
         }
+    }
+
+    public ServerGame getServerGameByGame(Game game) {
+        Map<Integer, ServerPlayer> players = new HashMap<>();
+
+        try (PreparedStatement gameStatement = server.getDb().prepareStatement("SELECT * FROM game WHERE id = ?")) {
+            gameStatement.setInt(1, game.getId());
+            ResultSet gameResultSet = gameStatement.executeQuery();
+
+            if (gameResultSet.next()) {
+                try (PreparedStatement playerStatement = server.getDb().prepareStatement("SELECT id FROM player WHERE game_id = ?")) {
+                    playerStatement.setInt(1, game.getId());
+                    ResultSet playerResultSet = playerStatement.executeQuery();
+
+                    while (playerResultSet.next()) {
+                        int playerId = playerResultSet.getInt("id");
+                        Player player = server.getUserManager().getPlayer(playerId);
+
+                        if (player instanceof ServerPlayer) {
+                            players.put(playerId, (ServerPlayer) player);
+                        }
+                    }
+                }
+
+                return new ServerGame(
+                        gameResultSet.getInt("id"),
+                        gameResultSet.getString("name"),
+                        gameResultSet.getInt("turn_interval"),
+                        gameResultSet.getInt("min_players"),
+                        gameResultSet.getInt("max_players"),
+                        false,
+                        GameState.valueOf(gameResultSet.getString("state")),
+                        gameResultSet.getTimestamp("last_turn_at"),
+                        gameResultSet.getInt("current_turn"),
+                        players
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public ServerGame getGameById(int id) {
+        for (ServerGame game : this.games) {
+            if (game.getId() == id) {
+                return game;
+            }
+        }
+        return null;
+    }
+
+    public void addConnectionToGame(ServerPlayer player, SocketWrapper sender) {
+        this.currentlyPlayingMap.put(sender, player);
     }
 
     /**
@@ -129,30 +213,28 @@ public class GameManager {
             return;
         }
 
-        // Temporairement, on crée une partie pour chaque nom de joueur, qui est démarrée immédiatement
-        String gameName = "Partie de " + user.getUsername();
-        Race chosenRace = packet.getChosenRace();
-
-        // TODO : Séparer le fait de créer une partie et de rejoindre une partie. Pour le moment la partie est créée si elle n'existe pas
-        ServerGame game = null;
-        ServerPlayer player;
-        for (ServerGame g : games) {
-            if (g.getName().equals(gameName)) {
-                player = g.getPlayers().stream().filter(p -> p.getUser().equals(user)).findFirst().orElse(null);
-                if (player != null && player.getRace().equals(chosenRace)) {
-                    game = g;
+        ServerGame game = getGameById(packet.getGameId());
+        if (game == null) {
+            Game realGame = null;
+            for (Game g : ServerData.getGames()) {
+                if (g.getId() == packet.getGameId()) {
+                    realGame = g;
                     break;
                 }
             }
+            if (realGame == null) {
+                System.err.printf("La partie %d n'existe pas.%n", packet.getGameId());
+                try {
+                    sender.sendPacket(new PacketError(ErrorType.JOINING_GAME_GAME_NOT_FOUND));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return;
+            }
+            game = this.getServerGameByGame(realGame);
         }
-        if (game == null) {
-            game = this.newGame(gameName);
-            player = this.addPlayerToGame(user, game, chosenRace);
-            game.start();
-        } else {
-            System.out.println("La partie " + gameName + " existe déjà. Le joueur va rejoindre cette partie.");
-            player = game.getPlayers().iterator().next(); // TODO : Gérer plusieurs joueurs sur une même partie
-        }
+
+        ServerPlayer player = this.addPlayerToGame(user, game, packet.getChosenRace());
 
         try {
             sender.sendPacket(new PacketInitialGameData<>(game, player));
@@ -244,5 +326,20 @@ public class GameManager {
      */
     public synchronized void onClientDisconnected(SocketWrapper client) {
         this.currentlyPlayingMap.remove(client);
+    }
+
+    public void onClientQuitGame(SocketWrapper client) {
+        ServerPlayer player = this.currentlyPlayingMap.remove(client);
+        if (player == null) {
+            return;
+        }
+        ServerGame serverGame = player.getGame();
+        serverGame.removePlayer(player.getUser());
+        try (PreparedStatement statement = server.getDb().prepareStatement("DELETE FROM player WHERE id = ?")) {
+            statement.setInt(1, player.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

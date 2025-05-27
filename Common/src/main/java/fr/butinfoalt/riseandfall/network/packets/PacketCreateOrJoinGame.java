@@ -19,12 +19,18 @@ public class PacketCreateOrJoinGame implements IPacket {
     private final Race chosenRace;
 
     /**
+     * L'identifiant de la partie à rejoindre.
+     */
+    private int gameId;
+
+    /**
      * Constructeur du paquet de création ou de jointure de partie.
      *
      * @param chosenRace La race choisie par le joueur pour cette partie.
      */
-    public PacketCreateOrJoinGame(Race chosenRace) {
+    public PacketCreateOrJoinGame(Race chosenRace, int gameId) {
         this.chosenRace = chosenRace;
+        this.gameId = gameId;
     }
 
     /**
@@ -35,7 +41,8 @@ public class PacketCreateOrJoinGame implements IPacket {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
     public PacketCreateOrJoinGame(ReadHelper readHelper) throws IOException {
-        this.chosenRace = Identifiable.getById(ServerData.getRaces(), readHelper.readInt());
+        this.chosenRace = Identifiable.getById(ServerData.getRaces().toArray(new Race[0]), readHelper.readInt());
+        this.gameId = readHelper.readInt();
     }
 
     /**
@@ -47,6 +54,7 @@ public class PacketCreateOrJoinGame implements IPacket {
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
         writeHelper.writeInt(this.chosenRace.getId());
+        writeHelper.writeInt(this.gameId);
     }
 
     /**
@@ -56,5 +64,14 @@ public class PacketCreateOrJoinGame implements IPacket {
      */
     public Race getChosenRace() {
         return this.chosenRace;
+    }
+
+    /**
+     * Récupère l'identifiant de la partie à rejoindre
+     *
+     * @return L'identifiant de la partie à rejoindre
+     */
+    public int getGameId() {
+        return this.gameId;
     }
 }
