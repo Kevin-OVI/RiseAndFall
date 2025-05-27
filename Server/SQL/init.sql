@@ -6,10 +6,10 @@ CREATE TABLE race (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    gold_multiplier DECIMAL NOT NULL,
-    intelligence_multiplier DECIMAL NOT NULL,
-    damage_multiplier DECIMAL NOT NULL,
-    health_multiplier DECIMAL NOT NULL
+    gold_multiplier DECIMAL(10, 2) NOT NULL,
+    intelligence_multiplier DECIMAL(10, 2) NOT NULL,
+    damage_multiplier DECIMAL(10, 2) NOT NULL,
+    health_multiplier DECIMAL(10, 2) NOT NULL
 );
 
 CREATE TABLE user (
@@ -22,7 +22,7 @@ CREATE TABLE user_token (
     id SERIAL PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     token VARCHAR(255) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    FOREIGN KEY (user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE game (
@@ -39,40 +39,40 @@ CREATE TABLE game (
 
 CREATE TABLE player (
     id SERIAL PRIMARY KEY,
-    user_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED DEFAULT NULL,
     game_id BIGINT UNSIGNED NOT NULL,
     race_id BIGINT UNSIGNED NOT NULL,
     gold INT NOT NULL DEFAULT 50,
-    intelligence INT NOT NULL DEFAULT 50,
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (game_id) REFERENCES game(id),
-    FOREIGN KEY (race_id) REFERENCES race(id)
+    intelligence INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (game_id) REFERENCES game(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (race_id) REFERENCES race(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE building_type (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    price_gold INT NOT NULL,
-    price_intelligence INT NOT NULL,
+    price INT NOT NULL,
+    required_intelligence INT NOT NULL DEFAULT 0,
     gold_production INT NOT NULL,
     intelligence_production INT NOT NULL,
     max_units INT NOT NULL,
     initial_amount INT NOT NULL,
-    accessible_race_id BIGINT UNSIGNED,
-    FOREIGN KEY (accessible_race_id) REFERENCES race(id)
+    accessible_race_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'NULL si accessible à toutes les races, renseigné si accessible uniquement par une race particulière. Suppression en cascade pour ne pas rendre accessible à tous les bâtiments privés.',
+    FOREIGN KEY (accessible_race_id) REFERENCES race(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE unit_type (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    price_gold INT NOT NULL,
-    price_intelligence INT NOT NULL,
+    price INT NOT NULL,
+    required_intelligence INT NOT NULL,
     health INT NOT NULL,
     damage INT NOT NULL,
-    accessible_race_id BIGINT UNSIGNED,
-    FOREIGN KEY (accessible_race_id) REFERENCES race(id)
+    accessible_race_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'NULL si accessible à toutes les races, renseigné si accessible uniquement par une race particulière. Suppression en cascade pour ne pas rendre accessible à tous les bâtiments privés.',
+    FOREIGN KEY (accessible_race_id) REFERENCES race(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE building_creation_order (
@@ -80,8 +80,8 @@ CREATE TABLE building_creation_order (
     player_id BIGINT UNSIGNED NOT NULL,
     building_type_id BIGINT UNSIGNED NOT NULL,
     amount INT NOT NULL,
-    FOREIGN KEY (player_id) REFERENCES player(id),
-    FOREIGN KEY (building_type_id) REFERENCES building_type(id)
+    FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (building_type_id) REFERENCES building_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE unit_creation_order (
@@ -89,8 +89,8 @@ CREATE TABLE unit_creation_order (
     player_id BIGINT UNSIGNED NOT NULL,
     unit_id BIGINT UNSIGNED NOT NULL,
     amount INT NOT NULL,
-    FOREIGN KEY (player_id) REFERENCES player(id),
-    FOREIGN KEY (unit_id) REFERENCES unit_type(id)
+    FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (unit_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 
@@ -99,17 +99,17 @@ INSERT INTO race (id, name, description, gold_multiplier, intelligence_multiplie
 VALUES
     (1, 'Mort-Vivant', 'Individu mort qui revient à la vie', 1.5, 0.75, 1, 0.75),
     (2, 'Humain', 'Race équilibrée avec des compétences militaires et économiques', 1, 1.5, 0.75, 1),
-    (3, 'Orc', 'Créature verte, de taille humanoïde mais plus musclée et pourvue de crocs implantés au hasard. Il a un goût prononcé pour la violence', 0.75, 0.50, 2, 1.5),
-    (4, 'Elfe', 'Créature Mystique', 1, 2, 1, 0.5),
-    (5, 'Nain', 'Homme de petite taille mais robuste', 1.5, 1, 0.5, 1.5),
+    (3, 'Orc', 'Créature verte, de taille humanoïde mais plus musclée et pourvue de crocs implantés au hasard. Il a un goût prononcé pour la violence mais il est débile', 0.75, 0.50, 2, 1.5),
+    (4, 'Elfe', 'Créature Mystique aux grandes oreilles possèdant une grande intelligence mais faible', 1, 2, 1, 0.5),
+    (5, 'Nain', 'Homme de petite taille,robuste et possèdant ENORMEMENT d''or', 1.5, 1, 0.5, 1.5),
     (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes le problèmes sont leurs économie', 0.5, 1.2, 1.2, 1.5),
-    (7, 'Primotaures', 'Asterion en est fan', 1.7, 1, 0.5, 1.75);
+    (7, 'Primotaures', 'Première créature du monde , les primotaures sont riches mais pacifiques', 1.7, 1, 0.5, 1.75);
 
-INSERT INTO building_type (name, description, price_gold, price_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id)
+INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id)
 VALUES
     ('Carrière', 'Structure permettant d’extraire des ressources minérales pour financer l’économie du royaume', 5, 0, 1, 0, 0, 4, NULL),
     ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 3, 1, NULL),
-    ('Bibliothèque', 'Centre de savoir produisant de l’intelligence pour le développement des technologies', 10, 10, 0, 2, 0, 0, NULL),
+    ('Bibliothèque', 'Centre de savoir produisant de l’intelligence pour le développement des technologies', 10, 0, 0, 2, 0, 0, NULL),
     ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 10, 10, 0, 0, 2, 0, 1),
     ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d’unités pieuses', 10, 10, 0, 0, 2, 0, 2),
     ('Donjon', 'Endroit qui respire la violence permettant de former des futur combattants', 10, 10, 0, 0, 4, 0, 3),
@@ -118,7 +118,7 @@ VALUES
     ('Tente', 'Endroit où les futurs combattants sont formés', 10, 10, 10, 1, 5, 5, 6),
     ('Labyrinthe', 'Endroit Mystique', 10, 3, 10, 1, 1, 1, 7);
 
-INSERT INTO unit_type (name, description, price_gold, price_intelligence, health, damage, accessible_race_id)
+INSERT INTO unit_type (name, description, price, required_intelligence, health, damage, accessible_race_id)
 VALUES
     ('Guerrier', 'Une unité de combat robuste et polyvalente', 10, 0, 100.0, 15.0, NULL),
     ('Génie', 'Un expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 10, 10, 80.0, 12.0, 2),

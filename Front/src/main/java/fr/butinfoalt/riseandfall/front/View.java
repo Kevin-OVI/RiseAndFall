@@ -45,6 +45,11 @@ public enum View {
      * Vue de l'inscription.
      */
     REGISTER("authentification/register-view.fxml", "Rise & Fall - Inscription"),
+
+    /**
+     * Vue de la liste des parties.
+     */
+    GAME_LIST("gamelist-view.fxml", "Rise & Fall - Liste des parties"),
     ;
 
     private static final String GENERAL_STYLESHEET = Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/style.css")).toExternalForm();

@@ -6,6 +6,7 @@ import fr.butinfoalt.riseandfall.network.common.WriteHelper;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Représente un type de bâtiment disponible dans le jeu.
@@ -29,12 +30,12 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
     /**
      * Prix du bâtiment en or.
      */
-    private final int priceGold;
+    private final int price;
 
     /**
-     * Prix du bâtiment en intelligence
+     * La quantité d'intelligence requise pour construire le bâtiment.
      */
-    private final int priceIntelligence;
+    private final int requiredIntelligence;
 
     /**
      * Production d'or du bâtiment par tour.
@@ -68,20 +69,20 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      * @param id                     L'identifiant du type de bâtiment dans la base de données
      * @param name                   Le nom d'affichage du type de bâtiment.
      * @param description            La description du bâtiment.
-     * @param priceGold              Le prix du bâtiment en or.
-     * @param priceIntelligence      Le prix du bâtiment en intelligence
+     * @param price                  Le prix du bâtiment en or.
+     * @param requiredIntelligence   La quantité d'intelligence requise pour construire le bâtiment.
      * @param goldProduction         La production d'or du bâtiment par tour.
      * @param intelligenceProduction La production d'intelligence du bâtiment par tour.
      * @param maxUnits               Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      * @param initialAmount          Le nombre initial de bâtiments de ce type.
      * @param accessibleByRace       La race qui peut construire ce bâtiment.
      */
-    public BuildingType(int id, String name, String description, int priceGold, int priceIntelligence, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
+    public BuildingType(int id, String name, String description, int price, int requiredIntelligence, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.priceGold = priceGold;
-        this.priceIntelligence = priceIntelligence;
+        this.price = price;
+        this.requiredIntelligence = requiredIntelligence;
         this.goldProduction = goldProduction;
         this.intelligenceProduction = intelligenceProduction;
         this.maxUnits = maxUnits;
@@ -97,12 +98,12 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      * @param races      Un tableau contenant les races déjà désérialisées
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
-    public BuildingType(ReadHelper readHelper, Race[] races) throws IOException {
+    public BuildingType(ReadHelper readHelper, List<Race> races) throws IOException {
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
         this.description = readHelper.readString();
-        this.priceGold = readHelper.readInt();
-        this.priceIntelligence = readHelper.readInt();
+        this.price = readHelper.readInt();
+        this.requiredIntelligence = readHelper.readInt();
         this.goldProduction = readHelper.readInt();
         this.intelligenceProduction = readHelper.readInt();
         this.maxUnits = readHelper.readInt();
@@ -146,18 +147,18 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      * @return Le prix du bâtiment en or.
      */
     @Override
-    public int getPriceGold() {
-        return this.priceGold;
+    public int getPrice() {
+        return this.price;
     }
 
     /**
-     * Méthode pour obtenir le prix du bâtiment en intelligence.
+     * Méthode pour obtenir la quantité d'intelligence requise pour construire le bâtiment.
      *
-     * @return Le prix du bâtiment en intelligence.
+     * @return La quantité d'intelligence requise pour construire le bâtiment.
      */
     @Override
-    public int getPriceIntelligence() {
-        return this.priceIntelligence;
+    public int getRequiredIntelligence() {
+        return this.requiredIntelligence;
     }
 
     /**
@@ -210,8 +211,8 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         writeHelper.writeInt(this.id);
         writeHelper.writeString(this.name);
         writeHelper.writeString(this.description);
-        writeHelper.writeInt(this.priceGold);
-        writeHelper.writeInt(this.priceIntelligence);
+        writeHelper.writeInt(this.price);
+        writeHelper.writeInt(this.requiredIntelligence);
         writeHelper.writeInt(this.goldProduction);
         writeHelper.writeInt(this.intelligenceProduction);
         writeHelper.writeInt(this.maxUnits);
@@ -225,8 +226,8 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
                 .add("id", this.id)
                 .add("name", this.name)
                 .add("description", this.description)
-                .add("priceGold", this.priceGold)
-                .add("priceIntelligence", this.priceIntelligence)
+                .add("price", this.price)
+                .add("requiredIntelligence)", this.requiredIntelligence)
                 .add("goldProduction", this.goldProduction)
                 .add("intelligenceProduction", this.intelligenceProduction)
                 .add("maxUnits", this.maxUnits)

@@ -120,7 +120,7 @@ public class MainController {
             e.printStackTrace();
         }
         RiseAndFall.resetPlayer();
-        RiseAndFallApplication.switchToPreviousView();
+        RiseAndFallApplication.switchToView(View.GAME_LIST, true);
     }
 
     /**

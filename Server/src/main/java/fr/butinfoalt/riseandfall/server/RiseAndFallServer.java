@@ -1,17 +1,25 @@
 package fr.butinfoalt.riseandfall.server;
 
-import com.mysql.cj.jdbc.Driver;
+import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
+import fr.butinfoalt.riseandfall.server.data.ServerGame;
+import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
-import static fr.butinfoalt.riseandfall.server.Environment.*;
+import static fr.butinfoalt.riseandfall.server.Environment.SERVER_PORT;
 
 /**
  * Classe principale du serveur de jeu Rise and Fall.
@@ -19,10 +27,8 @@ import static fr.butinfoalt.riseandfall.server.Environment.*;
  * Elle initialise également la base de données et charge les données du serveur.
  */
 public class RiseAndFallServer extends BaseSocketServer {
-    /**
-     * La connexion à la base de données.
-     */
-    private final Connection db;
+    private final DatabaseManager databaseManager;
+
     /**
      * Le gestionnaire d'authentification pour gérer les connexions des clients.
      */
@@ -31,21 +37,25 @@ public class RiseAndFallServer extends BaseSocketServer {
     /**
      * Le gestionnaire de jeu pour gérer les parties en attente, en cours ou terminées.
      */
-    private final GameManager gameManager;
+    private GameManager gameManager;
+
+    /**
+     * Le gestionnaire de jeu pour gérer les utilisateurs et les joueurs.
+     */
+    private UserManager userManager;
 
     /**
      * Constructeur de la classe BaseSocketServer.
      * Initialise le serveur socket sur le port spécifié.
      *
-     * @param port Le port sur lequel le serveur écoute les connexions des clients.
-     * @param db   La connexion à la base de données.
+     * @param port            Le port sur lequel le serveur écoute les connexions des clients.
+     * @param databaseManager Le gestionnaire de base de données pour interagir avec la base de données du serveur.
      * @throws IOException Si une erreur se produit lors de la création du serveur socket.
      */
-    public RiseAndFallServer(int port, Connection db) throws IOException {
+    public RiseAndFallServer(int port, DatabaseManager databaseManager) throws IOException {
         super(port);
-        this.db = db;
+        this.databaseManager = databaseManager;
         this.authManager = new AuthenticationManager(this);
-        this.gameManager = new GameManager(this);
         this.loadServerData();
 
         this.registerReceivePacket((byte) 0, PacketAuthentification.class, this.authManager::onAuthentification, PacketAuthentification::new);
@@ -66,12 +76,16 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     private void loadServerData() {
         try {
-            Race[] races;
+            List<Race> races = new ArrayList<>();
+            List<User> users = new ArrayList<>();
+            List<ServerPlayer> players = new ArrayList<>();
+            List<ServerGame> games = new ArrayList<>();
+
             List<BuildingType> buildingTypes = new ArrayList<>();
             List<UnitType> unitTypes = new ArrayList<>();
 
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, gold_multiplier, intelligence_multiplier, damage_multiplier, health_multiplier FROM race ORDER BY id")) {
-                List<Race> racesList = new ArrayList<>();
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, gold_multiplier, intelligence_multiplier, damage_multiplier, health_multiplier FROM race ORDER BY id")) {
+
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
@@ -81,48 +95,85 @@ public class RiseAndFallServer extends BaseSocketServer {
                     float intelligenceMultiplier = set.getFloat("intelligence_multiplier");
                     float damageMultiplier = set.getFloat("damage_multiplier");
                     float healthMultiplier = set.getFloat("health_multiplier");
-                    racesList.add(new Race(id, name, description, goldMultiplier, intelligenceMultiplier, damageMultiplier, healthMultiplier));
+                    races.add(new Race(id, name, description, goldMultiplier, intelligenceMultiplier, damageMultiplier, healthMultiplier));
                 }
-                races = racesList.toArray(new Race[0]);
             }
 
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price_gold, price_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type ORDER BY id")) {
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, price, required_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
 
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    int priceGold = set.getInt("price_gold");
-                    int priceIntelligence = set.getInt("price_intelligence");
+                    int price = set.getInt("price");
+                    int requiredIntelligence = set.getInt("required_intelligence");
                     int goldProduction = set.getInt("gold_production");
                     int intelligenceProduction = set.getInt("intelligence_production");
                     int maxUnits = set.getInt("max_units");
                     int initialAmount = set.getInt("initial_amount");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
-                    buildingTypes.add(new BuildingType(id, name, description, priceGold, priceIntelligence, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleRace));
+                    buildingTypes.add(new BuildingType(id, name, description, price, requiredIntelligence, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleRace));
                 }
             }
 
-            try (PreparedStatement statement = this.db.prepareStatement("SELECT id, name, description, price_gold, price_intelligence, health, damage, accessible_race_id FROM unit_type ORDER BY id")) {
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, price, required_intelligence, health, damage, accessible_race_id FROM unit_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    int priceGold = set.getInt("price_gold");
-                    int priceIntelligence = set.getInt("price_intelligence");
+                    int price = set.getInt("price");
+                    int requiredIntelligence = set.getInt("required_intelligence");
                     int health = set.getInt("health");
                     int damage = set.getInt("damage");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
-                    unitTypes.add(new UnitType(id, name, description, priceGold, priceIntelligence, health, damage, accessibleRace));
-
+                    unitTypes.add(new UnitType(id, name, description, price, requiredIntelligence, health, damage, accessibleRace));
                 }
             }
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM game")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int id = set.getInt("id");
+                    String name = set.getString("name");
+                    int turnInterval = set.getInt("turn_interval");
+                    int minPlayers = set.getInt("min_players");
+                    int maxPlayers = set.getInt("max_players");
+                    boolean isPrivate = false;
+                    GameState state = GameState.valueOf(set.getString("state"));
+                    games.add(new ServerGame(id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, null, 0, new HashMap<>()));
+                }
+                this.gameManager = new GameManager(this, new HashSet<>(games));
+            }
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM `user`")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int id = set.getInt("id");
+                    String username = set.getString("username");
+                    users.add(new User(id, username));
+                }
+            }
+            ServerData.init(races, buildingTypes, unitTypes, games);
 
-            ServerData.init(races, buildingTypes.toArray(new BuildingType[0]), unitTypes.toArray(new UnitType[0]));
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM `player`")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int id = set.getInt("id");
+                    User user = Identifiable.getById(users, set.getInt("user_id"));
+                    ServerGame game = Identifiable.getById(games, set.getInt("game_id"));
+                    Race race = Identifiable.getById(races, set.getInt("race_id"));
+                    int gold = set.getInt("gold");
+                    int intelligence = set.getInt("intelligence");
+                    ServerPlayer player = new ServerPlayer(id, user, game, race);
+                    player.setGoldAmount(gold);
+                    player.setIntelligence(intelligence);
+                    players.add(player);
+                    game.addPlayer(player);
+                }
+            }
+            this.userManager = new UserManager(this, users, players);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -139,7 +190,12 @@ public class RiseAndFallServer extends BaseSocketServer {
         super.onClientConnected(client);
         System.out.println("Client connecté : " + client.getName());
         try {
-            client.sendPacket(new PacketServerData(ServerData.getRaces(), ServerData.getUnitTypes(), ServerData.getBuildingTypes()));
+            client.sendPacket(new PacketServerData(
+                    ServerData.getRaces(),
+                    ServerData.getUnitTypes(),
+                    ServerData.getBuildingTypes(),
+                    ServerData.getGames()
+            ));
         } catch (IOException e) {
             System.err.println("Erreur lors de l'envoi des données du serveur au client : " + e.getMessage());
             try {
@@ -172,7 +228,7 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     private void onGameAction(SocketWrapper sender, PacketGameAction packet) {
         switch (packet.getAction()) {
-            case QUIT_GAME -> this.gameManager.onClientDisconnected(sender);
+            case QUIT_GAME -> this.gameManager.onClientQuitGame(sender);
             case LOG_OUT -> {
                 this.gameManager.onClientDisconnected(sender);
                 this.authManager.onClientDisconnected(sender);
@@ -187,7 +243,7 @@ public class RiseAndFallServer extends BaseSocketServer {
      * @return La connexion à la base de données.
      */
     public Connection getDb() {
-        return this.db;
+        return this.databaseManager.getDb();
     }
 
     /**
@@ -200,34 +256,21 @@ public class RiseAndFallServer extends BaseSocketServer {
     }
 
     /**
-     * Méthode pour charger le driver MySQL.
-     * Elle lève une exception si le driver n'est pas trouvé.
+     * Méthode pour obtenir le gestionnaire de jeu.
+     *
+     * @return Le gestionnaire de jeu.
      */
-    private static void loadMysqlDriver() {
-        try {
-            Class.forName(Driver.class.getName());
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Driver MySQL introuvable.", e);
-        }
+    public GameManager getGameManager() {
+        return this.gameManager;
     }
 
     /**
-     * Méthode pour établir une connexion à la base de données.
+     * Méthode pour obtenir le gestionnaire d'utilisateurs.
      *
-     * @return La connexion à la base de données.
+     * @return Le gestionnaire d'utilisateurs.
      */
-    private static Connection connectToDatabase() {
-        String url = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?serverTimezone=UTC";
-
-        try {
-            Connection conn = DriverManager.getConnection(url, DB_USER, DB_PASSWORD);
-            if (conn.isValid(2)) {
-                System.out.println("Connexion à la base de données réussie !");
-            }
-            return conn;
-        } catch (SQLException e) {
-            throw new RuntimeException("Erreur lors de la connexion à la base.", e);
-        }
+    public UserManager getUserManager() {
+        return this.userManager;
     }
 
     /**
@@ -245,35 +288,31 @@ public class RiseAndFallServer extends BaseSocketServer {
             }
         }));
 
-        loadMysqlDriver();
-        Connection db = connectToDatabase();
-        shutdownTasks.add(() -> {
-            System.out.println("Fermeture de la connexion à la base de données...");
-            try {
-                db.close();
-            } catch (SQLException e) {
+        try (DatabaseManager databaseManager = new DatabaseManager()) {
+            shutdownTasks.add(() -> {
+                LogManager.logMessage("Fermeture du gestionnaire de base de données...");
+                databaseManager.close();
+            });
+            try (RiseAndFallServer server = new RiseAndFallServer(SERVER_PORT, databaseManager)) {
+                server.start();
+                shutdownTasks.addFirst(() -> {
+                    LogManager.logMessage("Arrêt du serveur...");
+                    try {
+                        server.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+                LogManager.logMessage("Serveur démarré sur le port " + SERVER_PORT);
+                try {
+                    server.join();
+                } catch (InterruptedException e) {
+                    LogManager.logError("Le serveur a été interrompu.", e);
+                }
+                LogManager.logMessage("Serveur arrêté.");
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
-
-        try (RiseAndFallServer server = new RiseAndFallServer(SERVER_PORT, db)) {
-            server.start();
-            shutdownTasks.addFirst(() -> {
-                System.out.println("Arrêt du serveur...");
-                try {
-                    server.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            System.out.println("Serveur démarré sur le port " + SERVER_PORT);
-            try {
-                server.join();
-            } catch (InterruptedException ignored) {
-            }
-            System.out.println("Serveur arrêté.");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }

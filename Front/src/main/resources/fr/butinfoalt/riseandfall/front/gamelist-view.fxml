@@ -1,0 +1,29 @@
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+
+<?import javafx.scene.control.ChoiceBox?>
+<VBox xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx" alignment="CENTER"
+      spacing="20.0" prefHeight="400.0" prefWidth="600.0"
+      fx:controller="fr.butinfoalt.riseandfall.front.GameList.GameListController">
+
+    <ImageView fx:id="backgroundImageView" managed="false"/>
+    <Label fx:id="instructions">Sélectionnez votre race pour jouer</Label>
+    <ChoiceBox fx:id="raceChoiceBox"/>
+
+    <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
+        Listes des parties disponibles:
+    </TitleLabel>
+
+    <VBox fx:id="listContainer" alignment="CENTER"
+          maxWidth="Infinity"
+          StackPane.alignment="TOP_CENTER">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+    </VBox>
+</VBox>

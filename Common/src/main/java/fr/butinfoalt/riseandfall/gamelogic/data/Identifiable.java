@@ -1,6 +1,6 @@
 package fr.butinfoalt.riseandfall.gamelogic.data;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -20,25 +20,25 @@ public interface Identifiable {
     /**
      * Récupère un objet identifiable par son identifiant dans un tableau.
      *
-     * @param list Le tableau d'objets identifiables
+     * @param list La collection d'objets identifiables
      * @param id   L'identifiant de l'objet à rechercher
      * @param <T>  Le type de l'objet identifiable
      * @return Un objet {@link Optional} contenant l'objet trouvé, ou vide si aucun objet n'a été trouvé
      */
-    static <T extends Identifiable> Optional<T> getOptionalById(T[] list, int id) {
-        return Arrays.stream(list).filter(e -> e.getId() == id).findFirst();
+    static <T extends Identifiable> Optional<T> getOptionalById(Collection<T> list, int id) {
+        return list.stream().filter(e -> e.getId() == id).findFirst();
     }
 
     /**
      * Récupère un objet identifiable par son identifiant dans un tableau.
      *
-     * @param list Le tableau d'objets identifiables
+     * @param list La collection d'objets identifiables
      * @param id   L'identifiant de l'objet à rechercher
      * @param <T>  Le type de l'objet identifiable
      * @return L'objet trouvé
      * @throws NoSuchElementException Si aucun objet n'a été trouvé
      */
-    static <T extends Identifiable> T getById(T[] list, int id) throws NoSuchElementException {
+    static <T extends Identifiable> T getById(Collection<T> list, int id) throws NoSuchElementException {
         Optional<T> foundObj = getOptionalById(list, id);
         if (foundObj.isEmpty()) {
             throw new NoSuchElementException();
@@ -49,12 +49,12 @@ public interface Identifiable {
     /**
      * Récupère un objet identifiable par son identifiant dans un tableau.
      *
-     * @param list Le tableau d'objets identifiables
+     * @param list La collection d'objets identifiables
      * @param id   L'identifiant de l'objet à rechercher
      * @param <T>  Le type de l'objet identifiable
      * @return L'objet trouvé, ou null si aucun objet n'a été trouvé ou si l'identifiant est négatif
      */
-    static <T extends Identifiable> T getByIdOrNull(T[] list, int id) {
+    static <T extends Identifiable> T getByIdOrNull(Collection<T> list, int id) {
         if (id < 0) return null;
         return getOptionalById(list, id).orElse(null);
     }

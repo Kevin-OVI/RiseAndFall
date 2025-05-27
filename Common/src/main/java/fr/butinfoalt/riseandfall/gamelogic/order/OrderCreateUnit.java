@@ -48,19 +48,8 @@ public class OrderCreateUnit implements BaseOrder {
      * @return Le prix de l'ordre en or.
      */
     @Override
-    public int getPriceGold() {
-        return this.unitType.getPriceGold() * this.count;
-    }
-
-    /**
-     * Obtient le prix de l'ordre en intelligence.
-     * On calcule le prix total en multipliant le prix de l'unité à l'unité par le nombre d'unités à créer.
-     *
-     * @return Le prix de l'ordre en intelligence.
-     */
-    @Override
-    public int getPriceIntelligence() {
-        return this.unitType.getPriceIntelligence() * this.count;
+    public int getPrice() {
+        return this.unitType.getPrice() * this.count;
     }
 
     /**

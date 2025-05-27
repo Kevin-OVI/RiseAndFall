@@ -1,6 +1,5 @@
 package fr.butinfoalt.riseandfall.front;
 
-import fr.butinfoalt.riseandfall.front.authentification.LoginController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
@@ -97,16 +96,14 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param packet Le paquet reçu.
      */
     private void onServerData(SocketWrapper sender, PacketServerData packet) {
-        ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes());
-        Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOGIN, true));
-
+        ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes(), packet.getGames());
         try {
             String token = new String(Files.readAllBytes(Paths.get("auth_token.txt")));
             System.out.println("Token récupéré : " + token);
             sender.sendPacket(new PacketToken(token));
         } catch (IOException e) {
             System.err.println("Erreur lors de la lecture du fichier auth_token.txt : ");
-            e.printStackTrace();
+            Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOGIN, true));
         }
     }
 

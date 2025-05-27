@@ -48,19 +48,8 @@ public class OrderCreateBuilding implements BaseOrder {
      * @return Le prix de l'ordre en or.
      */
     @Override
-    public int getPriceGold() {
-        return this.buildingType.getPriceGold() * this.count;
-    }
-
-    /**
-     * Obtient le prix de l'ordre en intelligence.
-     * On calcule le prix total en multipliant le prix du bâtiment à l'unité par le nombre de bâtiments à créer.
-     *
-     * @return Le prix de l'ordre en intelligence.
-     */
-    @Override
-    public int getPriceIntelligence() {
-        return this.buildingType.getPriceIntelligence() * this.count;
+    public int getPrice() {
+        return this.buildingType.getPrice() * this.count;
     }
 
     /**

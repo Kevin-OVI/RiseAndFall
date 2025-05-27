@@ -51,7 +51,7 @@ public abstract class Player implements Identifiable, ISerializable {
     /**
      * Quantité d'intelligence que possède le joueur.
      */
-    private int intelligence = 50;
+    private int intelligence = 0;
 
     /**
      * Constructeur de la classe Player.
@@ -62,12 +62,12 @@ public abstract class Player implements Identifiable, ISerializable {
         this.id = id;
         this.race = race;
         this.buildingMap = new ObjectIntMap<>(
-                Arrays.stream(ServerData.getBuildingTypes())
+                ServerData.getBuildingTypes().stream()
                         .filter(buildingType -> buildingType.getAccessibleByRace() == null || buildingType.getAccessibleByRace() == this.race)
                         .collect(Collectors.toList())
         );
         this.unitMap = new ObjectIntMap<>(
-                Arrays.stream(ServerData.getUnitTypes())
+                ServerData.getUnitTypes().stream()
                         .filter(unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race)
                         .collect(Collectors.toList())
         );

@@ -30,12 +30,19 @@ public class PurchasableTable<T extends PurchasableItem> extends HeightAdaptedTa
     private final TableColumn<PurchasableTableRow<T>, Number> pricePerUnitColumn;
 
     /**
+     * Colonne pour afficher l'intelligence requise de l'élément.
+     */
+    private final TableColumn<PurchasableTableRow<T>, Number> requiredIntelligenceColumn;
+
+    /**
      * Constructeur de la classe PurchasableTable.
      * Ajoute des classes CSS pour le style et initialise les colonnes nom, quantité et prix unitaire.
      */
     public PurchasableTable() {
         this.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         this.setEditable(false);
+        // On empêche la sélection d'une ligne en forçant la sélection à null
+        this.selectionModelProperty().bind(new ReadOnlyObjectWrapper<>(null));
         this.getStyleClass().add("purchasable-table");
 
         this.getColumns().addListener((ListChangeListener<TableColumn<PurchasableTableRow<T>, ?>>) change -> {
@@ -55,7 +62,11 @@ public class PurchasableTable<T extends PurchasableItem> extends HeightAdaptedTa
         this.getColumns().add(this.quantityColumn);
 
         this.pricePerUnitColumn = new TableColumn<>("Prix unitaire");
-        this.pricePerUnitColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getPriceGold()));
+        this.pricePerUnitColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getPrice()));
         this.getColumns().add(this.pricePerUnitColumn);
+
+        this.requiredIntelligenceColumn = new TableColumn<>("Intelligence requise");
+        this.requiredIntelligenceColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getRequiredIntelligence()));
+        this.getColumns().add(this.requiredIntelligenceColumn);
     }
 }

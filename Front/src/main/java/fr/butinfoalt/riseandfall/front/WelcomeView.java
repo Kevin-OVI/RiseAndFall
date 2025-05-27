@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
+import fr.butinfoalt.riseandfall.front.GameList.GameListController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.NamedItemStringConverter;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
@@ -19,12 +20,6 @@ import javafx.util.Duration;
 import java.io.IOException;
 
 public class WelcomeView {
-    /**
-     * Champ de sélection de race.
-     */
-    @FXML
-    public ChoiceBox<Race> raceChoiceBox;
-
     /**
      * Label d'instructions.
      */
@@ -48,10 +43,6 @@ public class WelcomeView {
      */
     @FXML
     public void initialize() {
-        this.raceChoiceBox.getItems().clear();
-        this.raceChoiceBox.getItems().addAll(ServerData.getRaces());
-        this.raceChoiceBox.setConverter(new NamedItemStringConverter<>());
-
         Color startColor = Color.BLACK;
         Color endColor = Color.ORANGERED;
 
@@ -72,18 +63,6 @@ public class WelcomeView {
      */
     @FXML
     public void play() {
-        if (this.raceChoiceBox.getValue() == null) {
-            this.instructionsBlinkTransition.play();
-            return;
-        }
-
-        try {
-            RiseAndFall.getClient().sendPacket(new PacketCreateOrJoinGame(this.raceChoiceBox.getValue()));
-        } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi du paquet de création de partie : ");
-            e.printStackTrace();
-            return;
-        }
-        RiseAndFallApplication.switchToView(View.LOADING);
+        RiseAndFallApplication.switchToView(View.GAME_LIST);
     }
 }

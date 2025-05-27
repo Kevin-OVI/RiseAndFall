@@ -20,12 +20,5 @@ public interface BaseOrder extends ISerializable {
      *
      * @return Le prix de l'ordre en or.
      */
-    int getPriceGold();
-
-    /**
-     * Obtient le prix de l'ordre en intelligence.
-     *
-     * @return Le prix de l'ordre en intelligence.
-     */
-    int getPriceIntelligence();
+    int getPrice();
 }

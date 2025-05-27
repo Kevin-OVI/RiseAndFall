@@ -23,6 +23,16 @@ public class ServerPlayer extends Player {
     private final ServerGame game;
 
     /**
+     * Quantité de gold
+     */
+    private int goldAmount;
+
+    /**
+     * Quantité d'intelligence
+     */
+    private int intelligenceAmount;
+
+    /**
      * Constructeur de la classe Player.
      *
      * @param id   Identifiant du joueur dans la base de données.
@@ -45,9 +55,9 @@ public class ServerPlayer extends Player {
         }
 
         for (BaseOrder order : this.pendingOrders) {
-            if (this.goldAmount >= order.getPriceGold()) {
+            if (this.goldAmount >= order.getPrice()) {
                 order.execute(this);
-                this.removeGoldAmount(order.getPriceGold());
+                this.removeGoldAmount(order.getPrice());
             }
         }
         this.pendingOrders.clear();
