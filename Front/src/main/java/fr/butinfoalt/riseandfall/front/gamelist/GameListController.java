@@ -78,7 +78,7 @@ public class GameListController {
                 Node partyNode = loader.load();
 
                 GameComponentController controller = loader.getController();
-                controller.init(game.getId(), game.getName(), game.getTurnInterval(), 3, 30);
+                controller.init(game.getId(), game.getName(), game.getTurnInterval());
 
                 this.listContainer.getChildren().add(partyNode);
             } catch (IOException e) {

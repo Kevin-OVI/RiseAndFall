@@ -10,9 +10,7 @@
       maxWidth="400"
       style="-fx-padding: 10; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-background-color: white;">
     <Label fx:id="partyNameLabel" style="-fx-font-size: 16;" />
-    <Label fx:id="dayDuration" style="-fx-font-size: 16;" />
-    <Label fx:id="currentPlayer" style="-fx-font-size: 16;" />
-    <Label fx:id="maxPlayer" style="-fx-font-size: 16;" />
+    <Label fx:id="turnInterval" style="-fx-font-size: 16;" />
     <Pane HBox.hgrow="ALWAYS"/>
     <Button text="Rejoindre" onAction="#onJoinClicked"/>
 </HBox>

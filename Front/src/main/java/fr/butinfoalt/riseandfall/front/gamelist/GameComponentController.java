@@ -5,26 +5,17 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 public class GameComponentController {
-
         @FXML
         private Label partyNameLabel;
 
         @FXML
-        private Label dayDuration;
-
-        @FXML
-        private Label currentPlayer;
-
-        @FXML
-        private Label maxPlayer;
+        private Label turnInterval;
 
         private int gameId;
 
-        public void init(int gameId, String name, int dayDuration, int currentPlayer, int maxPlayer) {
-            partyNameLabel.setText(name);
-            this.dayDuration.setText(String.valueOf(dayDuration));
-            this.currentPlayer.setText(String.valueOf(currentPlayer));
-            this.maxPlayer.setText(String.valueOf(maxPlayer));
+        public void init(int gameId, String name, int dayDuration) {
+            this.partyNameLabel.setText(name);
+            this.turnInterval.setText(String.valueOf(dayDuration));
             this.gameId = gameId;
         }
 
