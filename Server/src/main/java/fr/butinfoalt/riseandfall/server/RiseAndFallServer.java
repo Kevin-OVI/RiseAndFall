@@ -7,6 +7,7 @@ import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.util.Scheduler;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
@@ -26,6 +27,15 @@ import static fr.butinfoalt.riseandfall.server.Environment.SERVER_PORT;
  * Elle initialise également la base de données et charge les données du serveur.
  */
 public class RiseAndFallServer extends BaseSocketServer {
+    /**
+     * Le planificateur de tâches pour exécuter des tâches périodiques ou différées.
+     * Il peut être utilisé pour gérer les actions du jeu, comme le passage au tour suivant.
+     */
+    public static final Scheduler SCHEDULER = new Scheduler();
+
+    /**
+     * Le gestionnaire de base de données pour interagir avec la base de données du serveur.
+     */
     private final DatabaseManager databaseManager;
 
     /**
@@ -43,6 +53,9 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     private UserManager userManager;
 
+    /**
+     * Les données du serveur, contenant les races, les types de bâtiments, les types d'unités et les parties en cours.
+     */
     private ServerData<ServerGame> data;
 
     /**
