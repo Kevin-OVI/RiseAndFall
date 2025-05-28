@@ -333,6 +333,11 @@ public class GameManager {
         }
 
         ServerGame game = player.getGame();
+        // TODO : À retirer lorsque le démarrage des parties sera implémenté
+        if (game.getState() == GameState.WAITING) {
+            LogManager.logMessage("Démarrage de la partie " + game.getName() + " pour le joueur " + player.getUser().getUsername() + ".");
+            game.start();
+        }
         try {
             game.nextTurn();
         } catch (IllegalStateException e) {
