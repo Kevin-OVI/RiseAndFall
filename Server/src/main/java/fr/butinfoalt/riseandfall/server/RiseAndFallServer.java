@@ -39,8 +39,6 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     private UserManager userManager;
 
-    private ServerData<ServerGame> data;
-
     /**
      * Constructeur de la classe BaseSocketServer.
      * Initialise le serveur socket sur le port spécifié.
@@ -65,6 +63,7 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerSendPacket((byte) 8, PacketError.class);
         this.registerReceivePacket((byte) 9, PacketRegister.class, this.authManager::onRegister, PacketRegister::new);
+        this.registerSendPacket((byte) 10, PacketWaitingGames.class);
     }
 
     /**
@@ -146,8 +145,8 @@ public class RiseAndFallServer extends BaseSocketServer {
                 }
             }
             // Nécessaire pour charger les joueurs juste après
-            this.data = new ServerData<>(races, buildingTypes, unitTypes, games);
-            this.gameManager = new GameManager(this);
+            ServerData.init(races, buildingTypes, unitTypes);
+            this.gameManager = new GameManager(this, games);
 
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM `user`")) {
                 ResultSet set = statement.executeQuery();
@@ -191,11 +190,10 @@ public class RiseAndFallServer extends BaseSocketServer {
         super.onClientConnected(client);
         LogManager.logMessage("Client connecté : " + client.getName());
         try {
-            client.sendPacket(new PacketServerData<>(
-                    this.data.races(),
-                    this.data.unitTypes(),
-                    this.data.buildingTypes(),
-                    this.data.games()
+            client.sendPacket(new PacketServerData(
+                    ServerData.getRaces(),
+                    ServerData.getUnitTypes(),
+                    ServerData.getBuildingTypes()
             ));
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi des données du serveur au client :", e);
@@ -268,15 +266,6 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     public UserManager getUserManager() {
         return this.userManager;
-    }
-
-    /**
-     * Méthode pour obtenir les données du serveur.
-     *
-     * @return Les données du serveur.
-     */
-    public ServerData<ServerGame> getData() {
-        return this.data;
     }
 
     /**

@@ -16,8 +16,8 @@ import java.util.Map;
  * Chaque type d'ordre est associé à une classe d'ordre et à un désérialiseur.
  */
 public enum OrderType {
-    CREATE_BUILDING(OrderCreateBuilding.class, readHelper -> new OrderCreateBuilding(Identifiable.getById(ServerData.getInstance().buildingTypes(), readHelper.readInt()), readHelper.readInt())),
-    CREATE_UNIT(OrderCreateUnit.class, readHelper -> new OrderCreateUnit(Identifiable.getById(ServerData.getInstance().unitTypes(), readHelper.readInt()), readHelper.readInt()));
+    CREATE_BUILDING(OrderCreateBuilding.class, readHelper -> new OrderCreateBuilding(Identifiable.getById(ServerData.getBuildingTypes(), readHelper.readInt()), readHelper.readInt())),
+    CREATE_UNIT(OrderCreateUnit.class, readHelper -> new OrderCreateUnit(Identifiable.getById(ServerData.getUnitTypes(), readHelper.readInt()), readHelper.readInt()));
 
     /**
      * Map statique pour associer les classes d'ordres à leurs types.

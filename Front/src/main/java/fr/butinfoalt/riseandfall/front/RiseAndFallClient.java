@@ -34,7 +34,7 @@ public class RiseAndFallClient extends BaseSocketClient {
 
         this.registerSendPacket((byte) 0, PacketAuthentification.class);
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this::onToken, PacketToken::new);
-        this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, readHelper -> new PacketServerData<>(readHelper, ClientGame::new));
+        this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, PacketServerData::new);
         this.registerSendPacket((byte) 3, PacketCreateOrJoinGame.class);
         this.registerReceivePacket((byte) 4, PacketJoinedGame.class, this::onJoinedGame, this::decodePacketJoinedGame);
         this.registerSendPacket((byte) 5, PacketUpdateOrders.class);
@@ -42,6 +42,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerReceivePacket((byte) 8, PacketError.class, this::onError, PacketError::new);
         this.registerSendPacket((byte) 9, PacketRegister.class);
+        this.registerReceivePacket((byte) 10, PacketWaitingGames.class, this::onWaitingGames, readHelper -> new PacketWaitingGames<>(readHelper, ClientGame::new));
     }
 
     /**
@@ -65,12 +66,12 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param packet Le paquet reçu.
      */
     private void onToken(SocketWrapper sender, PacketToken packet) {
-        try (FileWriter writer = new FileWriter("auth_token.txt")) {
+        try (FileWriter writer = new FileWriter(Environment.authTokenFile)) {
             writer.write(packet.getToken());
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'écriture du token d'authentification dans le fichier", e);
         }
-        Platform.runLater(() -> RiseAndFallApplication.switchToView(View.WELCOME, true));
+        // Le basculement vers l'écran principal ou la liste des parties se fera en fonction du paquet reçu du serveur : PacketJoinedGame ou PacketWaitingGames.
     }
 
     /**
@@ -80,10 +81,10 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param sender Le socket connecté au serveur.
      * @param packet Le paquet reçu.
      */
-    private void onServerData(SocketWrapper sender, PacketServerData<ClientGame> packet) {
-        RiseAndFall.initServerData(new ServerData<>(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes(), packet.getGames()));
+    private void onServerData(SocketWrapper sender, PacketServerData packet) {
+        ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes());
         try {
-            String token = new String(Files.readAllBytes(Paths.get("auth_token.txt")));
+            String token = new String(Files.readAllBytes(Paths.get(Environment.authTokenFile)));
             LogManager.logMessage("Envoi du token d'authentification...");
             sender.sendPacket(new PacketToken(token));
             return;
@@ -141,9 +142,8 @@ public class RiseAndFallClient extends BaseSocketClient {
         switch (packet.getAction()) {
             case QUIT_GAME -> {
                 RiseAndFall.resetGame();
-                Platform.runLater(() -> {
-                    RiseAndFallApplication.switchToView(View.GAME_LIST, true);
-                });
+                Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOADING, true));
+                // Le basculement vers la liste des parties aura lieu après la réception du paquet PacketWaitingGames
             }
             default -> LogManager.logError("Action de jeu non gérée : " + packet.getAction());
         }
@@ -168,9 +168,10 @@ public class RiseAndFallClient extends BaseSocketClient {
                     RiseAndFallApplication.switchToView(View.REGISTER, true);
                     ((RegisterController) View.REGISTER.getController()).showError(errorType.getMessage());
                 }
-                case JOINING_GAME_FAILED, JOINING_GAME_GAME_NOT_FOUND -> {
-                    RiseAndFallApplication.switchToView(View.GAME_LIST, true);
-                    ((GameListController) View.GAME_LIST.getController()).showError(errorType.getMessage());
+                case JOINING_GAME_FAILED, JOINING_GAME_NOT_FOUND -> {
+                    GameListController controller = View.GAME_LIST.getController();
+                    controller.showError(errorType.getMessage());
+                    // Le basculement vers la vue de la liste des parties aura lieu après la réception du paquet PacketWaitingGames
                 }
                 case QUIT_GAME_FAILED, QUIT_NON_WAITING -> {
                     LogManager.logMessage("Erreur reçue lors de la tentative de quitter la partie : " + errorType.getMessage());
@@ -179,6 +180,14 @@ public class RiseAndFallClient extends BaseSocketClient {
                 }
                 default -> LogManager.logError("Erreur inconnue : " + errorType.getMessage());
             }
+        });
+    }
+
+    private void onWaitingGames(SocketWrapper sender, PacketWaitingGames<ClientGame> packet) {
+        Platform.runLater(() -> {
+            GameListController controller = View.GAME_LIST.getController();
+            controller.refreshGameList(packet.getWaitingGames());
+            RiseAndFallApplication.switchToView(View.GAME_LIST, true);
         });
     }
 }

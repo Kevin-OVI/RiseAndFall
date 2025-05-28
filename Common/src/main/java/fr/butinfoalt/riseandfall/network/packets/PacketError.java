@@ -58,7 +58,9 @@ public class PacketError implements IPacket {
         REGISTER_GENERIC_ERROR("Une erreur est survenue lors de l'inscription, veuillez réessayer ou redémarrer le jeu si le problème persiste."),
         REGISTER_USERNAME_TAKEN("Le nom d'utilisateur est déjà pris, veuillez en choisir un autre."),
 
-        JOINING_GAME_GAME_NOT_FOUND("La partie n'existe pas."),
+        JOINING_GAME_NOT_FOUND("La partie n'existe pas."),
+        JOINING_NON_WAITING("La partie a déjà commencé, vous ne pouvez pas la rejoindre."),
+        JOINING_GAME_FULL("La partie est déjà pleine, veuillez en rejoindre une autre."),
         JOINING_GAME_FAILED("Échec de la connexion à la partie, veuillez réessayer ou redémarrer le jeu si le problème persiste."),
 
         QUIT_NON_WAITING("Vous ne pouvez plus quitter une partie qui a déjà commencé."),

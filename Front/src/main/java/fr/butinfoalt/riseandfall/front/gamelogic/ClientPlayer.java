@@ -22,7 +22,7 @@ public class ClientPlayer extends Player {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture des données.
      */
     public ClientPlayer(ReadHelper readHelper) throws IOException {
-        super(readHelper.readInt(), Identifiable.getById(RiseAndFall.getServerData().races(), readHelper.readInt()));
+        super(readHelper.readInt(), Identifiable.getById(ServerData.getRaces(), readHelper.readInt()));
         this.updateModifiableData(readHelper);
     }
 
@@ -34,17 +34,16 @@ public class ClientPlayer extends Player {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture des données.
      */
     public void updateModifiableData(ReadHelper readHelper) throws IOException {
-        ServerData<ClientGame> serverData = RiseAndFall.getServerData();
         this.setGoldAmount(readHelper.readInt());
         this.setIntelligence(readHelper.readInt());
         int size = this.buildingMap.size();
         for (int i = 0; i < size; i++) {
-            BuildingType buildingType = Identifiable.getById(serverData.buildingTypes(), readHelper.readInt());
+            BuildingType buildingType = Identifiable.getById(ServerData.getBuildingTypes(), readHelper.readInt());
             this.buildingMap.set(buildingType, readHelper.readInt());
         }
         size = this.unitMap.size();
         for (int i = 0; i < size; i++) {
-            UnitType unitType = Identifiable.getById(serverData.unitTypes(), readHelper.readInt());
+            UnitType unitType = Identifiable.getById(ServerData.getUnitTypes(), readHelper.readInt());
             this.unitMap.set(unitType, readHelper.readInt());
         }
         this.updatePendingOrders(deserializeOrders(readHelper));

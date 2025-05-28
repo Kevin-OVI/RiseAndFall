@@ -37,6 +37,17 @@ public class RiseAndFallApplication extends Application {
      * @param args Arguments de la ligne de commande (non utilisés).
      */
     public static void main(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("--auth-token-file")) {
+                if (i + 1 < args.length) {
+                    Environment.authTokenFile = args[i + 1];
+                } else {
+                    LogManager.logError("Le fichier d'authentification n'a pas été spécifié après l'option --auth-token-file");
+                }
+            }
+        }
+
+
         Font.loadFont(Objects.requireNonNull(RiseAndFallApplication.class.getResourceAsStream("fonts/IMFellEnglishSC-Regular.ttf")), 12);
         Application.launch();
     }

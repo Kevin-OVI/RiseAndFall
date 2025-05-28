@@ -18,7 +18,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Classe gérant les parties de jeu.
@@ -31,12 +32,18 @@ public class GameManager {
     private final RiseAndFallServer server;
 
     /**
+     * Liste des parties
+     */
+    private final List<ServerGame> games;
+
+    /**
      * Constructeur de la classe GameManager.
      *
      * @param server Instance du serveur.
      */
-    public GameManager(RiseAndFallServer server) {
+    public GameManager(RiseAndFallServer server, List<ServerGame> games) {
         this.server = server;
+        this.games = games;
     }
 
     /**
@@ -56,8 +63,7 @@ public class GameManager {
      * @return Le joueur dans une partie en cours, ou null si l'utilisateur n'est pas dans une partie en cours.
      */
     public ServerPlayer getPlayerInRunningGame(User user) {
-        List<ServerGame> games = this.server.getData().games();
-        for (ServerGame game : games) {
+        for (ServerGame game : this.games) {
             // On ignore les parties qui sont terminées
             if (game.getState() == GameState.ENDED) {
                 continue;
@@ -93,7 +99,7 @@ public class GameManager {
     public synchronized ServerGame newGame(String name) {
         LogManager.logMessage("Création de la partie : " + name);
         ServerGame game = new ServerGame(0, name, 15, 1, 30, false, GameState.WAITING, null, 0);
-        this.server.getData().games().add(game);
+        this.games.add(game);
         return game;
     }
 
@@ -161,7 +167,6 @@ public class GameManager {
      * Envoie un paquet de jointure de partie au client spécifié.
      * Méthode privée utilisée lorsqu'on a déjà récupéré toutes les informations nécessaires pour envoyer le paquet.
      *
-     *
      * @param packet Le paquet de jointure de partie à envoyer.
      * @param client Le client qui reçoit le paquet.
      */
@@ -175,20 +180,44 @@ public class GameManager {
 
     /**
      * Envoie un paquet de jointure de partie au client spécifié.
+     *
      * @param connection La connexion du client qui reçoit le paquet.
-     * @param user L'utilisateur pour lequel on envoie le paquet de jointure de partie.
+     * @param user       L'utilisateur pour lequel on envoie le paquet de jointure de partie.
      */
     public void sendJoinGamePacket(SocketWrapper connection, User user) {
         ServerPlayer player = getPlayerInRunningGame(user);
-        if (player != null) {
+        if (player == null) {
+            // Affichage de la liste des parties en attente si le joueur n'est pas dans une partie en cours
+            this.sendWaitingGames(connection);
+        } else {
             ServerGame game = player.getGame();
             this.sendJoinGamePacket(new PacketJoinedGame<>(game, player), connection);
         }
     }
 
+    /**
+     * Envoie un paquet de jointure de partie à tous les clients associés à un utilisateur.
+     *
+     * @param game   La partie à laquelle le joueur a rejoint.
+     * @param player Le joueur qui a rejoint la partie.
+     * @param user   L'utilisateur pour lequel on envoie le paquet de jointure de partie.
+     */
     public void sendJoinGamePacket(ServerGame game, ServerPlayer player, User user) {
         for (SocketWrapper connection : this.server.getAuthManager().getConnectionsFor(user)) {
             this.sendJoinGamePacket(new PacketJoinedGame<>(game, player), connection);
+        }
+    }
+
+    /**
+     * Envoie la liste des parties en attente au client spécifié.
+     *
+     * @param sender Le socket du client qui recevra la liste des parties en attente.
+     */
+    public void sendWaitingGames(SocketWrapper sender) {
+        try {
+            sender.sendPacket(new PacketWaitingGames<>(this.games.stream().filter(game -> game.getState() == GameState.WAITING).toList()));
+        } catch (IOException e) {
+            LogManager.logError("Erreur lors de l'envoi des parties en attente au client :", e);
         }
     }
 
@@ -207,27 +236,41 @@ public class GameManager {
             return;
         }
 
-        Optional<ServerGame> optionalGame = Identifiable.getOptionalById(this.server.getData().games(), packet.getGameId());
+        ServerPlayer player = this.getPlayerInRunningGame(user);
+        if (player != null) {
+            // L'utilisateur est déjà dans une partie en cours, on lui envoie les données de cette partie là
+            this.sendJoinGamePacket(player.getGame(), player, user);
+            return;
+        }
+
+        ServerGame game;
+        ErrorType joinError;
+        Optional<ServerGame> optionalGame = Identifiable.getOptionalById(this.games, packet.getGameId());
         if (optionalGame.isEmpty()) {
             LogManager.logError("La partie " + packet.getGameId() + " n'existe pas.");
-            try {
-                sender.sendPacket(new PacketError(ErrorType.JOINING_GAME_GAME_NOT_FOUND));
-            } catch (IOException e) {
-                LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
-            }
+            joinError = ErrorType.JOINING_GAME_NOT_FOUND;
+        } else if ((game = optionalGame.get()).getState() != GameState.WAITING) {
+            LogManager.logError("La partie " + game.getName() + " n'est pas en attente. Impossible de rejoindre.");
+            joinError = ErrorType.JOINING_NON_WAITING;
+        } else if (game.getPlayers().size() >= game.getMaxPlayers()) {
+            LogManager.logError("La partie " + game.getName() + " est pleine. Impossible de rejoindre.");
+            joinError = ErrorType.JOINING_GAME_FULL;
+        } else if ((player = this.addPlayerToGame(user, game, packet.getChosenRace())) == null) {
+            LogManager.logError("Impossible d'ajouter le joueur " + user.getUsername() + " à la partie " + game.getName() + ".");
+            joinError = ErrorType.JOINING_GAME_FAILED;
+        } else {
+            // Tous les tests sont passés, et la partie a bien été rejointe.
+            this.sendJoinGamePacket(game, player, user);
             return;
         }
-        ServerGame game = optionalGame.get();
-        ServerPlayer player = this.addPlayerToGame(user, game, packet.getChosenRace());
-        if (player == null) {
-            try {
-                sender.sendPacket(new PacketError(ErrorType.JOINING_GAME_FAILED));
-            } catch (IOException e) {
-                LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
-            }
-            return;
+        // Si on arrive ici, c'est qu'il y a eu une erreur lors de la jointure de la partie
+        try {
+            sender.sendPacket(new PacketError(joinError));
+        } catch (IOException e) {
+            LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
         }
-        this.sendJoinGamePacket(game, player, user);
+        // Le client aura besoin de rafraîchir la liste des parties en attente
+        this.sendWaitingGames(sender);
     }
 
     /**
@@ -310,37 +353,43 @@ public class GameManager {
      *
      * @param sender Le socket du client qui a envoyé la demande de déconnexion.
      */
-    public void onClientQuitGame(SocketWrapper sender) {
+    public synchronized void onClientQuitGame(SocketWrapper sender) {
         ServerPlayer player = this.getPlayerInRunningGame(sender);
-        if (player != null) {
-            ServerGame serverGame = player.getGame();
-            if (serverGame.getState() != GameState.WAITING) {
-                LogManager.logError("Le joueur " + player.getUser().getUsername() + " a quitté la partie " + serverGame.getName() + " alors qu'elle était déjà en cours.");
-                try {
-                    sender.sendPacket(new PacketError(ErrorType.QUIT_NON_WAITING));
-                } catch (IOException e) {
-                    LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
-                }
-                return;
-            }
-            serverGame.removePlayer(player.getUser());
-            try (PreparedStatement statement = server.getDb().prepareStatement("DELETE FROM player WHERE id = ?")) {
-                statement.setInt(1, player.getId());
-                statement.executeUpdate();
-            } catch (SQLException e) {
-                LogManager.logError("Erreur lors de la suppression du joueur " + player.getUser().getUsername() + " de la base de données.", e);
-                try {
-                    sender.sendPacket(new PacketError(ErrorType.QUIT_GAME_FAILED));
-                } catch (IOException ioException) {
-                    LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), ioException);
-                }
-                return;
-            }
+        if (player == null) {
+            this.sendWaitingGames(sender);
+            return;
         }
-        try {
-            sender.sendPacket(new PacketGameAction(PacketGameAction.Action.QUIT_GAME));
-        } catch (IOException e) {
-            LogManager.logError("Erreur lors de l'envoi du paquet de déconnexion au client " + sender.getName(), e);
+        ServerGame serverGame = player.getGame();
+        if (serverGame.getState() != GameState.WAITING) {
+            LogManager.logError("Le joueur " + player.getUser().getUsername() + " a quitté la partie " + serverGame.getName() + " alors qu'elle était déjà en cours.");
+            try {
+                sender.sendPacket(new PacketError(ErrorType.QUIT_NON_WAITING));
+            } catch (IOException e) {
+                LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
+            }
+            return;
+        }
+        try (PreparedStatement statement = server.getDb().prepareStatement("DELETE FROM player WHERE id = ?")) {
+            statement.setInt(1, player.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de la suppression du joueur " + player.getUser().getUsername() + " de la base de données.", e);
+            try {
+                sender.sendPacket(new PacketError(ErrorType.QUIT_GAME_FAILED));
+            } catch (IOException ioException) {
+                LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), ioException);
+            }
+            return;
+        }
+        serverGame.removePlayer(player.getUser());
+
+        for (SocketWrapper connection : this.server.getAuthManager().getConnectionsFor(player.getUser())) {
+            try {
+                connection.sendPacket(new PacketGameAction(PacketGameAction.Action.QUIT_GAME));
+            } catch (IOException e) {
+                LogManager.logError("Erreur lors de l'envoi du paquet de déconnexion au client " + sender.getName(), e);
+            }
+            this.sendWaitingGames(connection);
         }
     }
 }

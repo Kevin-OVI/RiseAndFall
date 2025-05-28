@@ -20,11 +20,6 @@ public enum View {
     LOADING("authentification/loading-view.fxml", "Rise & Fall - Chargement"),
 
     /**
-     * Page de bienvenue de l'application.
-     */
-    WELCOME("welcome-view.fxml", "Rise & Fall - Bienvenue"),
-
-    /**
      * Vue principale de l'application.
      */
     MAIN("main-view.fxml", "Rise & Fall"),

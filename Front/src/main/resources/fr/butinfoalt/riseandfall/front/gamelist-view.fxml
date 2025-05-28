@@ -12,10 +12,14 @@
       fx:controller="fr.butinfoalt.riseandfall.front.gamelist.GameListController">
 
     <ImageView fx:id="backgroundImageView" managed="false"/>
+
+    <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
+        Bienvenue sur Rise &amp; Fall Futur Empereur.
+    </TitleLabel>
     <Label fx:id="instructions">Sélectionnez votre race pour jouer</Label>
     <ChoiceBox fx:id="raceChoiceBox"/>
 
-    <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
+    <TitleLabel style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: black;">
         Listes des parties disponibles:
     </TitleLabel>
 

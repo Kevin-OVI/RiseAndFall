@@ -69,6 +69,7 @@ public class PacketGameAction implements IPacket {
         /**
          * Envoyé au serveur pour passer au tour suivant.
          */
-        NEXT_TURN;
+        NEXT_TURN,
+        ;
     }
 }
