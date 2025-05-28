@@ -7,7 +7,7 @@ import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
-import fr.butinfoalt.riseandfall.util.Scheduler;
+import fr.butinfoalt.riseandfall.util.scheduler.Scheduler;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;

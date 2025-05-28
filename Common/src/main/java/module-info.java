@@ -11,4 +11,5 @@ module fr.butinfoalt.riseandfall {
     exports fr.butinfoalt.riseandfall.network.packets;
     exports fr.butinfoalt.riseandfall.network.server;
     exports fr.butinfoalt.riseandfall.gamelogic.data;
+    exports fr.butinfoalt.riseandfall.util.scheduler;
 }

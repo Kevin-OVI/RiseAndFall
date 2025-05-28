@@ -1,6 +1,6 @@
 package fr.butinfoalt.riseandfall.front.util;
 
-import fr.butinfoalt.riseandfall.util.Scheduler;
+import fr.butinfoalt.riseandfall.util.scheduler.Scheduler;
 import javafx.application.Platform;
 
 /**

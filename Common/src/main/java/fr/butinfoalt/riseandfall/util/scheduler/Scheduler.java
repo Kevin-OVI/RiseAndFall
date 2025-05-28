@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall.util;
+package fr.butinfoalt.riseandfall.util.scheduler;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
@@ -12,7 +12,7 @@ public class Scheduler {
     /**
      * File de priorité pour stocker les tâches planifiées.
      */
-    private final PriorityQueue<ScheduledTask> tasks = new PriorityQueue<>(Comparator.comparingLong(o -> o.scheduledTime));
+    private final PriorityQueue<ScheduledTask> tasks = new PriorityQueue<>(Comparator.comparingLong(ScheduledTask::getScheduledTime));
     /**
      * Thread qui exécute les tâches planifiées.
      * Il est mis en veille jusqu'à ce qu'une tâche soit prête
@@ -27,18 +27,21 @@ public class Scheduler {
      * @param task     La tâche à exécuter.
      * @param duration Le délai avant l'exécution de la tâche.
      * @param timeUnit L'unité de temps du délai.
+     * @return
      */
-    public synchronized void schedule(Runnable task, long duration, TimeUnit timeUnit) {
+    public synchronized ScheduledTask schedule(Runnable task, long duration, TimeUnit timeUnit) {
         long scheduledTime = System.currentTimeMillis() + timeUnit.toMillis(duration);
-        this.tasks.add(new ScheduledTask(task, scheduledTime));
+        ScheduledTask scheduledTask = new ScheduledTask(this, task, scheduledTime);
+        this.tasks.add(scheduledTask);
 
         if (this.schedulerThread == null || !this.schedulerThread.isAlive()) {
             this.schedulerThread = new Thread(this::runTasks);
             this.schedulerThread.setDaemon(true);
             this.schedulerThread.start();
         } else {
-            this.schedulerThread.interrupt(); // Réveille le thread si il est en attente
+            this.schedulerThread.interrupt(); // Réveille le thread s'il est en attente
         }
+        return scheduledTask;
     }
 
     /**
@@ -47,8 +50,20 @@ public class Scheduler {
      * @param task     La tâche à exécuter.
      * @param duration Le délai avant l'exécution de la tâche en millisecondes.
      */
-    public void schedule(Runnable task, long duration) {
-        schedule(task, duration, TimeUnit.MILLISECONDS);
+    public ScheduledTask schedule(Runnable task, long duration) {
+        return schedule(task, duration, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Annule une tâche planifiée.
+     *
+     * @param scheduledTask La tâche planifiée à annuler.
+     */
+    public synchronized void cancelTask(ScheduledTask scheduledTask) {
+        if (!this.tasks.isEmpty() && this.tasks.peek() == scheduledTask && this.schedulerThread != null) {
+            this.schedulerThread.interrupt(); // Réveille le thread s'il est en attente et que la tâche est en tête de file
+        }
+        this.tasks.remove(scheduledTask);
     }
 
     /**
@@ -71,10 +86,10 @@ public class Scheduler {
                     break;
                 }
                 ScheduledTask scheduledTask = tasks.peek();
-                if (scheduledTask.scheduledTime <= currentTime) {
-                    taskToRun = this.wrapTask(tasks.poll().task);
+                if (scheduledTask.getScheduledTime() <= currentTime) {
+                    taskToRun = this.wrapTask(tasks.poll().getTask());
                 } else {
-                    timeToWait = scheduledTask.scheduledTime - currentTime;
+                    timeToWait = scheduledTask.getScheduledTime() - currentTime;
                 }
             }
             if (taskToRun != null) {
@@ -88,7 +103,7 @@ public class Scheduler {
                 try {
                     Thread.sleep(timeToWait);
                 } catch (InterruptedException ignored) {
-                    // Une nouvelle tâche a été planifiée, on doit vérifier à nouveau le début de la file
+                    // Une nouvelle tâche a été planifiée ou a été annulée, on doit vérifier à nouveau le début de la file
                 }
             }
         }
@@ -104,11 +119,5 @@ public class Scheduler {
      */
     protected Runnable wrapTask(Runnable task) {
         return task;
-    }
-
-    /**
-     * Représente une tâche planifiée avec son temps de planification.
-     */
-    private record ScheduledTask(Runnable task, long scheduledTime) {
     }
 }
