@@ -91,7 +91,7 @@ public class OrderController {
      */
     public void loadPendingOrders() {
         ClientPlayer player = RiseAndFall.getPlayer();
-        int playerIntelligence = player.getIntelligence();
+        float playerIntelligence = player.getIntelligence();
         this.pendingUnits = player.getUnitMap().createEmptyClone();
         this.pendingBuildings = player.getBuildingMap().createEmptyClone();
 
@@ -105,18 +105,18 @@ public class OrderController {
 
         this.intelligenceField.setText("Intelligence : " + playerIntelligence);
 
-        Counter goldCounter = new Counter(player.getGoldAmount());
+        Counter<Float> goldCounter = Counter.of(player.getGoldAmount());
         goldCounter.addListener(goldAmount -> {
             this.goldField.setText("Or restant : " + goldAmount);
             this.totalPrice.setText("Prix total : " + (goldCounter.getInitialValue() - goldAmount));
         });
-        Counter allowedUnitsCounter = new Counter(player.getAllowedUnitCount());
+        Counter<Integer> allowedUnitsCounter = Counter.of(player.getAllowedUnitCount());
         allowedUnitsCounter.addListener(allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
-        Counter allowedBuildingsCounter = new Counter(5);
+        Counter<Integer> allowedBuildingsCounter = Counter.of(5);
 
         this.unitTable.getItems().clear();
         for (ObjectIntMap.Entry<UnitType> entry : this.pendingUnits) {
-            Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
+            Modifier<Integer> unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
             PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter, playerIntelligence,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
@@ -125,7 +125,7 @@ public class OrderController {
 
         this.buildingTable.getItems().clear();
         for (ObjectIntMap.Entry<BuildingType> entry : pendingBuildings) {
-            Modifier buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
+            Modifier<Integer> buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
             PurchasableItemAmountSelector<BuildingType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter, playerIntelligence,
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> buildingModifier.setDelta(-amount));

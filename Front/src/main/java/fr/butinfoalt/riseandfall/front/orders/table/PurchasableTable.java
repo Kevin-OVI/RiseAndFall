@@ -4,7 +4,7 @@ import fr.butinfoalt.riseandfall.front.components.HeightAdaptedTableView;
 import fr.butinfoalt.riseandfall.front.orders.amountselector.PurchasableItemAmountSelector;
 import fr.butinfoalt.riseandfall.gamelogic.data.PurchasableItem;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.TableColumn;
@@ -62,11 +62,11 @@ public class PurchasableTable<T extends PurchasableItem> extends HeightAdaptedTa
         this.getColumns().add(this.quantityColumn);
 
         this.pricePerUnitColumn = new TableColumn<>("Prix unitaire");
-        this.pricePerUnitColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getPrice()));
+        this.pricePerUnitColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getPrice()));
         this.getColumns().add(this.pricePerUnitColumn);
 
         this.requiredIntelligenceColumn = new TableColumn<>("Intelligence requise");
-        this.requiredIntelligenceColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getRequiredIntelligence()));
+        this.requiredIntelligenceColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getRequiredIntelligence()));
         this.getColumns().add(this.requiredIntelligenceColumn);
     }
 }

@@ -1,6 +1,9 @@
 package fr.butinfoalt.riseandfall.front.orders.table;
 
+import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.Race;
+import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.TableColumn;
 
@@ -30,12 +33,14 @@ public class BuildingsTable extends PurchasableTable<BuildingType> {
     public BuildingsTable() {
         super();
 
+        Race race = RiseAndFall.getPlayer().getRace();
+
         this.goldProductionColumn = new TableColumn<>("Production d'or");
-        this.goldProductionColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getGoldProduction()));
+        this.goldProductionColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getGoldProduction() * race.getGoldMultiplier()));
         this.getColumns().add(this.goldProductionColumn);
 
         this.intelligenceProductionColumn = new TableColumn<>("Production d'intelligence");
-        this.intelligenceProductionColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getIntelligenceProduction()));
+        this.intelligenceProductionColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getIntelligenceProduction() * race.getIntelligenceMultiplier()));
         this.getColumns().add(this.intelligenceProductionColumn);
 
         this.hostingCapacityColumn = new TableColumn<>("Capacité d'hébergement");

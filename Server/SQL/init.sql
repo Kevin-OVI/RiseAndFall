@@ -42,8 +42,8 @@ CREATE TABLE player (
     user_id BIGINT UNSIGNED DEFAULT NULL,
     game_id BIGINT UNSIGNED NOT NULL,
     race_id BIGINT UNSIGNED NOT NULL,
-    gold INT NOT NULL DEFAULT 50,
-    intelligence INT NOT NULL DEFAULT 0,
+    gold DECIMAL(10, 2) NOT NULL DEFAULT 50,
+    intelligence DECIMAL(10, 2)  NOT NULL DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE SET NULL,
     FOREIGN KEY (game_id) REFERENCES game(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (race_id) REFERENCES race(id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -53,10 +53,10 @@ CREATE TABLE building_type (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    price INT NOT NULL,
-    required_intelligence INT NOT NULL DEFAULT 0,
-    gold_production INT NOT NULL,
-    intelligence_production INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    required_intelligence DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    gold_production DECIMAL(10, 2) NOT NULL,
+    intelligence_production DECIMAL(10, 2) NOT NULL,
     max_units INT NOT NULL,
     initial_amount INT NOT NULL,
     accessible_race_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'NULL si accessible à toutes les races, renseigné si accessible uniquement par une race particulière. Suppression en cascade pour ne pas rendre accessible à tous les bâtiments privés.',
@@ -67,10 +67,10 @@ CREATE TABLE unit_type (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    price INT NOT NULL,
-    required_intelligence INT NOT NULL,
-    health INT NOT NULL,
-    damage INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    required_intelligence DECIMAL(10, 2) NOT NULL,
+    health DECIMAL(10, 2) NOT NULL,
+    damage DECIMAL(10, 2) NOT NULL,
     accessible_race_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'NULL si accessible à toutes les races, renseigné si accessible uniquement par une race particulière. Suppression en cascade pour ne pas rendre accessible à tous les bâtiments privés.',
     FOREIGN KEY (accessible_race_id) REFERENCES race(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -102,16 +102,17 @@ VALUES
     (3, 'Orc', 'Créature verte, de taille humanoïde mais plus musclée et pourvue de crocs implantés au hasard. Il a un goût prononcé pour la violence mais il est débile', 0.75, 0.50, 2, 1.5),
     (4, 'Elfe', 'Créature Mystique aux grandes oreilles possèdant une grande intelligence mais faible', 1, 2, 1, 0.5),
     (5, 'Nain', 'Homme de petite taille,robuste et possèdant ENORMEMENT d''or', 1.5, 1, 0.5, 1.5),
-    (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes le problèmes sont leurs économie', 0.5, 1.2, 1.2, 1.5),
-    (7, 'Primotaures', 'Première créature du monde , les primotaures sont riches mais pacifiques', 1.7, 1, 0.5, 1.75);
+    (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes le problèmes sont leurs économie', 0.5, 1.25, 1.25, 1.5),
+    (7, 'Primotaures', 'Premières créatures du monde, les primotaures sont riches mais pacifiques', 2, 1, 0.5, 1.75);
 
 INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id)
 VALUES
-    ('Carrière', 'Structure permettant d’extraire des ressources minérales pour financer l’économie du royaume', 5, 0, 1, 0, 0, 4, NULL),
+    ('Carrière', 'Structure permettant d''extraire des ressources minérales pour financer l''économie du royaume', 10, 0, 5, 0, 0, 4, NULL),
+    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume', 20, 30, 10, 0, 0, 0, NULL),
     ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 3, 1, NULL),
-    ('Bibliothèque', 'Centre de savoir produisant de l’intelligence pour le développement des technologies', 10, 0, 0, 2, 0, 0, NULL),
+    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 0, 0, NULL),
     ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 10, 10, 0, 0, 2, 0, 1),
-    ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d’unités pieuses', 10, 10, 0, 0, 2, 0, 2),
+    ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 10, 0, 0, 2, 0, 2),
     ('Donjon', 'Endroit qui respire la violence permettant de former des futur combattants', 10, 10, 0, 0, 4, 0, 3),
     ('Tour de Mage', 'Endroit où les prochains mages sont formés', 10, 10, 1, 5, 1, 1, 4),
     ('Mine', 'Mine d''or où les nains adultes passent 100% de leurs temps', 13, 10, 5, 1, 0, 0, 5),

@@ -47,11 +47,11 @@ public abstract class Player implements Identifiable, ISerializable {
      * Quantité d'or que possède le joueur.
      * Initialisé à 50 pièces d'or au début de la partie.
      */
-    protected int goldAmount = 50;
+    protected float goldAmount = 50;
     /**
      * Quantité d'intelligence que possède le joueur.
      */
-    private int intelligence = 0;
+    private float intelligence = 0;
 
     /**
      * Constructeur de la classe Player.
@@ -101,7 +101,7 @@ public abstract class Player implements Identifiable, ISerializable {
      *
      * @return La quantité d'or actuelle du joueur.
      */
-    public int getGoldAmount() {
+    public float getGoldAmount() {
         return this.goldAmount;
     }
 
@@ -110,8 +110,26 @@ public abstract class Player implements Identifiable, ISerializable {
      *
      * @param goldAmount La nouvelle quantité d'or à définir.
      */
-    public void setGoldAmount(int goldAmount) {
+    public void setGoldAmount(float goldAmount) {
         this.goldAmount = goldAmount;
+    }
+
+    /**
+     * Méthode pour ajouter une certaine quantité d'or au joueur.
+     *
+     * @param goldAmount La quantité d'or à ajouter.
+     */
+    public void addGoldAmount(float goldAmount) {
+        this.goldAmount += goldAmount;
+    }
+
+    /**
+     * Méthode pour retirer une certaine quantité d'or au joueur.
+     *
+     * @param goldAmount La quantité d'or à retirer.
+     */
+    public void removeGoldAmount(float goldAmount) {
+        this.goldAmount -= goldAmount;
     }
 
     /**
@@ -119,7 +137,7 @@ public abstract class Player implements Identifiable, ISerializable {
      *
      * @return La quantité d'intelligence actuelle du joueur.
      */
-    public int getIntelligence() {
+    public float getIntelligence() {
         return this.intelligence;
     }
 
@@ -128,11 +146,11 @@ public abstract class Player implements Identifiable, ISerializable {
      *
      * @param intelligence La nouvelle quantité d'intelligence à définir.
      */
-    public void setIntelligence(int intelligence) {
+    public void setIntelligence(float intelligence) {
         this.intelligence = intelligence;
     }
 
-    public void addIntelligence(int valeur) {
+    public void addIntelligence(float valeur) {
         this.intelligence += valeur;
     }
 
@@ -149,24 +167,6 @@ public abstract class Player implements Identifiable, ISerializable {
         }
 
         return allowedCount;
-    }
-
-    /**
-     * Méthode pour ajouter une certaine quantité d'or au joueur.
-     *
-     * @param goldAmount La quantité d'or à ajouter.
-     */
-    public void addGoldAmount(int goldAmount) {
-        this.goldAmount += goldAmount;
-    }
-
-    /**
-     * Méthode pour retirer une certaine quantité d'or au joueur.
-     *
-     * @param goldAmount La quantité d'or à retirer.
-     */
-    public void removeGoldAmount(int goldAmount) {
-        this.goldAmount -= goldAmount;
     }
 
     /**
@@ -251,8 +251,8 @@ public abstract class Player implements Identifiable, ISerializable {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la sérialisation.
      */
     public void serializeModifiableData(WriteHelper writeHelper) throws IOException {
-        writeHelper.writeInt(this.goldAmount);
-        writeHelper.writeInt(this.intelligence);
+        writeHelper.writeFloat(this.goldAmount);
+        writeHelper.writeFloat(this.intelligence);
         for (Entry<BuildingType> entry : this.buildingMap) {
             writeHelper.writeInt(entry.getKey().getId());
             writeHelper.writeInt(entry.getValue());

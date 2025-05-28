@@ -40,10 +40,14 @@ public class ServerPlayer extends Player {
      * Exécute les ordres en attente pour le joueur.
      */
     public void executeOrders() {
+        float addGold = 0, addIntelligence = 0;
         for (ObjectIntMap.Entry<BuildingType> entry : this.buildingMap) {
-            this.addGoldAmount(entry.getValue() * entry.getKey().getGoldProduction());
-            this.addIntelligence(entry.getValue() * entry.getKey().getIntelligenceProduction());
+            addGold += entry.getValue() * entry.getKey().getGoldProduction();
+            addIntelligence += entry.getValue() * entry.getKey().getIntelligenceProduction();
         }
+
+        this.addGoldAmount(addGold * this.getRace().getGoldMultiplier());
+        this.addIntelligence(addIntelligence * this.getRace().getIntelligenceMultiplier());
 
         for (BaseOrder order : this.pendingOrders) {
             if (this.goldAmount >= order.getPrice()) {

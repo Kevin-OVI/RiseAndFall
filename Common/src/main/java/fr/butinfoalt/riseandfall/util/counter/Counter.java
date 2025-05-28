@@ -10,26 +10,26 @@ import java.util.function.Consumer;
  * Elle permet de gérer un compteur qui peut être modifié par des modificateurs et d'informer les
  * écouteurs lorsque la valeur du compteur change.
  */
-public class Counter {
+public class Counter<T extends Number> {
     /**
      * Valeur initiale du compteur.
      */
-    private final int initialValue;
+    private final OperationHelper<T> initialValue;
 
     /**
      * Ensemble de modificateurs appliqués au compteur.
      */
-    private final HashSet<Modifier> modifiers = new HashSet<>();
+    private final HashSet<Modifier<T>> modifiers = new HashSet<>();
 
     /**
      * Ensemble d'écouteurs de changement de valeur du compteur.
      */
-    private final Dispatcher<Integer> dispatcher = new Dispatcher<>(false);
+    private final Dispatcher<T> dispatcher = new Dispatcher<>(false);
 
     /**
      * Valeur actuelle du compteur.
      */
-    private int currentValue;
+    private OperationHelper<T> currentValue;
 
     /**
      * Constructeur de la classe Counter.
@@ -37,9 +37,23 @@ public class Counter {
      *
      * @param initialValue La valeur initiale du compteur.
      */
-    public Counter(int initialValue) {
+    private Counter(OperationHelper<T> initialValue) {
         this.initialValue = initialValue;
         this.currentValue = initialValue;
+    }
+
+    /**
+     * @return Un compteur de type Integer initialisé à la valeur spécifiée.
+     */
+    public static Counter<Integer> of(int initialValue) {
+        return new Counter<>(new IntOperationHelper(initialValue));
+    }
+
+    /**
+     * @return Un compteur de type Float initialisé à la valeur spécifiée.
+     */
+    public static Counter<Float> of(float initialValue) {
+        return new Counter<>(new FloatOperationHelper(initialValue));
     }
 
     /**
@@ -49,10 +63,10 @@ public class Counter {
      * @param delta La valeur du modificateur à ajouter.
      * @return Le modificateur ajouté.
      */
-    public Modifier addModifier(int delta) {
-        Modifier modifier = new Modifier(this, delta);
+    public Modifier<T> addModifier(T delta) {
+        Modifier<T> modifier = new Modifier<>(this, delta);
         this.modifiers.add(modifier);
-        this.dispatcher.dispatch(this.currentValue += delta);
+        this.dispatcher.dispatch((this.currentValue = this.currentValue.add(delta)).getValue());
         return modifier;
     }
 
@@ -62,8 +76,8 @@ public class Counter {
      *
      * @return Le modificateur ajouté.
      */
-    public Modifier addModifier() {
-        return this.addModifier(0);
+    public Modifier<T> addModifier() {
+        return this.addModifier(this.initialValue.getDefaultModifierValue());
     }
 
     /**
@@ -72,9 +86,9 @@ public class Counter {
      *
      * @param modifier Le modificateur à supprimer.
      */
-    public void removeModifier(Modifier modifier) {
+    public void removeModifier(Modifier<T> modifier) {
         if (this.modifiers.remove(modifier)) {
-            this.dispatcher.dispatch(this.currentValue -= modifier.getDelta());
+            this.dispatcher.dispatch((this.currentValue = this.currentValue.subtract(modifier.getDelta())).getValue());
         }
     }
 
@@ -84,7 +98,7 @@ public class Counter {
      * @param modifier Le modificateur à vérifier.
      * @return true si le modificateur est présent, false sinon.
      */
-    public boolean hasModifier(Modifier modifier) {
+    public boolean hasModifier(Modifier<T> modifier) {
         return this.modifiers.contains(modifier);
     }
 
@@ -93,8 +107,8 @@ public class Counter {
      *
      * @return La valeur initiale du compteur.
      */
-    public int getInitialValue() {
-        return this.initialValue;
+    public T getInitialValue() {
+        return this.initialValue.getValue();
     }
 
     /**
@@ -102,8 +116,19 @@ public class Counter {
      *
      * @return La valeur actuelle du compteur.
      */
-    public int getCurrentValue() {
-        return this.currentValue;
+    public T getCurrentValue() {
+        return this.currentValue.getValue();
+    }
+
+    /**
+     * Calcule la nouvelle valeur du compteur en fonction des deltas précédents et nouveaux.
+     *
+     * @param previousDelta L'ancien delta
+     * @param newDelta      Le nouveau delta
+     * @return Une nouvelle instance d'OperationHelper représentant la valeur actuelle du compteur après application des deltas.
+     */
+    OperationHelper<T> computeNewValue(T previousDelta, T newDelta) {
+        return this.currentValue.add(newDelta).subtract(previousDelta);
     }
 
     /**
@@ -112,8 +137,8 @@ public class Counter {
      * @param previousDelta L'ancien delta
      * @param newDelta      Le nouveau delta
      */
-    void updateCurrentValue(int previousDelta, int newDelta) {
-        this.dispatcher.dispatch(this.currentValue += newDelta - previousDelta);
+    void updateCurrentValue(T previousDelta, T newDelta) {
+        this.dispatcher.dispatch((this.currentValue = this.computeNewValue(previousDelta, newDelta)).getValue());
     }
 
     /**
@@ -121,7 +146,7 @@ public class Counter {
      *
      * @param listener L'écouteur à ajouter.
      */
-    public void addListener(Consumer<Integer> listener) {
+    public void addListener(Consumer<T> listener) {
         this.dispatcher.addListener(listener);
     }
 
@@ -130,7 +155,7 @@ public class Counter {
      *
      * @param listener L'écouteur à supprimer.
      */
-    public void removeListener(Consumer<Integer> listener) {
+    public void removeListener(Consumer<T> listener) {
         this.dispatcher.removeListener(listener);
     }
 
@@ -152,12 +177,12 @@ public class Counter {
     public void setDispatchChanges(boolean dispatchChanges) {
         this.dispatcher.setDispatchChanges(dispatchChanges);
         if (dispatchChanges) {
-            this.dispatcher.dispatch(this.currentValue);
+            this.dispatcher.dispatch(this.currentValue.getValue());
         }
     }
 
     @Override
     public String toString() {
-        return "Counter{initialValue=%d, modifiers=%s, dispatcher=%s, currentValue=%d}".formatted(this.initialValue, this.modifiers, this.dispatcher, this.currentValue);
+        return "Counter{initialValue=%s, modifiers=%s, dispatcher=%s, currentValue=%s}".formatted(this.initialValue, this.modifiers, this.dispatcher, this.currentValue);
     }
 }

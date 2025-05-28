@@ -288,9 +288,9 @@ public class GameManager {
         }
 
         // On vérifie coté serveur que le joueur a bien les ressources nécessaires pour exécuter les ordres
-        int goldCapacity = player.getGoldAmount();
+        float goldCapacity = player.getGoldAmount();
         int unitsCapacity = player.getAllowedUnitCount();
-        int playerIntelligence = player.getIntelligence();
+        float playerIntelligence = player.getIntelligence();
         int buildingsCapacity = 5; // Maximum 5 bâtiments par tour
         List<BaseOrder> newOrders = packet.getOrders();
         for (BaseOrder order : newOrders) {

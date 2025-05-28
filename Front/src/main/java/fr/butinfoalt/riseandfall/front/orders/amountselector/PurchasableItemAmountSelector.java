@@ -30,7 +30,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
     /**
      * La quantité d'intelligence du joueur.
      */
-    private int playerIntelligence;
+    private final float playerIntelligence;
 
     /**
      * Fonction de validation supplémentaire de la quantité en plus de celle du prix.
@@ -47,7 +47,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
     /**
      * Le modificateur d'or associé à cet élément.
      */
-    private final Modifier goldModifier;
+    private final Modifier<Float> goldModifier;
 
     /**
      * Le bouton de diminution de la quantité.
@@ -72,7 +72,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
      * @param playerIntelligence La quantité d'intelligence du joueur.
      * @param amountValidator    Fonction de validation de la quantité.
      */
-    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter goldCounter, int playerIntelligence, Function<Integer, Boolean> amountValidator) {
+    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter<Float> goldCounter, float playerIntelligence, Function<Integer, Boolean> amountValidator) {
         this.entry = entry;
         this.playerIntelligence = playerIntelligence;
         this.amountValidator = amountValidator;
@@ -103,7 +103,7 @@ public class PurchasableItemAmountSelector<T extends PurchasableItem> extends HB
      * @param playerIntelligence La quantité d'intelligence du joueur.
      * @param goldCounter        Le compteur d'or à modifier.
      */
-    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter goldCounter, int playerIntelligence) {
+    public PurchasableItemAmountSelector(ObjectIntMap.Entry<T> entry, Counter<Float> goldCounter, float playerIntelligence) {
         this(entry, goldCounter, playerIntelligence, null);
     }
 

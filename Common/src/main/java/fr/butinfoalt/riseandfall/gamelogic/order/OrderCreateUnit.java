@@ -48,7 +48,7 @@ public class OrderCreateUnit implements BaseOrder {
      * @return Le prix de l'ordre en or.
      */
     @Override
-    public int getPrice() {
+    public float getPrice() {
         return this.unitType.getPrice() * this.count;
     }
 
