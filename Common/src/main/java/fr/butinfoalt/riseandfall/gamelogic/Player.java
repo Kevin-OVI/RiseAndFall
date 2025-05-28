@@ -8,6 +8,7 @@ import fr.butinfoalt.riseandfall.network.common.WriteHelper;
 import fr.butinfoalt.riseandfall.network.packets.data.OrderType;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap.Entry;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -206,11 +207,6 @@ public abstract class Player implements Identifiable, ISerializable {
         this.pendingOrders.addAll(orders);
     }
 
-    @Override
-    public String toString() {
-        return "Player{id=%d, buildingMap=%s, unitMap=%s, pendingOrders=%s, race=%s, goldAmount=%d, intelligence=%d}".formatted(this.id, this.buildingMap, this.unitMap, this.pendingOrders, this.race, this.goldAmount, this.intelligence);
-    }
-
     /**
      * Méthode pour désérialiser une liste d'ordres à partir d'un flux de données.
      * On lit d'abord le nombre d'ordres, puis on lit chaque ordre en fonction de son type.
@@ -279,5 +275,21 @@ public abstract class Player implements Identifiable, ISerializable {
         writeHelper.writeInt(this.id);
         writeHelper.writeInt(this.race.getId());
         this.serializeModifiableData(writeHelper);
+    }
+
+    protected ToStringFormatter toStringFormatter() {
+        return new ToStringFormatter(this.getClass().getSimpleName())
+                .add("id", this.id)
+                .add("race", this.race)
+                .add("goldAmount", this.goldAmount)
+                .add("intelligence", this.intelligence)
+                .add("buildingMap", this.buildingMap)
+                .add("unitMap", this.unitMap)
+                .add("pendingOrders", this.pendingOrders);
+    }
+
+    @Override
+    public String toString() {
+        return this.toStringFormatter().build();
     }
 }

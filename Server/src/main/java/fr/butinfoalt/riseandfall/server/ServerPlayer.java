@@ -7,6 +7,7 @@ import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 /**
  * Représente un joueur dans le serveur.
@@ -21,16 +22,6 @@ public class ServerPlayer extends Player {
      * Partie associée au joueur.
      */
     private final ServerGame game;
-
-    /**
-     * Quantité de gold
-     */
-    private int goldAmount;
-
-    /**
-     * Quantité d'intelligence
-     */
-    private int intelligenceAmount;
 
     /**
      * Constructeur de la classe Player.
@@ -79,5 +70,12 @@ public class ServerPlayer extends Player {
      */
     public ServerGame getGame() {
         return this.game;
+    }
+
+    @Override
+    public ToStringFormatter toStringFormatter() {
+        return super.toStringFormatter()
+                .add("user.id", this.user.getId())
+                .add("game.id", this.game.getId());
     }
 }

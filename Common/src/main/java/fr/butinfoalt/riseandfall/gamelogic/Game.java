@@ -4,6 +4,7 @@ import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -174,5 +175,20 @@ public abstract class Game implements Identifiable, ISerializable {
         writeHelper.writeInt(this.state.ordinal());
         writeHelper.writeLong(this.lastTurnTimestamp == null ? -1 : this.lastTurnTimestamp.getTime());
         writeHelper.writeInt(this.currentTurn);
+    }
+
+    protected ToStringFormatter toStringFormatter() {
+        return new ToStringFormatter(this.getClass().getSimpleName())
+                .add("id", this.id)
+                .add("name", this.name)
+                .add("turnInterval", this.turnInterval)
+                .add("state", this.state)
+                .add("lastTurnTimestamp", this.lastTurnTimestamp)
+                .add("currentTurn", this.currentTurn);
+    }
+
+    @Override
+    public String toString() {
+        return this.toStringFormatter().build();
     }
 }

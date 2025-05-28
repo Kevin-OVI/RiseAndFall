@@ -200,17 +200,11 @@ public class ServerGame extends Game {
     }
 
     @Override
-    public String toString() {
-        return new ToStringFormatter("ServerGame")
-                .add("id", this.getId())
-                .add("name", this.name)
-                .add("turnInterval", this.turnInterval)
+    public ToStringFormatter toStringFormatter() {
+        return super.toStringFormatter()
                 .add("minPlayers", this.minPlayers)
                 .add("maxPlayers", this.maxPlayers)
                 .add("isPrivate", this.isPrivate)
-                .add("state", this.state)
-                .add("currentTurn", this.currentTurn)
-                .add("playersCount", this.players.size())
-                .build();
+                .add("playersCount", this.players.size());
     }
 }
