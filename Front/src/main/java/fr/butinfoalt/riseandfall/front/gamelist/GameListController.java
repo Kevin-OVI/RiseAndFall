@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall.front.GameList;
+package fr.butinfoalt.riseandfall.front.gamelist;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;

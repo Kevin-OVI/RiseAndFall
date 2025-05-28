@@ -1,23 +1,14 @@
 package fr.butinfoalt.riseandfall.front;
 
-import fr.butinfoalt.riseandfall.front.GameList.GameListController;
-import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.front.util.NamedItemStringConverter;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
-import fr.butinfoalt.riseandfall.gamelogic.data.Race;
-import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
-import fr.butinfoalt.riseandfall.network.packets.PacketCreateOrJoinGame;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
-
-import java.io.IOException;
 
 public class WelcomeView {
     /**

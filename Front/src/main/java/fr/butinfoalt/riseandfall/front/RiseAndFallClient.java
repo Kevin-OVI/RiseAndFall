@@ -1,6 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
-import fr.butinfoalt.riseandfall.front.GameList.GameListController;
+import fr.butinfoalt.riseandfall.front.gamelist.GameListController;
 import fr.butinfoalt.riseandfall.front.authentification.LoginController;
 import fr.butinfoalt.riseandfall.front.authentification.RegisterController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
