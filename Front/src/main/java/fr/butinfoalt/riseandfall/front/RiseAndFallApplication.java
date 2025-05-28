@@ -1,11 +1,16 @@
 package fr.butinfoalt.riseandfall.front;
 
+import fr.butinfoalt.riseandfall.front.authentification.LoadingController;
+import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Stack;
 
@@ -47,15 +52,28 @@ public class RiseAndFallApplication extends Application {
 
     /**
      * Méthode pour changer la vue de la fenêtre principale.
+     * On peut choisir de remplacer la vue actuelle ou de l'empiler pour y revenir plus tard.
+     *
+     * @param view    La nouvelle vue à afficher.
+     * @param replace Indique si la vue actuelle doit être remplacée ou non.
+     */
+    public static void switchToView(View view, boolean replace) {
+        Parent newRoot = view.getSceneRoot();
+        if (!replace) {
+            stageViewStack.push(new StageViewElement(mainWindow.getScene().getRoot(), mainWindow.getTitle()));
+        }
+        mainWindow.getScene().setRoot(newRoot);
+        mainWindow.setTitle(view.getWindowTitle());
+    }
+
+    /**
+     * Méthode pour changer la vue de la fenêtre principale.
      * On empile d'abord la vue actuelle avant de la remplacer par la nouvelle vue afin de pouvoir y revenir.
      *
      * @param view La nouvelle vue à afficher.
      */
     public static void switchToView(View view) {
-        Parent newRoot = view.getSceneRoot();
-        stageViewStack.push(new StageViewElement(mainWindow.getScene().getRoot(), mainWindow.getTitle()));
-        mainWindow.getScene().setRoot(newRoot);
-        mainWindow.setTitle(view.getWindowTitle());
+        switchToView(view, false);
     }
 
     /**
@@ -79,14 +97,27 @@ public class RiseAndFallApplication extends Application {
     public void start(Stage stage) {
         mainWindow = stage;
 
-        Scene scene = new Scene(View.WELCOME.getSceneRoot(), WIDTH, HEIGHT);
-        stage.setTitle(View.WELCOME.getWindowTitle());
+        Scene scene = new Scene(View.LOADING.getSceneRoot(), WIDTH, HEIGHT);
+        stage.setTitle(View.LOADING.getWindowTitle());
         stage.setScene(scene);
         stage.setMaximized(true);
+        stage.setOnCloseRequest(this::onCloseRequest);
         stage.show();
 
-        WelcomeView controller = View.WELCOME.getController();
+        RiseAndFall.initSocketClient();
+
+        LoadingController controller = View.LOADING.getController();
         controller.initializeScene(scene);
+    }
+
+    private void onCloseRequest(WindowEvent windowEvent) {
+        if (!windowEvent.isConsumed()) {
+            try {
+                RiseAndFall.getClient().close();
+            } catch (IOException e) {
+                LogManager.logError("Erreur lors de la fermeture du client", e);
+            }
+        }
     }
 
     /**

@@ -1,14 +1,14 @@
 package fr.butinfoalt.riseandfall.front.orders.table;
 
 import fr.butinfoalt.riseandfall.front.orders.amountselector.PurchasableItemAmountSelector;
-import fr.butinfoalt.riseandfall.gamelogic.map.PurchasableItem;
+import fr.butinfoalt.riseandfall.gamelogic.data.PurchasableItem;
 
 /**
  * Représente une ligne dans un tableau d'éléments achetables.
  *
  * @param <T> Le type de l'élément achetable, qui doit être une énumération implémentant PurchasableItem.
  */
-public class PurchasableTableRow<T extends Enum<T> & PurchasableItem> {
+public class PurchasableTableRow<T extends PurchasableItem> {
     /**
      * L'élément achetable.
      */

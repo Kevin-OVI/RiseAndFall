@@ -40,3 +40,6 @@ build/
 # Project exclude paths
 /out/
 *.jar
+
+*.env
+/auth_token.txt

@@ -3,6 +3,8 @@ module fr.butinfoalt.riseandfall.front {
     requires javafx.fxml;
     requires java.desktop;
     requires fr.butinfoalt.riseandfall;
+    requires io.github.cdimascio.dotenv.java;
+    requires java.sql; // Pas de SQL sur le client mais nécessaire pour l'objet java.sql.Timestamp
 
 
     opens fr.butinfoalt.riseandfall.front to javafx.fxml;
@@ -19,6 +21,10 @@ module fr.butinfoalt.riseandfall.front {
     opens fr.butinfoalt.riseandfall.front.orders.table to javafx.fxml;
     exports fr.butinfoalt.riseandfall.front.orders.amountselector;
     opens fr.butinfoalt.riseandfall.front.orders.amountselector to javafx.fxml;
+    opens fr.butinfoalt.riseandfall.front.authentification to javafx.fxml;
+    exports fr.butinfoalt.riseandfall.front.authentification;
+    opens fr.butinfoalt.riseandfall.front.gamelist to javafx.fxml;
+    exports fr.butinfoalt.riseandfall.front.gamelist;
     opens fr.butinfoalt.riseandfall.front.util to javafx.fxml;
     exports fr.butinfoalt.riseandfall.front.util;
 }

@@ -1,80 +1,29 @@
-package fr.butinfoalt.riseandfall.gamelogic.map;
+package fr.butinfoalt.riseandfall.util;
 
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Predicate;
 
 /**
  * Une classe pour associer plusieurs types d'énumération à des entiers.
  *
  * @param <T> Le type d'énumération à associer.
  */
-public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<T>> {
-    /**
-     * La classe de l'énumération pour laquelle les valeurs doivent être associées.
-     */
-    private final Class<T> enumClass;
-
+public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
     /**
      * Un tableau d'entiers pour stocker les valeurs associées à chaque valeur de l'énumération.
      */
-    private final int[] map;
-
-    /**
-     * Un prédicat pour filtrer les valeurs de l'énumération.
-     */
-    private final Predicate<T> filter;
-
-    /**
-     * Un tableau contenant les valeurs de l'énumération filtrées.
-     */
-    private final T[] keyUniverse;
+    private final LinkedHashMap<T, Integer> map;
 
     /**
      * Constructeur privé de la classe EnumIntMap.
      * On crée un tableau d'entiers de la taille spécifiée.
      *
-     * @param enumClass   La classe de l'énumération pour laquelle les valeurs doivent être associées.
-     * @param filter      Le prédicat pour filtrer les valeurs de l'énumération.
      * @param keyUniverse Un tableau contenant les valeurs de l'énumération filtrées.
-     * @param mapSize     La taille du tableau d'entiers.
      */
-    private EnumIntMap(Class<T> enumClass, Predicate<T> filter, T[] keyUniverse, int mapSize) {
-        this.enumClass = enumClass;
-        this.filter = filter;
-        this.keyUniverse = keyUniverse;
-        this.map = new int[mapSize];
-    }
-
-    /**
-     * Constructeur privé de la classe EnumIntMap.
-     *
-     * @param enumClass        La classe de l'énumération pour laquelle les valeurs doivent être associées.
-     * @param filter           Le prédicat pour filtrer les valeurs de l'énumération.
-     * @param allEnumConstants Un tableau contenant toutes les valeurs de l'énumération.
-     */
-    private EnumIntMap(Class<T> enumClass, Predicate<T> filter, T[] allEnumConstants) {
-        this(enumClass, filter, Arrays.stream(allEnumConstants).filter(filter).toArray(value -> (T[]) Array.newInstance(enumClass, value)), allEnumConstants.length);
-    }
-
-    /**
-     * Constructeur de la classe EnumIntMap.
-     * On crée un tableau d'entiers de la même taille que le nombre d'éléments dans l'énumération.
-     *
-     * @param enumClass La classe de l'énumération pour laquelle les valeurs doivent être associées.
-     * @param filter    Le prédicat pour filtrer les valeurs de l'énumération.
-     */
-    public EnumIntMap(Class<T> enumClass, Predicate<T> filter) {
-        this(enumClass, filter, enumClass.getEnumConstants());
-    }
-
-    /**
-     * Constructeur de la classe EnumIntMap sans filtre.
-     *
-     * @param enumClass La classe de l'énumération pour laquelle les valeurs doivent être associées.
-     */
-    public EnumIntMap(final Class<T> enumClass) {
-        this(enumClass, t -> true);
+    public ObjectIntMap(Collection<T> keyUniverse) {
+        this.map = new LinkedHashMap<>();
+        for (T key : keyUniverse) {
+            this.map.put(key, 0);
+        }
     }
 
     /**
@@ -84,7 +33,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      * @param count La valeur à associer au type d'énumération.
      */
     public void set(T type, int count) {
-        this.map[type.ordinal()] = count;
+        this.map.put(type, count);
     }
 
     /**
@@ -94,7 +43,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      * @return La valeur associée au type d'énumération.
      */
     public int get(T type) {
-        return this.map[type.ordinal()];
+        return this.map.get(type);
     }
 
     /**
@@ -105,7 +54,9 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      * @return La nouvelle valeur associée au type d'énumération après l'incrémentation.
      */
     public int increment(T type, int count) {
-        return this.map[type.ordinal()] += count;
+        int value = this.get(type) + count;
+        this.set(type, value);
+        return value;
     }
 
     /**
@@ -116,7 +67,9 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      * @return La nouvelle valeur associée au type d'énumération après la décrémentation.
      */
     public int decrement(T type, int count) {
-        return this.map[type.ordinal()] -= count;
+        int value = this.get(type) - count;
+        this.set(type, value);
+        return value;
     }
 
     /**
@@ -124,8 +77,8 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      *
      * @return Un tableau contenant les types de l'énumération.
      */
-    public T[] getEnumConstants() {
-        return this.keyUniverse.clone();
+    public Set<T> getEnumConstants() {
+        return this.map.keySet();
     }
 
     /**
@@ -134,7 +87,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      * @return Le nombre de types dans l'énumération.
      */
     public int size() {
-        return this.keyUniverse.length;
+        return this.map.size();
     }
 
     /**
@@ -143,7 +96,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      * @return Le nombre total de valeurs associées dans l'association.
      */
     public int getTotal() {
-        return Arrays.stream(this.map).sum();
+        return this.map.values().stream().mapToInt(Integer::intValue).sum();
     }
 
     /**
@@ -151,8 +104,8 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      *
      * @return Une nouvelle instance d'EnumIntMap vide.
      */
-    public EnumIntMap<T> createEmptyClone() {
-        return new EnumIntMap<>(this.enumClass, this.filter, this.keyUniverse, this.map.length);
+    public ObjectIntMap<T> createEmptyClone() {
+        return new ObjectIntMap<>(this.getEnumConstants());
     }
 
     /**
@@ -163,7 +116,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      */
     @Override
     public Iterator<Entry<T>> iterator() {
-        return new EnumIntMapIterator<T>(this);
+        return new EnumIntMapIterator<>(this);
     }
 
     /**
@@ -174,35 +127,33 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      */
     @Override
     public Spliterator<Entry<T>> spliterator() {
-        return Spliterators.spliterator(this.iterator(), this.map.length, Spliterator.ORDERED);
+        return Spliterators.spliterator(this.iterator(), this.size(), Spliterator.ORDERED);
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        EnumIntMap<?> that = (EnumIntMap<?>) o;
-        return Objects.equals(this.enumClass, that.enumClass) && Arrays.equals(this.keyUniverse, that.keyUniverse) && Arrays.equals(this.map, that.map);
+        ObjectIntMap<?> that = (ObjectIntMap<?>) o;
+        return Objects.equals(this.map, that.map);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.enumClass, Arrays.hashCode(this.keyUniverse), Arrays.hashCode(this.map));
+        return Objects.hash(this.map);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("EnumIntMap{enumClass=");
-        sb.append(this.enumClass);
-        sb.append(", map={");
+        StringBuilder sb = new StringBuilder("EnumIntMap{");
         boolean removeLastComma = false;
         for (Entry<T> entry : this) {
             sb.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
             removeLastComma = true;
         }
         if (removeLastComma) {
-            sb.setLength(sb.length() - 2); // Remove the last comma and space
+            sb.setLength(sb.length() - 2);
         }
-        sb.append("}}");
+        sb.append("}");
         return sb.toString();
     }
 
@@ -211,24 +162,21 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      *
      * @param <T> Le type d'énumération à associer.
      */
-    public static class EnumIntMapIterator<T extends Enum<T>> implements Iterator<Entry<T>> {
+    public static class EnumIntMapIterator<T> implements Iterator<Entry<T>> {
         /**
          * L'instance de l'association sur laquelle itérer
          */
-        private final EnumIntMap<T> enumIntMap;
-
-        /**
-         * L'indice courant de l'itération.
-         */
-        private int currentIndex = 0;
+        private final ObjectIntMap<T> objectIntMap;
+        private final Iterator<T> internalIterator;
 
         /**
          * Constructeur de l'itérateur.
          *
-         * @param enumIntMap L'instance de l'association sur laquelle itérer.
+         * @param objectIntMap L'instance de l'association sur laquelle itérer.
          */
-        public EnumIntMapIterator(EnumIntMap<T> enumIntMap) {
-            this.enumIntMap = enumIntMap;
+        public EnumIntMapIterator(ObjectIntMap<T> objectIntMap) {
+            this.objectIntMap = objectIntMap;
+            this.internalIterator = objectIntMap.map.keySet().iterator();
         }
 
         /**
@@ -239,7 +187,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
          */
         @Override
         public boolean hasNext() {
-            return this.currentIndex < this.enumIntMap.size();
+            return this.internalIterator.hasNext();
         }
 
         /**
@@ -251,11 +199,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
          */
         @Override
         public Entry<T> next() throws NoSuchElementException {
-            if (!hasNext()) {
-                throw new NoSuchElementException("No more elements to iterate.");
-            }
-            T key = this.enumIntMap.keyUniverse[this.currentIndex++];
-            return new Entry<T>(this.enumIntMap, key);
+            return new Entry<>(this.objectIntMap, this.internalIterator.next());
         }
     }
 
@@ -264,11 +208,11 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
      *
      * @param <T> Le type d'énumération à associer.
      */
-    public static final class Entry<T extends Enum<T>> {
+    public static final class Entry<T> {
         /**
          * L'instance de l'association sur laquelle l'entrée est associée.
          */
-        private final EnumIntMap<T> enumIntMap;
+        private final ObjectIntMap<T> objectIntMap;
 
         /**
          * Le type d'énumération associé à l'entrée.
@@ -278,11 +222,11 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
         /**
          * Constructeur de l'entrée.
          *
-         * @param enumIntMap L'instance de l'association sur laquelle l'entrée est associée.
+         * @param objectIntMap L'instance de l'association sur laquelle l'entrée est associée.
          * @param key        Le type d'énumération associé à l'entrée.
          */
-        private Entry(EnumIntMap<T> enumIntMap, T key) {
-            this.enumIntMap = enumIntMap;
+        private Entry(ObjectIntMap<T> objectIntMap, T key) {
+            this.objectIntMap = objectIntMap;
             this.key = key;
         }
 
@@ -301,7 +245,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
          * @return La valeur associée à la clé de l'entrée.
          */
         public int getValue() {
-            return this.enumIntMap.get(this.key);
+            return this.objectIntMap.get(this.key);
         }
 
         /**
@@ -310,7 +254,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
          * @param value La valeur à associer à la clé de l'entrée.
          */
         public void setValue(int value) {
-            this.enumIntMap.set(this.key, value);
+            this.objectIntMap.set(this.key, value);
         }
 
         /**
@@ -320,7 +264,7 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
          * @return La nouvelle valeur associée à la clé de l'entrée après l'incrémentation.
          */
         public int increment(int count) {
-            return this.enumIntMap.increment(this.key, count);
+            return this.objectIntMap.increment(this.key, count);
         }
 
         /**
@@ -330,24 +274,24 @@ public class EnumIntMap<T extends Enum<T>> implements Iterable<EnumIntMap.Entry<
          * @return La nouvelle valeur associée à la clé de l'entrée après la décrémentation.
          */
         public int decrement(int count) {
-            return this.enumIntMap.decrement(this.key, count);
+            return this.objectIntMap.decrement(this.key, count);
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             Entry<?> entry = (Entry<?>) o;
-            return Objects.equals(this.enumIntMap, entry.enumIntMap) && Objects.equals(this.key, entry.key);
+            return Objects.equals(this.objectIntMap, entry.objectIntMap) && Objects.equals(this.key, entry.key);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.enumIntMap, this.key);
+            return Objects.hash(this.objectIntMap, this.key);
         }
 
         @Override
         public String toString() {
-            return "Entry{enumIntMap=%s, key=%s, value=%s}".formatted(this.enumIntMap, this.key, this.getValue());
+            return "Entry{enumIntMap=%s, key=%s, value=%s}".formatted(this.objectIntMap, this.key, this.getValue());
         }
     }
 }

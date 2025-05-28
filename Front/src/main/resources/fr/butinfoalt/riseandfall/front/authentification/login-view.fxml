@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx" alignment="CENTER"
+      spacing="20.0"
+      fx:controller="fr.butinfoalt.riseandfall.front.authentification.LoginController"
+      prefHeight="400.0" prefWidth="600.0">
+    <ImageView fx:id="backgroundImageView" managed="false"/>
+    <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
+        Bienvenue sur Rise &amp; Fall futur empereur.
+    </TitleLabel>
+    <Label text="Connexion" style="-fx-font-size: 24px; -fx-text-fill: #333;"/>
+
+    <TextField fx:id="username" promptText="Nom d'utilisateur" maxWidth="400.0"/>
+    <PasswordField fx:id="password" promptText="Mot de passe" maxWidth="400.0"/>
+
+
+    <Label fx:id="errorMessage" text="" style="-fx-text-fill: red;" visible="false"/>
+
+    <VBox.margin>
+        <Insets bottom="40"/>
+    </VBox.margin>
+
+    <Button text="Se connecter" style="-fx-background-color: #0078D7; -fx-text-fill: white;" onAction="#login"/>
+    <Hyperlink text="Créer un compte" onAction="#register"/>
+</VBox>

@@ -1,6 +1,6 @@
-package fr.butinfoalt.riseandfall.gamelogic.counter;
+package fr.butinfoalt.riseandfall.util.counter;
 
-import fr.butinfoalt.riseandfall.gamelogic.Dispatcher;
+import fr.butinfoalt.riseandfall.util.Dispatcher;
 
 import java.util.HashSet;
 import java.util.function.Consumer;

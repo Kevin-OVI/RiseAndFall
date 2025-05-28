@@ -1,6 +1,6 @@
 package fr.butinfoalt.riseandfall.front.orders.table;
 
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.TableColumn;
 

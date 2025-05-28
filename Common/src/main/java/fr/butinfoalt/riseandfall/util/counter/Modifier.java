@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall.gamelogic.counter;
+package fr.butinfoalt.riseandfall.util.counter;
 
 /**
  * Classe représentant un modificateur appliqué à un compteur.
@@ -55,8 +55,9 @@ public class Modifier {
         if (!this.counter.hasModifier(this)) {
             throw new IllegalStateException("This modifier got removed from the counter.");
         }
-        this.counter.updateCurrentValue(this.delta, delta);
+        int previousDelta = this.delta;
         this.delta = delta;
+        this.counter.updateCurrentValue(previousDelta, delta);
     }
 
     /**

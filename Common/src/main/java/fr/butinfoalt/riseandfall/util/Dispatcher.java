@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall.gamelogic;
+package fr.butinfoalt.riseandfall.util;
 
 import java.util.HashSet;
 import java.util.function.Consumer;

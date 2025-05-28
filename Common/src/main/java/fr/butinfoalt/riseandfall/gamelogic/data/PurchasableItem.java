@@ -1,6 +1,4 @@
-package fr.butinfoalt.riseandfall.gamelogic.map;
-
-import fr.butinfoalt.riseandfall.gamelogic.NamedItem;
+package fr.butinfoalt.riseandfall.gamelogic.data;
 
 /**
  * Interface représentant un objet achetable dans le jeu.
@@ -13,4 +11,11 @@ public interface PurchasableItem extends NamedItem {
      * @return Le prix de l'objet en or.
      */
     int getPrice();
+
+    /**
+     * Obtient la quantité d'intelligence requise pour construire l'unité.
+     *
+     * @return La quantité d'intelligence requise pour construire l'unité.
+     */
+    int getRequiredIntelligence();
 }

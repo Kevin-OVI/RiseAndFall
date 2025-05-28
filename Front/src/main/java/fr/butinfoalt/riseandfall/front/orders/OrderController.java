@@ -8,18 +8,24 @@ import fr.butinfoalt.riseandfall.front.orders.table.BuildingsTable;
 import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTable;
 import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTableRow;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
-import fr.butinfoalt.riseandfall.gamelogic.counter.Counter;
-import fr.butinfoalt.riseandfall.gamelogic.counter.Modifier;
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap;
-import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
+import fr.butinfoalt.riseandfall.network.packets.PacketUpdateOrders;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
+import fr.butinfoalt.riseandfall.util.counter.Counter;
+import fr.butinfoalt.riseandfall.util.counter.Modifier;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
 
 /**
  * Contrôleur pour la vue de gestion des ordres.
@@ -28,18 +34,24 @@ public class OrderController {
     /**
      * Liste des unités en attente de création.
      */
-    private EnumIntMap<UnitType> pendingUnits;
+    private ObjectIntMap<UnitType> pendingUnits;
 
     /**
      * Liste des bâtiments en attente de création.
      */
-    private EnumIntMap<BuildingType> pendingBuildings;
+    private ObjectIntMap<BuildingType> pendingBuildings;
 
     /**
      * Champ pour le composant de la quantité d'or.
      */
     @FXML
     private Label goldField;
+
+    /**
+     * Champ pour le composant de la quantité d'intelligence.
+     */
+    @FXML
+    public Label intelligenceField;
 
     /**
      * Champ pour le composant contenant la quantité d'unités pouvant être produites.
@@ -79,6 +91,7 @@ public class OrderController {
      */
     public void loadPendingOrders() {
         ClientPlayer player = RiseAndFall.getPlayer();
+        int playerIntelligence = player.getIntelligence();
         this.pendingUnits = player.getUnitMap().createEmptyClone();
         this.pendingBuildings = player.getBuildingMap().createEmptyClone();
 
@@ -90,6 +103,8 @@ public class OrderController {
             }
         }
 
+        this.intelligenceField.setText("Intelligence : " + playerIntelligence);
+
         Counter goldCounter = new Counter(player.getGoldAmount());
         goldCounter.addListener(goldAmount -> {
             this.goldField.setText("Or restant : " + goldAmount);
@@ -100,18 +115,18 @@ public class OrderController {
         Counter allowedBuildingsCounter = new Counter(5);
 
         this.unitTable.getItems().clear();
-        for (EnumIntMap.Entry<UnitType> entry : pendingUnits) {
+        for (ObjectIntMap.Entry<UnitType> entry : this.pendingUnits) {
             Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
-            PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
+            PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter, playerIntelligence,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
             unitTable.getItems().add(new PurchasableTableRow<>(entry.getKey(), selector));
         }
 
         this.buildingTable.getItems().clear();
-        for (EnumIntMap.Entry<BuildingType> entry : pendingBuildings) {
+        for (ObjectIntMap.Entry<BuildingType> entry : pendingBuildings) {
             Modifier buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
-            PurchasableItemAmountSelector<BuildingType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter,
+            PurchasableItemAmountSelector<BuildingType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter, playerIntelligence,
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> buildingModifier.setDelta(-amount));
             allowedBuildingsCounter.addListener(value -> selector.updateButtonsState());
@@ -137,20 +152,27 @@ public class OrderController {
      */
     @FXML
     private void handleSave() {
-        ClientPlayer player = RiseAndFall.getPlayer();
-        player.clearPendingOrders();
-        for (EnumIntMap.Entry<UnitType> entry : this.pendingUnits) {
+        ArrayList<BaseOrder> newOrders = new ArrayList<>();
+
+        for (ObjectIntMap.Entry<UnitType> entry : this.pendingUnits) {
             int nbTroops = entry.getValue();
             if (nbTroops > 0) {
-                player.addPendingOrder(new OrderCreateUnit(entry.getKey(), nbTroops));
+                newOrders.add(new OrderCreateUnit(entry.getKey(), nbTroops));
             }
         }
-        for (EnumIntMap.Entry<BuildingType> entry : this.pendingBuildings) {
+        for (ObjectIntMap.Entry<BuildingType> entry : this.pendingBuildings) {
             int nbHuts = entry.getValue();
             if (nbHuts > 0) {
-                player.addPendingOrder(new OrderCreateBuilding(entry.getKey(), nbHuts));
+                newOrders.add(new OrderCreateBuilding(entry.getKey(), nbHuts));
             }
         }
+        try {
+            RiseAndFall.getClient().sendPacket(new PacketUpdateOrders(newOrders));
+        } catch (IOException e) {
+            LogManager.logError("Erreur lors de l'envoi du paquet de mise à jour des ordres", e);
+            return;
+        }
+        RiseAndFall.getPlayer().updatePendingOrders(newOrders);
 
         this.switchBack();
     }

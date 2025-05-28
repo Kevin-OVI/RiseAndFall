@@ -5,11 +5,15 @@ import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
+import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+
+import java.io.IOException;
 
 /**
  * Contrôleur pour la vue principale de l'application.
@@ -73,7 +77,11 @@ public class MainController {
      */
     @FXML
     private void handleEndTurn() {
-        RiseAndFall.getPlayer().executeOrders();
+        try {
+            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.NEXT_TURN));
+        } catch (IOException e) {
+            LogManager.logError("Erreur lors de l'envoi du paquet de fin de tour", e);
+        }
     }
 
     /**
@@ -81,8 +89,14 @@ public class MainController {
      */
     @FXML
     public void handleQuitGame() {
+        try {
+            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.QUIT_GAME));
+        } catch (IOException e) {
+            LogManager.logError("Erreur lors de l'envoi du paquet pour quitter la partie", e);
+            return;
+        }
         RiseAndFall.resetPlayer();
-        RiseAndFallApplication.switchToPreviousView();
+        RiseAndFallApplication.switchToView(View.GAME_LIST, true);
     }
 
     /**
@@ -92,16 +106,16 @@ public class MainController {
         ClientPlayer player = RiseAndFall.getPlayer();
         this.goldField.setText("Or : " + player.getGoldAmount());
         this.intelligenceField.setText("Intelligence : " + player.getIntelligence());
-        this.raceField.setText("Race : " + player.getRace().getDisplayName());
+        this.raceField.setText("Race : " + player.getRace().getName());
 
         this.unitVBox.getChildren().clear();
         this.buildingsVBox.getChildren().clear();
         for (var entry : player.getUnitMap()) {
-            Label label = new Label(entry.getKey().getDisplayName() + " : " + entry.getValue());
+            Label label = new Label(entry.getKey().getName() + " : " + entry.getValue());
             this.unitVBox.getChildren().add(label);
         }
         for (var entry : player.getBuildingMap()) {
-            Label label = new Label(entry.getKey().getDisplayName() + " : " + entry.getValue());
+            Label label = new Label(entry.getKey().getName() + " : " + entry.getValue());
             this.buildingsVBox.getChildren().add(label);
         }
     }
@@ -110,5 +124,9 @@ public class MainController {
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
+    }
+
+    public void showError(String message) {
+        // TODO : implémenter une méthode pour afficher les erreurs à l'utilisateur
     }
 }

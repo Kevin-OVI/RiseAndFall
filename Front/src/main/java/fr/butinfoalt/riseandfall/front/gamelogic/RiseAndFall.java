@@ -1,7 +1,13 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
+import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
+import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
+import fr.butinfoalt.riseandfall.network.packets.PacketInitialGameData;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 import fr.butinfoalt.riseandfall.front.util.JavaFXScheduler;
-import fr.butinfoalt.riseandfall.gamelogic.Race;
 
 /**
  * Classe principale du jeu RiseAndFall coté client.
@@ -15,10 +21,23 @@ public class RiseAndFall {
     public static final JavaFXScheduler SCHEDULER = new JavaFXScheduler();
 
     /**
-     * Instance du joueur actuel.
-     * Il n'y a qu'un seul joueur dans le jeu.
+     * Instance du joueur contrôlé par ce client.
      */
     private static ClientPlayer player;
+    /**
+     * Instance de la partie actuelle.
+     */
+    private static ClientGame game;
+
+    /**
+     * Instance du client socket.
+     */
+    private static RiseAndFallClient client;
+
+    /**
+     * Données du serveur envoyées au client.
+     */
+    private static ServerData<ClientGame> serverData;
 
     /**
      * Méthode pour obtenir le joueur actuel.
@@ -30,12 +49,12 @@ public class RiseAndFall {
     }
 
     /**
-     * Méthode pour créer un nouveau joueur.
+     * Méthode pour obtenir la partie actuelle.
      *
-     * @param race La race choisie par le joueur.
+     * @return La partie actuelle.
      */
-    public static void createPlayer(Race race) {
-        player = new ClientPlayer(race);
+    public static ClientGame getGame() {
+        return game;
     }
 
     /**
@@ -44,5 +63,53 @@ public class RiseAndFall {
      */
     public static void resetPlayer() {
         player = null;
+    }
+
+    /**
+     * Initialise le client socket.
+     * Appelée lors du démarrage de l'application ({@link RiseAndFallApplication#start(Stage)}).
+     */
+    public static void initSocketClient() {
+        client = new RiseAndFallClient();
+
+        try {
+            client.connect();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Méthode pour obtenir le client socket.
+     *
+     * @return Le client socket.
+     */
+    public static RiseAndFallClient getClient() {
+        return client;
+    }
+
+    /**
+     * Méthode pour obtenir les données du serveur.
+     * Ces données sont envoyées par le serveur lors de la connexion.
+     *
+     * @return Les données du serveur.
+     */
+    public static ServerData<ClientGame> getServerData() {
+        return serverData;
+    }
+
+    /**
+     * Méthode pour initialiser la partie.
+     * Appelée lors de la réception du paquet {@link PacketInitialGameData}.
+     *
+     * @param packet Le paquet contenant les données de la partie.
+     */
+    public static void initGame(PacketInitialGameData<ClientGame, ClientPlayer> packet) {
+        game = packet.getGame();
+        player = packet.getPlayer();
+    }
+
+    public static void initServerData(ServerData<ClientGame> serverData) {
+        RiseAndFall.serverData = serverData;
     }
 }
