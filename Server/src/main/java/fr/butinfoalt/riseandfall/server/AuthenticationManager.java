@@ -1,10 +1,8 @@
 package fr.butinfoalt.riseandfall.server;
 
-import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
-import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
@@ -221,7 +219,7 @@ public class AuthenticationManager {
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du token", e);
         }
-        sendGamePacket(sender, user);
+        this.server.getGameManager().sendJoinGamePacket(sender, user);
     }
 
     /**
@@ -247,7 +245,7 @@ public class AuthenticationManager {
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du token", e);
         }
-        sendGamePacket(sender, user);
+        this.server.getGameManager().sendJoinGamePacket(sender, user);
     }
 
     /**
@@ -285,7 +283,7 @@ public class AuthenticationManager {
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du token", e);
         }
-        sendGamePacket(sender, user);
+        this.server.getGameManager().sendJoinGamePacket(sender, user);
     }
 
     /**
@@ -321,34 +319,5 @@ public class AuthenticationManager {
      */
     public synchronized void onClientDisconnected(SocketWrapper client) {
         this.userConnections.remove(client);
-    }
-
-    public ServerPlayer getPlayerInRunningGameForUser(User user) {
-        List<ServerGame> games = this.server.getData().games();
-        for (ServerGame game : games) {
-            // On ignore les parties qui sont terminées
-            if (game.getState() == GameState.ENDED) {
-                continue;
-            }
-            ServerPlayer player = game.getPlayerFor(user);
-            if (player != null) {
-                return player;
-            }
-        }
-        return null;
-    }
-
-    public void sendGamePacket(SocketWrapper sender, User user) {
-        ServerPlayer player = getPlayerInRunningGameForUser(user);
-        if (player != null) {
-            ServerGame game = player.getGame();
-            try {
-                sender.sendPacket(new PacketInitialGameData<>(game, player));
-                sender.sendPacket(new PacketUpdateGameData(game, player));
-                server.getGameManager().addConnectionToGame(player, sender);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }

@@ -7,7 +7,7 @@ import fr.butinfoalt.riseandfall.network.common.WriteHelper;
 import java.io.IOException;
 
 /**
- * Paquet envoyé au serveur pour effectuer une action simple dans le jeu.
+ * Paquet envoyé au serveur pour effectuer une action simple dans le jeu, ou au client pour lui indiquer une action à effectuer.
  */
 public class PacketGameAction implements IPacket {
     /**
@@ -58,6 +58,17 @@ public class PacketGameAction implements IPacket {
      * Enumération des actions possibles
      */
     public enum Action {
-        QUIT_GAME, LOG_OUT, NEXT_TURN;
+        /**
+         * Envoyé au serveur pour quitter la partie en cours, ou au client pour lui indiquer que la partie a été quittée.
+         */
+        QUIT_GAME,
+        /**
+         * Envoyé au serveur pour se déconnecter de son compte.
+         */
+        LOG_OUT,
+        /**
+         * Envoyé au serveur pour passer au tour suivant.
+         */
+        NEXT_TURN;
     }
 }

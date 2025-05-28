@@ -61,6 +61,7 @@ public class PacketError implements IPacket {
         JOINING_GAME_GAME_NOT_FOUND("La partie n'existe pas."),
         JOINING_GAME_FAILED("Échec de la connexion à la partie, veuillez réessayer ou redémarrer le jeu si le problème persiste."),
 
+        QUIT_NON_WAITING("Vous ne pouvez plus quitter une partie qui a déjà commencé."),
         QUIT_GAME_FAILED("Échec de la déconnexion de la partie, veuillez réessayer ou redémarrer le jeu si le problème persiste."),
         ;
 

@@ -4,10 +4,12 @@ import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.server.RiseAndFallServer;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,7 +42,7 @@ public class ServerGame extends Game {
      * Map des joueurs dans la partie.
      * Associe l'identifiant de l'utilisateur à l'objet ServerPlayer.
      */
-    private final Map<Integer, ServerPlayer> players;
+    private final Map<Integer, ServerPlayer> players = new HashMap<>();
 
     /**
      * Constructeur de la classe Game.
@@ -53,14 +55,12 @@ public class ServerGame extends Game {
      * @param isPrivate    Indique si la partie est privée ou publique.
      * @param state        État de la partie (en attente, en cours, terminée).
      * @param currentTurn  Tour actuel de la partie.
-     * @param players      Liste des joueurs dans la partie.
      */
-    public ServerGame(int id, String name, int turnInterval, int minPlayers, int maxPlayers, boolean isPrivate, GameState state, Timestamp lastTurnTimestamp, int currentTurn, Map<Integer, ServerPlayer> players) {
+    public ServerGame(int id, String name, int turnInterval, int minPlayers, int maxPlayers, boolean isPrivate, GameState state, Timestamp lastTurnTimestamp, int currentTurn) {
         super(id, name, turnInterval, state, lastTurnTimestamp, currentTurn);
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
         this.isPrivate = isPrivate;
-        this.players = players;
     }
 
     /**
@@ -197,5 +197,20 @@ public class ServerGame extends Game {
         }
 
         return this.players.remove(user.getId());
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringFormatter("ServerGame")
+                .add("id", this.getId())
+                .add("name", this.name)
+                .add("turnInterval", this.turnInterval)
+                .add("minPlayers", this.minPlayers)
+                .add("maxPlayers", this.maxPlayers)
+                .add("isPrivate", this.isPrivate)
+                .add("state", this.state)
+                .add("currentTurn", this.currentTurn)
+                .add("playersCount", this.players.size())
+                .build();
     }
 }

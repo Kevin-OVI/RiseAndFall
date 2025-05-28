@@ -10,12 +10,8 @@ import fr.butinfoalt.riseandfall.server.data.User;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static fr.butinfoalt.riseandfall.server.Environment.SERVER_PORT;
@@ -63,10 +59,10 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this.authManager::onTokenAuthentification, PacketToken::new);
         this.registerSendPacket((byte) 2, PacketServerData.class);
         this.registerReceivePacket((byte) 3, PacketCreateOrJoinGame.class, this.gameManager::onCreateOrJoinGame, PacketCreateOrJoinGame::new);
-        this.registerSendPacket((byte) 4, PacketInitialGameData.class);
+        this.registerSendPacket((byte) 4, PacketJoinedGame.class);
         this.registerReceivePacket((byte) 5, PacketUpdateOrders.class, this.gameManager::onUpdateOrders, PacketUpdateOrders::new);
         this.registerSendPacket((byte) 6, PacketUpdateGameData.class);
-        this.registerReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
+        this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerSendPacket((byte) 8, PacketError.class);
         this.registerReceivePacket((byte) 9, PacketRegister.class, this.authManager::onRegister, PacketRegister::new);
     }
@@ -140,11 +136,13 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     int turnInterval = set.getInt("turn_interval");
+                    int currentTurn = set.getInt("current_turn");
                     int minPlayers = set.getInt("min_players");
                     int maxPlayers = set.getInt("max_players");
-                    boolean isPrivate = false;
+                    boolean isPrivate = set.getString("password_hash") != null;
                     GameState state = GameState.valueOf(set.getString("state"));
-                    games.add(new ServerGame(id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, null, 0, new HashMap<>()));
+                    Timestamp last_turn_at = set.getTimestamp("last_turn_at");
+                    games.add(new ServerGame(id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, last_turn_at, currentTurn));
                 }
             }
             // Nécessaire pour charger les joueurs juste après
@@ -217,7 +215,6 @@ public class RiseAndFallServer extends BaseSocketServer {
     @Override
     protected void onClientDisconnected(SocketWrapper client) {
         super.onClientDisconnected(client);
-        this.gameManager.onClientDisconnected(client);
         this.authManager.onClientDisconnected(client);
         LogManager.logMessage("Client déconnecté : " + client.getName());
     }
@@ -232,10 +229,7 @@ public class RiseAndFallServer extends BaseSocketServer {
     private void onGameAction(SocketWrapper sender, PacketGameAction packet) {
         switch (packet.getAction()) {
             case QUIT_GAME -> this.gameManager.onClientQuitGame(sender);
-            case LOG_OUT -> {
-                this.gameManager.onClientDisconnected(sender);
-                this.authManager.onClientDisconnected(sender);
-            }
+            case LOG_OUT -> this.authManager.onClientDisconnected(sender);
             case NEXT_TURN -> this.gameManager.onNextTurn(sender);
         }
     }

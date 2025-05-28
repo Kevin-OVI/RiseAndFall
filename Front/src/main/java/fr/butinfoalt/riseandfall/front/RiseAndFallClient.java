@@ -1,8 +1,8 @@
 package fr.butinfoalt.riseandfall.front;
 
-import fr.butinfoalt.riseandfall.front.gamelist.GameListController;
 import fr.butinfoalt.riseandfall.front.authentification.LoginController;
 import fr.butinfoalt.riseandfall.front.authentification.RegisterController;
+import fr.butinfoalt.riseandfall.front.gamelist.GameListController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
@@ -36,10 +36,10 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this::onToken, PacketToken::new);
         this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, readHelper -> new PacketServerData<>(readHelper, ClientGame::new));
         this.registerSendPacket((byte) 3, PacketCreateOrJoinGame.class);
-        this.registerReceivePacket((byte) 4, PacketInitialGameData.class, this::onInitialGameData, this::decodeInitialGameData);
+        this.registerReceivePacket((byte) 4, PacketJoinedGame.class, this::onJoinedGame, this::decodePacketJoinedGame);
         this.registerSendPacket((byte) 5, PacketUpdateOrders.class);
         this.registerReceivePacket((byte) 6, PacketUpdateGameData.class, this::onNextTurnData);
-        this.registerSendPacket((byte) 7, PacketGameAction.class);
+        this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerReceivePacket((byte) 8, PacketError.class, this::onError, PacketError::new);
         this.registerSendPacket((byte) 9, PacketRegister.class);
     }
@@ -51,10 +51,10 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @return Un objet PacketInitialGameData contenant les données du jeu et du joueur.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
-    private PacketInitialGameData<ClientGame, ClientPlayer> decodeInitialGameData(ReadHelper readHelper) throws IOException {
+    private PacketJoinedGame<ClientGame, ClientPlayer> decodePacketJoinedGame(ReadHelper readHelper) throws IOException {
         ClientGame clientGame = new ClientGame(readHelper);
         ClientPlayer player = new ClientPlayer(readHelper);
-        return new PacketInitialGameData<>(clientGame, player);
+        return new PacketJoinedGame<>(clientGame, player);
     }
 
     /**
@@ -97,13 +97,13 @@ public class RiseAndFallClient extends BaseSocketClient {
     }
 
     /**
-     * Méthode appelée lorsque le paquet {@link PacketInitialGameData} est reçu.
+     * Méthode appelée lorsque le paquet {@link PacketJoinedGame} est reçu.
      * Elle initialise les données du jeu et du joueur, puis change la vue de l'application pour afficher l'écran principal.
      *
      * @param client Le socket connecté au serveur.
      * @param packet Le paquet reçu.
      */
-    private void onInitialGameData(SocketWrapper client, PacketInitialGameData<ClientGame, ClientPlayer> packet) {
+    private void onJoinedGame(SocketWrapper client, PacketJoinedGame<ClientGame, ClientPlayer> packet) {
         RiseAndFall.initGame(packet);
         Platform.runLater(() -> {
             RiseAndFallApplication.switchToView(View.MAIN, true);
@@ -132,6 +132,24 @@ public class RiseAndFallClient extends BaseSocketClient {
     }
 
     /**
+     * Méthode appelée lorsque le paquet {@link PacketGameAction} est reçu.
+     *
+     * @param sender Le socket connecté au serveur.
+     * @param packet Le paquet d'action de jeu reçu.
+     */
+    private void onGameAction(SocketWrapper sender, PacketGameAction packet) {
+        switch (packet.getAction()) {
+            case QUIT_GAME -> {
+                RiseAndFall.resetGame();
+                Platform.runLater(() -> {
+                    RiseAndFallApplication.switchToView(View.GAME_LIST, true);
+                });
+            }
+            default -> LogManager.logError("Action de jeu non gérée : " + packet.getAction());
+        }
+    }
+
+    /**
      * Méthode appelée lorsque le paquet {@link PacketError} est reçu.
      * Elle gère les erreurs en fonction du type d'erreur et change la vue de l'application si nécessaire.
      *
@@ -154,9 +172,10 @@ public class RiseAndFallClient extends BaseSocketClient {
                     RiseAndFallApplication.switchToView(View.GAME_LIST, true);
                     ((GameListController) View.GAME_LIST.getController()).showError(errorType.getMessage());
                 }
-                case QUIT_GAME_FAILED -> {
+                case QUIT_GAME_FAILED, QUIT_NON_WAITING -> {
+                    LogManager.logMessage("Erreur reçue lors de la tentative de quitter la partie : " + errorType.getMessage());
                     RiseAndFallApplication.switchToView(View.MAIN, true);
-                    ((MainController)View.MAIN.getController()).showError(errorType.getMessage());
+                    ((MainController) View.MAIN.getController()).showError(errorType.getMessage());
                 }
                 default -> LogManager.logError("Erreur inconnue : " + errorType.getMessage());
             }

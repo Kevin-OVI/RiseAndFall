@@ -3,7 +3,7 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
-import fr.butinfoalt.riseandfall.network.packets.PacketInitialGameData;
+import fr.butinfoalt.riseandfall.network.packets.PacketJoinedGame;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -54,8 +54,9 @@ public class RiseAndFall {
      * Méthode pour réinitialiser le joueur.
      * Utilisée pour réinitialiser le joueur après une partie.
      */
-    public static void resetPlayer() {
+    public static void resetGame() {
         player = null;
+        game = null;
     }
 
     /**
@@ -93,11 +94,11 @@ public class RiseAndFall {
 
     /**
      * Méthode pour initialiser la partie.
-     * Appelée lors de la réception du paquet {@link PacketInitialGameData}.
+     * Appelée lors de la réception du paquet {@link PacketJoinedGame}.
      *
      * @param packet Le paquet contenant les données de la partie.
      */
-    public static void initGame(PacketInitialGameData<ClientGame, ClientPlayer> packet) {
+    public static void initGame(PacketJoinedGame<ClientGame, ClientPlayer> packet) {
         game = packet.getGame();
         player = packet.getPlayer();
     }
