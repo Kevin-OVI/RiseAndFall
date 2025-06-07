@@ -55,6 +55,18 @@ public class ServerPlayer extends Player {
                 this.removeGoldAmount(order.getPrice());
             }
         }
+
+        for (BaseOrder player_building : this.pendingOrders)
+            if (this.goldAmount >= player_building.getPrice()) {
+                player_building.execute(this);
+                this.removeGoldAmount(player_building.getPrice());
+            }
+
+        for (BaseOrder player_unit : this.pendingOrders)
+            if (this.goldAmount >= player_unit.getPrice()) {
+                player_unit.execute(this);
+                this.removeGoldAmount(player_unit.getPrice());
+            }
         this.pendingOrders.clear();
     }
 
