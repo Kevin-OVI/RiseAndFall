@@ -20,6 +20,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Classe gérant les parties de jeu.
@@ -141,6 +143,19 @@ public class GameManager {
         }
         ServerPlayer player = new ServerPlayer(playerId, user, game, race);
         game.addPlayer(player);
+        if (game.getState() == GameState.WAITING && game.getPlayers().size() == game.getMinPlayers()) {
+            if (game.startTimer == null) {
+                game.startTimer = new Timer();
+                game.startTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            game.start();
+                        } catch (IllegalStateException ignored) {}
+                    }
+                }, 60_000);
+            }
+        }
         return player;
     }
 

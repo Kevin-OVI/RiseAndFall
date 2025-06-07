@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 
 /**
  * Représente une partie de jeu.
@@ -43,6 +44,12 @@ public class ServerGame extends Game {
      * Associe l'identifiant de l'utilisateur à l'objet ServerPlayer.
      */
     private final Map<Integer, ServerPlayer> players = new HashMap<>();
+
+    /**
+     * Timer pour gérer le temps avant le demarrage de la partie ou entre les tours.
+     * Il peut être utilisé pour démarrer un compte à rebours ou gérer les tours.
+     */
+    public Timer startTimer;
 
     /**
      * Constructeur de la classe Game.
