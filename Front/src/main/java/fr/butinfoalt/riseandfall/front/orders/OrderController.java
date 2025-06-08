@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.front.orders;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.orders.amountselector.PurchasableItemAmountSelector;
@@ -143,7 +144,7 @@ public class OrderController {
      */
     @FXML
     private void switchBack() {
-        RiseAndFallApplication.switchToPreviousView();
+        RiseAndFallApplication.switchToView(View.MAIN);
     }
 
     /**

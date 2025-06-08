@@ -65,7 +65,7 @@ public class RegisterController {
      */
     @FXML
     public void login() {
-        RiseAndFallApplication.switchToView(View.LOGIN, true);
+        RiseAndFallApplication.switchToView(View.LOGIN);
     }
 
     /**
@@ -103,6 +103,6 @@ public class RegisterController {
             LogManager.logError("Impossible d'envoyer le packet d'enregistrement", e);
             return;
         }
-        RiseAndFallApplication.switchToView(View.LOADING, true);
+        RiseAndFallApplication.switchToView(View.LOADING);
     }
 }

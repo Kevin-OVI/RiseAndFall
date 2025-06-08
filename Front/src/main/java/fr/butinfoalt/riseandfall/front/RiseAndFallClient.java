@@ -94,7 +94,7 @@ public class RiseAndFallClient extends BaseSocketClient {
             LogManager.logError("Erreur lors de la lecture du fichier d'authentification, affichage de la vue de connexion.", e);
         }
 
-        Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOGIN, true));
+        Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOGIN));
     }
 
     /**
@@ -107,7 +107,7 @@ public class RiseAndFallClient extends BaseSocketClient {
     private void onJoinedGame(SocketWrapper client, PacketJoinedGame<ClientGame, ClientPlayer> packet) {
         RiseAndFall.initGame(packet);
         Platform.runLater(() -> {
-            RiseAndFallApplication.switchToView(View.MAIN, true);
+            RiseAndFallApplication.switchToView(View.MAIN);
             MainController mainController = View.MAIN.getController();
             mainController.updateFields();
         });
@@ -142,7 +142,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         switch (packet.getAction()) {
             case QUIT_GAME -> {
                 RiseAndFall.resetGame();
-                Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOADING, true));
+                Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOADING));
                 // Le basculement vers la liste des parties aura lieu après la réception du paquet PacketWaitingGames
             }
             default -> LogManager.logError("Action de jeu non gérée : " + packet.getAction());
@@ -161,11 +161,11 @@ public class RiseAndFallClient extends BaseSocketClient {
         Platform.runLater(() -> {
             switch (errorType) {
                 case LOGIN_GENERIC_ERROR, LOGIN_INVALID_CREDENTIALS, LOGIN_INVALID_SESSION -> {
-                    RiseAndFallApplication.switchToView(View.LOGIN, true);
+                    RiseAndFallApplication.switchToView(View.LOGIN);
                     ((LoginController) View.LOGIN.getController()).showError(errorType.getMessage());
                 }
                 case REGISTER_GENERIC_ERROR, REGISTER_USERNAME_TAKEN -> {
-                    RiseAndFallApplication.switchToView(View.REGISTER, true);
+                    RiseAndFallApplication.switchToView(View.REGISTER);
                     ((RegisterController) View.REGISTER.getController()).showError(errorType.getMessage());
                 }
                 case JOINING_GAME_FAILED, JOINING_GAME_NOT_FOUND -> {
@@ -175,7 +175,7 @@ public class RiseAndFallClient extends BaseSocketClient {
                 }
                 case QUIT_GAME_FAILED, QUIT_NON_WAITING -> {
                     LogManager.logMessage("Erreur reçue lors de la tentative de quitter la partie : " + errorType.getMessage());
-                    RiseAndFallApplication.switchToView(View.MAIN, true);
+                    RiseAndFallApplication.switchToView(View.MAIN);
                     ((MainController) View.MAIN.getController()).showError(errorType.getMessage());
                 }
                 default -> LogManager.logError("Erreur inconnue : " + errorType.getMessage());
@@ -187,7 +187,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         Platform.runLater(() -> {
             GameListController controller = View.GAME_LIST.getController();
             controller.refreshGameList(packet.getWaitingGames());
-            RiseAndFallApplication.switchToView(View.GAME_LIST, true);
+            RiseAndFallApplication.switchToView(View.GAME_LIST);
         });
     }
 }

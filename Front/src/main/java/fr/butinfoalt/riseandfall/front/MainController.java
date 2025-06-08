@@ -95,7 +95,7 @@ public class MainController {
             LogManager.logError("Erreur lors de l'envoi du paquet pour quitter la partie", e);
             return;
         }
-        RiseAndFallApplication.switchToView(View.LOADING, true);
+        RiseAndFallApplication.switchToView(View.LOADING);
     }
 
     /**
