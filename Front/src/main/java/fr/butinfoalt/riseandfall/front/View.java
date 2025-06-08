@@ -20,18 +20,6 @@ public enum View {
     LOADING("authentification/loading-view.fxml", "Rise & Fall - Chargement"),
 
     /**
-     * Vue principale de l'application.
-     */
-    MAIN("main-view.fxml", "Rise & Fall"),
-    /**
-     * Vue de gestion des ordres.
-     */
-    ORDERS("orders-view.fxml", "Rise & Fall - Définition des ordres"),
-    /**
-     * Vue de la description et des règles du jeu.
-     */
-    DESCRIPTION("description-view.fxml", "Rise & Fall - Description et règles du jeu"),
-    /**
      * Vue du LOGIN.
      */
     LOGIN("authentification/login-view.fxml", "Rise & Fall - Login"),
@@ -44,7 +32,27 @@ public enum View {
     /**
      * Vue de la liste des parties.
      */
-    GAME_LIST("gamelist-view.fxml", "Rise & Fall - Liste des parties"),
+    GAME_LIST("game/gamelist-view.fxml", "Rise & Fall - Liste des parties"),
+
+    /**
+     * Vue de la partie en attente.
+     */
+    WAITING_GAME("game/waiting-game-view.fxml", "Rise & Fall - Partie en attente"),
+
+    /**
+     * Vue principale lorsque le jeu est en cours
+     */
+    MAIN_RUNNING_GAME("game/main-running-game-view.fxml", "Rise & Fall"),
+
+    /**
+     * Vue de gestion des ordres.
+     */
+    ORDERS("game/orders-view.fxml", "Rise & Fall - Définition des ordres"),
+
+    /**
+     * Vue de la description et des règles du jeu.
+     */
+    DESCRIPTION("description-view.fxml", "Rise & Fall - Description et règles du jeu"),
     ;
 
     private static final String GENERAL_STYLESHEET = Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/style.css")).toExternalForm();

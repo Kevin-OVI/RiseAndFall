@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
-<?import fr.butinfoalt.riseandfall.front.orders.table.BuildingsTable?>
-<?import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTable?>
+<?import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsTable?>
+<?import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTable?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
-      fx:controller="fr.butinfoalt.riseandfall.front.orders.OrderController">
+      fx:controller="fr.butinfoalt.riseandfall.front.game.orders.OrderController">
     <ImageView fx:id="backgroundImageView" managed="false"/>
 
     <VBox.margin>

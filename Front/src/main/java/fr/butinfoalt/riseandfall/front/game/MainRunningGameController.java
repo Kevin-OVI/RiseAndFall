@@ -1,9 +1,11 @@
-package fr.butinfoalt.riseandfall.front;
+package fr.butinfoalt.riseandfall.front.game;
 
+import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.front.orders.OrderController;
+import fr.butinfoalt.riseandfall.front.game.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
@@ -18,7 +20,7 @@ import java.io.IOException;
 /**
  * Contrôleur pour la vue principale de l'application.
  */
-public class MainController {
+public class MainRunningGameController {
     /**
      * Champ pour le composant de la quantité d'or.
      */
@@ -82,20 +84,6 @@ public class MainController {
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du paquet de fin de tour", e);
         }
-    }
-
-    /**
-     * Méthode appelée par JavaFX quand on clique sur le bouton pour quitter le jeu.
-     */
-    @FXML
-    public void handleQuitGame() {
-        try {
-            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.QUIT_GAME));
-        } catch (IOException e) {
-            LogManager.logError("Erreur lors de l'envoi du paquet pour quitter la partie", e);
-            return;
-        }
-        RiseAndFallApplication.switchToView(View.LOADING, true);
     }
 
     /**

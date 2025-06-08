@@ -2,10 +2,10 @@
 
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
-      fx:controller="fr.butinfoalt.riseandfall.front.MainController">
+      fx:controller="fr.butinfoalt.riseandfall.front.game.MainRunningGameController">
     <ImageView fx:id="backgroundImageView" managed="false"/>
     <VBox alignment="CENTER" spacing="10">
         <TitleLabel>Vos ressources :</TitleLabel>
@@ -32,7 +32,5 @@
 
         <!-- Bouton pour passer au tour suivant -->
         <Button text="Tour suivant" onAction="#handleEndTurn"/>
-
-        <Button text="Quitter la partie" onAction="#handleQuitGame"/>
     </HBox>
 </VBox>

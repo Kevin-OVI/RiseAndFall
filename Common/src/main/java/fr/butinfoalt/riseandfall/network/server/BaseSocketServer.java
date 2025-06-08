@@ -124,8 +124,9 @@ public class BaseSocketServer extends Thread implements Closeable {
             socketWrapper.close();
         }
         try {
-            for (SocketWrapper socketWrapper : this.connectedClients) {
-                socketWrapper.waitForSocketClose();
+            // Impossible d'utiliser forEach car une ConcurrentModificationException sera levée quand un client se déconnectera
+            while (!this.connectedClients.isEmpty()) {
+                this.connectedClients.iterator().next().waitForSocketClose();
             }
             this.join();
         } catch (InterruptedException e) {

@@ -4,7 +4,7 @@
 
 <?import javafx.scene.layout.Pane?>
 <HBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="fr.butinfoalt.riseandfall.front.gamelist.GameComponentController"
+      fx:controller="fr.butinfoalt.riseandfall.front.game.gamelist.GameComponentController"
       spacing="20"
       alignment="CENTER_LEFT"
       maxWidth="400"

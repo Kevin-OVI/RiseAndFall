@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
 import static fr.butinfoalt.riseandfall.server.Environment.SERVER_PORT;
 
@@ -22,6 +23,9 @@ import static fr.butinfoalt.riseandfall.server.Environment.SERVER_PORT;
  * Elle initialise également la base de données et charge les données du serveur.
  */
 public class RiseAndFallServer extends BaseSocketServer {
+    /**
+     * Le gestionnaire de base de données pour interagir avec la base de données du serveur.
+     */
     private final DatabaseManager databaseManager;
 
     /**
@@ -38,6 +42,12 @@ public class RiseAndFallServer extends BaseSocketServer {
      * Le gestionnaire de jeu pour gérer les utilisateurs et les joueurs.
      */
     private UserManager userManager;
+
+    /**
+     * Timer pour gérer les tâches périodiques du serveur.
+     * Il peut être utilisé pour gérer les tours de jeu, le démarrage de parties, etc.
+     */
+    private final Timer timer = new Timer();
 
     /**
      * Constructeur de la classe BaseSocketServer.
@@ -140,8 +150,8 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int maxPlayers = set.getInt("max_players");
                     boolean isPrivate = set.getString("password_hash") != null;
                     GameState state = GameState.valueOf(set.getString("state"));
-                    Timestamp last_turn_at = set.getTimestamp("last_turn_at");
-                    games.add(new ServerGame(id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, last_turn_at, currentTurn));
+                    Timestamp nextActionAt = set.getTimestamp("next_action_at");
+                    games.add(new ServerGame(this, id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, nextActionAt, currentTurn));
                 }
             }
             // Nécessaire pour charger les joueurs juste après
@@ -171,6 +181,17 @@ public class RiseAndFallServer extends BaseSocketServer {
                     players.add(player);
                     // Ajout forcé car la partie peut avoir déjà démarré, mais on est dans un cas particulier car les données ne sont pas encore chargées
                     game.forceAddPlayer(player);
+                }
+            }
+            // Redémarrage des actions en attente
+            for (ServerGame game : games) {
+                switch (game.getState()) {
+                    case WAITING -> {
+                        if (game.hasSufficientPlayers()) {
+                            game.scheduleGameStart();
+                        }
+                    }
+                    case RUNNING -> game.scheduleNextTurn();
                 }
             }
             this.userManager = new UserManager(this, users, players);
@@ -232,6 +253,12 @@ public class RiseAndFallServer extends BaseSocketServer {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        super.close();
+        this.timer.cancel();
+    }
+
     /**
      * Méthode pour obtenir la connexion à la base de données.
      *
@@ -266,6 +293,15 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     public UserManager getUserManager() {
         return this.userManager;
+    }
+
+    /**
+     * Méthode pour obtenir le timer du serveur.
+     *
+     * @return Le timer du serveur.
+     */
+    public Timer getTimer() {
+        return this.timer;
     }
 
     /**
