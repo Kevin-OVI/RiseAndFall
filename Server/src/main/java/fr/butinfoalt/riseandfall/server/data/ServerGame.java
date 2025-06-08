@@ -5,6 +5,7 @@ import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.server.RiseAndFallServer;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -64,8 +65,8 @@ public class ServerGame extends Game {
      * @param state        État de la partie (en attente, en cours, terminée).
      * @param currentTurn  Tour actuel de la partie.
      */
-    public ServerGame(RiseAndFallServer server, int id, String name, int turnInterval, int minPlayers, int maxPlayers, boolean isPrivate, GameState state, Timestamp lastTurnTimestamp, int currentTurn) {
-        super(id, name, turnInterval, state, lastTurnTimestamp, currentTurn);
+    public ServerGame(RiseAndFallServer server, int id, String name, int turnInterval, int minPlayers, int maxPlayers, boolean isPrivate, GameState state, Timestamp nextActionAt, int currentTurn) {
+        super(id, name, turnInterval, state, nextActionAt, currentTurn);
         this.server = server;
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
@@ -77,7 +78,7 @@ public class ServerGame extends Game {
      *
      * @return Le nombre minimum de joueurs pour commencer la partie.
      */
-    public int getMinPlayers() {
+    public synchronized int getMinPlayers() {
         return this.minPlayers;
     }
 
@@ -86,7 +87,7 @@ public class ServerGame extends Game {
      *
      * @return Le nombre maximum de joueurs dans la partie.
      */
-    public int getMaxPlayers() {
+    public synchronized int getMaxPlayers() {
         return this.maxPlayers;
     }
 
@@ -95,7 +96,7 @@ public class ServerGame extends Game {
      *
      * @return true si la partie est privée, false sinon.
      */
-    public boolean isPrivate() {
+    public synchronized boolean isPrivate() {
         return this.isPrivate;
     }
 
@@ -105,14 +106,20 @@ public class ServerGame extends Game {
      *
      * @throws IllegalStateException Si la partie n'est pas en attente ou s'il n'y a pas assez de joueurs.
      */
-    public void start() throws IllegalStateException {
+    public synchronized void start() throws IllegalStateException {
         if (this.state != GameState.WAITING) {
             throw new IllegalStateException("Cannot start a game that is not in waiting state.");
         }
         if (this.players.size() < this.minPlayers) {
             throw new IllegalStateException("Cannot start this game with less than %d players.".formatted(this.minPlayers));
         }
+        LogManager.logMessage("Démarrage de la partie %s avec %d joueurs.".formatted(this.name, this.players.size()));
         this.state = GameState.RUNNING;
+
+        this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
+        this.scheduleNextTurn();
+
+        this.server.getGameManager().handleGameUpdate(this);
     }
 
     /**
@@ -121,11 +128,56 @@ public class ServerGame extends Game {
      *
      * @throws IllegalStateException Si la partie n'est pas en cours.
      */
-    public void end() throws IllegalStateException {
+    public synchronized void end() throws IllegalStateException {
         if (this.state != GameState.RUNNING) {
             throw new IllegalStateException("Cannot end a game that is not running.");
         }
+        LogManager.logMessage("Fin de la partie %s.".formatted(this.name));
         this.state = GameState.ENDED;
+        this.nextActionAt = null;
+    }
+
+    /**
+     * Méthode pour planifier une action différée, comme le démarrage de la partie ou le passage au tour suivant.
+     * Annule l'action précédente si elle existe et planifie la nouvelle action avec un délai calculé.
+     *
+     * @param logMessage Le message de log à afficher lors de la planification de l'action.
+     * @param action     L'action à exécuter après le délai.
+     */
+    private synchronized void scheduleNextAction(String logMessage, Runnable action) {
+        if (this.delayedTask != null) {
+            this.delayedTask.cancel();
+        }
+        long delay = this.nextActionAt.getTime() - System.currentTimeMillis();
+        LogManager.logMessage(logMessage.formatted(this.name, delay / 1000));
+        if (delay <= 0) {
+            this.delayedTask = null;
+            action.run();
+        } else {
+            this.server.getTimer().schedule(this.delayedTask = new TimerTask() {
+                @Override
+                public void run() {
+                    ServerGame.this.delayedTask = null;
+                    action.run();
+                }
+            }, delay);
+        }
+    }
+
+    /**
+     * Méthode pour planifier le démarrage de la partie.
+     * Utilise {@link #scheduleNextAction(String, Runnable)} pour planifier l'action avec un délai.
+     */
+    public void scheduleGameStart() {
+        this.scheduleNextAction("Démarrage de la partie %s dans %d secondes.", this::start);
+    }
+
+    /**
+     * Méthode pour planifier le passage au tour suivant.
+     * Utilise {@link #scheduleNextAction(String, Runnable)} pour planifier l'action avec un délai.
+     */
+    public void scheduleNextTurn() {
+        this.scheduleNextAction("Passage au tour suivant de la partie %s dans %d secondes.", this::nextTurn);
     }
 
     /**
@@ -134,15 +186,19 @@ public class ServerGame extends Game {
      *
      * @throws IllegalStateException Si la partie n'est pas en cours.
      */
-    public void nextTurn() throws IllegalStateException {
+    public synchronized void nextTurn() throws IllegalStateException {
         if (this.state != GameState.RUNNING) {
             throw new IllegalStateException("Cannot proceed to the next turn when the game is not running.");
         }
         for (ServerPlayer player : this.players.values()) {
             player.executeOrders();
         }
+        // TODO : Condition de Victoire pour arrêter la partie si nécessaire, pour le moment la partie ne s'arrête jamais.
         this.currentTurn++;
-        this.lastTurnTimestamp = new Timestamp(System.currentTimeMillis());
+        LogManager.logMessage("Passage au tour %d de la partie %s.".formatted(this.currentTurn, this.name));
+        this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
+        this.scheduleNextTurn();
+        this.server.getGameManager().handleGameUpdate(this);
     }
 
     /**
@@ -150,7 +206,7 @@ public class ServerGame extends Game {
      *
      * @return La liste des joueurs dans la partie.
      */
-    public Collection<ServerPlayer> getPlayers() {
+    public synchronized Collection<ServerPlayer> getPlayers() {
         return Collections.unmodifiableCollection(this.players.values());
     }
 
@@ -160,7 +216,7 @@ public class ServerGame extends Game {
      * @param user L'utilisateur dont on veut obtenir le joueur.
      * @return Le joueur correspondant à l'utilisateur, ou null si l'utilisateur ne joue pas dans cette partie.
      */
-    public ServerPlayer getPlayerFor(User user) {
+    public synchronized ServerPlayer getPlayerFor(User user) {
         return this.players.get(user.getId());
     }
 
@@ -171,7 +227,7 @@ public class ServerGame extends Game {
      * @param player Le joueur à ajouter.
      * @throws IllegalStateException Si la partie n'est pas en attente ou si elle est pleine.
      */
-    public void addPlayer(ServerPlayer player) {
+    public synchronized void addPlayer(ServerPlayer player) {
         if (this.state != GameState.WAITING) {
             throw new IllegalStateException("Cannot add player to a game that has already started.");
         }
@@ -179,17 +235,13 @@ public class ServerGame extends Game {
             throw new IllegalStateException("Cannot add player, game is full.");
         }
 
+        LogManager.logMessage("Ajout du joueur %s à la partie %s.".formatted(player.getUser().getUsername(), this.name));
         this.players.put(player.getUser().getId(), player);
 
-
-        if (this.state == GameState.WAITING && this.players.size() == this.minPlayers && this.delayedTask == null) {
-            this.server.getTimer().schedule(this.delayedTask = new TimerTask() {
-                @Override
-                public void run() {
-                    ServerGame.this.delayedTask = null;
-                    ServerGame.this.start();
-                }
-            }, 60_000); // Délais en millisecondes (1 minute)
+        if (this.state == GameState.WAITING && this.hasSufficientPlayers() && this.delayedTask == null) {
+            LogManager.logMessage("Suffisamment de joueurs pour démarrer la partie %s, planification du démarrage.".formatted(this.name));
+            this.nextActionAt = new Timestamp(System.currentTimeMillis() + 60_000L); // Démarrage prévu dans 1 minute
+            this.scheduleGameStart();
         }
     }
 
@@ -200,7 +252,7 @@ public class ServerGame extends Game {
      *
      * @param player Le joueur à ajouter.
      */
-    public void forceAddPlayer(ServerPlayer player) {
+    public synchronized void forceAddPlayer(ServerPlayer player) {
         this.players.put(player.getUser().getId(), player);
     }
 
@@ -211,21 +263,32 @@ public class ServerGame extends Game {
      * @param user L'utilisateur dont on veut retirer le joueur.
      * @return Le joueur retiré, ou null si l'utilisateur ne joue pas dans cette partie.
      */
-    public ServerPlayer removePlayer(User user) {
+    public synchronized ServerPlayer removePlayer(User user) {
         if (this.state != GameState.WAITING) {
             throw new IllegalStateException("Cannot remove player from a game that has already started.");
         }
 
         ServerPlayer removedPlayer = this.players.remove(user.getId());
+        LogManager.logMessage("Retrait du joueur %s de la partie %s.".formatted(user.getUsername(), this.name));
         if (removedPlayer != null && this.players.size() < this.minPlayers && this.delayedTask != null) {
+            LogManager.logMessage("Moins de joueurs que le minimum requis pour démarrer la partie %s, annulation du démarrage différé.".formatted(this.name));
             this.delayedTask.cancel();
             this.delayedTask = null;
         }
         return removedPlayer;
     }
 
+    /**
+     * Méthode pour vérifier si la partie a suffisamment de joueurs pour commencer.
+     *
+     * @return true si la partie a suffisamment de joueurs, false sinon.
+     */
+    public synchronized boolean hasSufficientPlayers() {
+        return this.players.size() >= this.minPlayers;
+    }
+
     @Override
-    public ToStringFormatter toStringFormatter() {
+    public synchronized ToStringFormatter toStringFormatter() {
         return super.toStringFormatter()
                 .add("minPlayers", this.minPlayers)
                 .add("maxPlayers", this.maxPlayers)

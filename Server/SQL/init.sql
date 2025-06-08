@@ -34,7 +34,7 @@ CREATE TABLE game (
     max_players INT NOT NULL DEFAULT 30,
     password_hash VARCHAR(255) DEFAULT NULL,
     state ENUM('WAITING', 'RUNNING', 'ENDED') NOT NULL DEFAULT 'WAITING',
-    last_turn_at TIMESTAMP DEFAULT NULL
+    next_action_at TIMESTAMP DEFAULT NULL
 );
 
 CREATE TABLE player (

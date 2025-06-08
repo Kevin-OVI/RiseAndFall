@@ -150,8 +150,8 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int maxPlayers = set.getInt("max_players");
                     boolean isPrivate = set.getString("password_hash") != null;
                     GameState state = GameState.valueOf(set.getString("state"));
-                    Timestamp last_turn_at = set.getTimestamp("last_turn_at");
-                    games.add(new ServerGame(this, id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, last_turn_at, currentTurn));
+                    Timestamp nextActionAt = set.getTimestamp("next_action_at");
+                    games.add(new ServerGame(this, id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, nextActionAt, currentTurn));
                 }
             }
             // Nécessaire pour charger les joueurs juste après
@@ -181,6 +181,17 @@ public class RiseAndFallServer extends BaseSocketServer {
                     players.add(player);
                     // Ajout forcé car la partie peut avoir déjà démarré, mais on est dans un cas particulier car les données ne sont pas encore chargées
                     game.forceAddPlayer(player);
+                }
+            }
+            // Redémarrage des actions en attente
+            for (ServerGame game : games) {
+                switch (game.getState()) {
+                    case WAITING -> {
+                        if (game.hasSufficientPlayers()) {
+                            game.scheduleGameStart();
+                        }
+                    }
+                    case RUNNING -> game.scheduleNextTurn();
                 }
             }
             this.userManager = new UserManager(this, users, players);

@@ -342,11 +342,6 @@ public class GameManager {
             game.nextTurn();
         } catch (IllegalStateException e) {
             LogManager.logError("Erreur lors du passage au tour suivant pour le joueur " + player.getUser().getUsername() + " dans la partie " + game.getName() + ": ", e);
-            return;
-        }
-
-        for (ServerPlayer p : game.getPlayers()) {
-            this.sendPlayerDataUpdates(p);
         }
     }
 
@@ -395,6 +390,28 @@ public class GameManager {
                 LogManager.logError("Erreur lors de l'envoi du paquet de déconnexion au client " + sender.getName(), e);
             }
             this.sendWaitingGames(connection);
+        }
+    }
+
+    /**
+     * Appelée lorsqu'une partie est mise à jour.
+     * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
+     *
+     * @param game La partie mise à jour.
+     */
+    public void handleGameUpdate(ServerGame game) {
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("UPDATE game SET state = ?, next_action_at = ?, current_turn = ? WHERE id = ?")) {
+            statement.setString(1, game.getState().name());
+            statement.setTimestamp(2, game.getNextActionAt());
+            statement.setInt(3, game.getCurrentTurn());
+            statement.setInt(4, game.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de la mise à jour de la partie " + game.getName() + " dans la base de données.", e);
+        }
+
+        for (ServerPlayer player : game.getPlayers()) {
+            this.sendPlayerDataUpdates(player);
         }
     }
 }
