@@ -7,11 +7,7 @@ import fr.butinfoalt.riseandfall.server.ServerPlayer;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
+import java.util.*;
 
 /**
  * Représente une partie de jeu.
@@ -26,6 +22,11 @@ import java.util.Timer;
  * - une liste de joueurs
  */
 public class ServerGame extends Game {
+    /**
+     * Référence au serveur de jeu, pour accéder aux fonctionnalités du serveur.
+     */
+    private final RiseAndFallServer server;
+
     /**
      * Nombre minimum de joueurs pour commencer la partie.
      */
@@ -46,14 +47,14 @@ public class ServerGame extends Game {
     private final Map<Integer, ServerPlayer> players = new HashMap<>();
 
     /**
-     * Timer pour gérer le temps avant le demarrage de la partie ou entre les tours.
-     * Il peut être utilisé pour démarrer un compte à rebours ou gérer les tours.
+     * Tâche de minuterie pour contenir une action différée, comme le démarrage de la partie ou le passage au tour suivant.
      */
-    public Timer startTimer;
+    public TimerTask delayedTask;
 
     /**
      * Constructeur de la classe Game.
      *
+     * @param server       Référence au serveur de jeu, pour accéder aux fonctionnalités du serveur.
      * @param id           Identifiant de la partie dans la base de données.
      * @param name         Nom de la partie.
      * @param turnInterval Intervalle entre chaque tour (en minutes).
@@ -63,8 +64,9 @@ public class ServerGame extends Game {
      * @param state        État de la partie (en attente, en cours, terminée).
      * @param currentTurn  Tour actuel de la partie.
      */
-    public ServerGame(int id, String name, int turnInterval, int minPlayers, int maxPlayers, boolean isPrivate, GameState state, Timestamp lastTurnTimestamp, int currentTurn) {
+    public ServerGame(RiseAndFallServer server, int id, String name, int turnInterval, int minPlayers, int maxPlayers, boolean isPrivate, GameState state, Timestamp lastTurnTimestamp, int currentTurn) {
         super(id, name, turnInterval, state, lastTurnTimestamp, currentTurn);
+        this.server = server;
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
         this.isPrivate = isPrivate;
@@ -178,6 +180,17 @@ public class ServerGame extends Game {
         }
 
         this.players.put(player.getUser().getId(), player);
+
+
+        if (this.state == GameState.WAITING && this.players.size() == this.minPlayers && this.delayedTask == null) {
+            this.server.getTimer().schedule(this.delayedTask = new TimerTask() {
+                @Override
+                public void run() {
+                    ServerGame.this.delayedTask = null;
+                    ServerGame.this.start();
+                }
+            }, 60_000); // Délais en millisecondes (1 minute)
+        }
     }
 
     /**
@@ -203,7 +216,12 @@ public class ServerGame extends Game {
             throw new IllegalStateException("Cannot remove player from a game that has already started.");
         }
 
-        return this.players.remove(user.getId());
+        ServerPlayer removedPlayer = this.players.remove(user.getId());
+        if (removedPlayer != null && this.players.size() < this.minPlayers && this.delayedTask != null) {
+            this.delayedTask.cancel();
+            this.delayedTask = null;
+        }
+        return removedPlayer;
     }
 
     @Override

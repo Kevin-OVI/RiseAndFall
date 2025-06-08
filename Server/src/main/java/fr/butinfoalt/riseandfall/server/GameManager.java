@@ -20,8 +20,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Classe gérant les parties de jeu.
@@ -100,7 +98,7 @@ public class GameManager {
      */
     public synchronized ServerGame newGame(String name) {
         LogManager.logMessage("Création de la partie : " + name);
-        ServerGame game = new ServerGame(0, name, 15, 1, 30, false, GameState.WAITING, null, 0);
+        ServerGame game = new ServerGame(this.server, 0, name, 15, 1, 30, false, GameState.WAITING, null, 0);
         this.games.add(game);
         return game;
     }
@@ -143,19 +141,6 @@ public class GameManager {
         }
         ServerPlayer player = new ServerPlayer(playerId, user, game, race);
         game.addPlayer(player);
-        if (game.getState() == GameState.WAITING && game.getPlayers().size() == game.getMinPlayers()) {
-            if (game.startTimer == null) {
-                game.startTimer = new Timer();
-                game.startTimer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        try {
-                            game.start();
-                        } catch (IllegalStateException ignored) {}
-                    }
-                }, 60_000);
-            }
-        }
         return player;
     }
 
