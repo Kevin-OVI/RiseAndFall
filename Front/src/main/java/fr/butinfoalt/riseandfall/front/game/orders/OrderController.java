@@ -1,13 +1,13 @@
-package fr.butinfoalt.riseandfall.front.orders;
+package fr.butinfoalt.riseandfall.front.game.orders;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.front.orders.amountselector.PurchasableItemAmountSelector;
-import fr.butinfoalt.riseandfall.front.orders.table.BuildingsTable;
-import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTable;
-import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTableRow;
+import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableItemAmountSelector;
+import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsTable;
+import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTable;
+import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTableRow;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
@@ -144,7 +144,7 @@ public class OrderController {
      */
     @FXML
     private void switchBack() {
-        RiseAndFallApplication.switchToView(View.MAIN);
+        RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
     }
 
     /**

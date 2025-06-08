@@ -242,6 +242,7 @@ public class ServerGame extends Game {
             LogManager.logMessage("Suffisamment de joueurs pour démarrer la partie %s, planification du démarrage.".formatted(this.name));
             this.nextActionAt = new Timestamp(System.currentTimeMillis() + 60_000L); // Démarrage prévu dans 1 minute
             this.scheduleGameStart();
+            this.server.getGameManager().handleGameUpdate(this, player);
         }
     }
 
@@ -274,6 +275,8 @@ public class ServerGame extends Game {
             LogManager.logMessage("Moins de joueurs que le minimum requis pour démarrer la partie %s, annulation du démarrage différé.".formatted(this.name));
             this.delayedTask.cancel();
             this.delayedTask = null;
+            this.nextActionAt = null;
+            this.server.getGameManager().handleGameUpdate(this);
         }
         return removedPlayer;
     }

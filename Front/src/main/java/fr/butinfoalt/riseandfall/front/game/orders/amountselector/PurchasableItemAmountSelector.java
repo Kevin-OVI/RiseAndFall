@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall.front.orders.amountselector;
+package fr.butinfoalt.riseandfall.front.game.orders.amountselector;
 
 import fr.butinfoalt.riseandfall.util.Dispatcher;
 import fr.butinfoalt.riseandfall.util.counter.Counter;

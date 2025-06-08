@@ -1,4 +1,4 @@
-package fr.butinfoalt.riseandfall.front.orders.table;
+package fr.butinfoalt.riseandfall.front.game.orders.table;
 
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;

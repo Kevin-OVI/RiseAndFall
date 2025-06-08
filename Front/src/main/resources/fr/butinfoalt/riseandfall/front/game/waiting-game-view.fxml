@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="fr.butinfoalt.riseandfall.front.game.WaitingGameController"
+      alignment="CENTER" spacing="20">
+    <ImageView fx:id="backgroundImageView" managed="false"/>
+
+    <TitleLabel>La partie est attente</TitleLabel>
+    <Label fx:id="raceField"/>
+    <Label fx:id="startingInField"/>
+    <Button text="Quitter la partie" onAction="#handleQuitGame"/>
+</VBox>

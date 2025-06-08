@@ -2,11 +2,14 @@ package fr.butinfoalt.riseandfall.front;
 
 import fr.butinfoalt.riseandfall.front.authentification.LoginController;
 import fr.butinfoalt.riseandfall.front.authentification.RegisterController;
-import fr.butinfoalt.riseandfall.front.gamelist.GameListController;
+import fr.butinfoalt.riseandfall.front.game.MainRunningGameController;
+import fr.butinfoalt.riseandfall.front.game.WaitingGameController;
+import fr.butinfoalt.riseandfall.front.game.gamelist.GameListController;
+import fr.butinfoalt.riseandfall.front.game.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.front.orders.OrderController;
+import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.network.client.BaseSocketClient;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
@@ -38,7 +41,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendPacket((byte) 3, PacketCreateOrJoinGame.class);
         this.registerReceivePacket((byte) 4, PacketJoinedGame.class, this::onJoinedGame, this::decodePacketJoinedGame);
         this.registerSendPacket((byte) 5, PacketUpdateOrders.class);
-        this.registerReceivePacket((byte) 6, PacketUpdateGameData.class, this::onNextTurnData);
+        this.registerReceivePacket((byte) 6, PacketUpdateGameData.class, this::onUpdateGameData);
         this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerReceivePacket((byte) 8, PacketError.class, this::onError, PacketError::new);
         this.registerSendPacket((byte) 9, PacketRegister.class);
@@ -98,6 +101,50 @@ public class RiseAndFallClient extends BaseSocketClient {
     }
 
     /**
+     * Change la vue de l'application en fonction de l'état du jeu.
+     * Si un message d'erreur est fourni, il sera affiché sur la vue associée.
+     *
+     * @param gameState    L'état du jeu (WAITING, RUNNING, ENDED).
+     * @param errorMessage Message d'erreur à afficher, ou null si aucune erreur n'est à afficher.
+     */
+    private void switchToGameView(GameState gameState, String errorMessage) {
+        WaitingGameController waitingGameController = View.WAITING_GAME.getController();
+        waitingGameController.stopUpdateTimer();
+        switch (gameState) {
+            case WAITING -> {
+                RiseAndFallApplication.switchToView(View.WAITING_GAME);
+                waitingGameController.updateFields();
+                if (errorMessage != null) {
+                    waitingGameController.showError(errorMessage);
+                }
+            }
+            case RUNNING -> {
+                RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
+                MainRunningGameController controller = View.MAIN_RUNNING_GAME.getController();
+                controller.updateFields();
+                if (errorMessage != null) {
+                    controller.showError(errorMessage);
+                }
+                OrderController orderController = View.ORDERS.getController();
+                orderController.loadPendingOrders();
+            }
+            case ENDED -> {
+                // TODO : Afficher un message de fin de partie (victoire, défaite)
+            }
+        }
+    }
+
+    /**
+     * Change la vue de l'application pour afficher l'écran principal du jeu.
+     * Cette méthode est une surcharge de {@link #switchToGameView(GameState, String)} sans message d'erreur.
+     *
+     * @param gameState L'état du jeu (WAITING, RUNNING, ENDED).
+     */
+    private void switchToGameView(GameState gameState) {
+        this.switchToGameView(gameState, null);
+    }
+
+    /**
      * Méthode appelée lorsque le paquet {@link PacketJoinedGame} est reçu.
      * Elle initialise les données du jeu et du joueur, puis change la vue de l'application pour afficher l'écran principal.
      *
@@ -106,11 +153,7 @@ public class RiseAndFallClient extends BaseSocketClient {
      */
     private void onJoinedGame(SocketWrapper client, PacketJoinedGame<ClientGame, ClientPlayer> packet) {
         RiseAndFall.initGame(packet);
-        Platform.runLater(() -> {
-            RiseAndFallApplication.switchToView(View.MAIN);
-            MainController mainController = View.MAIN.getController();
-            mainController.updateFields();
-        });
+        Platform.runLater(() -> this.switchToGameView(packet.getGame().getState()));
     }
 
     /**
@@ -121,15 +164,10 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param readHelper L'outil de lecture pour désérialiser le paquet.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
-    private void onNextTurnData(SocketWrapper sender, ReadHelper readHelper) throws IOException {
+    private void onUpdateGameData(SocketWrapper sender, ReadHelper readHelper) throws IOException {
         RiseAndFall.getGame().updateModifiableData(readHelper);
         RiseAndFall.getPlayer().updateModifiableData(readHelper);
-        Platform.runLater(() -> {
-            MainController mainController = View.MAIN.getController();
-            mainController.updateFields();
-            OrderController orderController = View.ORDERS.getController();
-            orderController.loadPendingOrders();
-        });
+        Platform.runLater(() -> this.switchToGameView(RiseAndFall.getGame().getState()));
     }
 
     /**
@@ -175,14 +213,20 @@ public class RiseAndFallClient extends BaseSocketClient {
                 }
                 case QUIT_GAME_FAILED, QUIT_NON_WAITING -> {
                     LogManager.logMessage("Erreur reçue lors de la tentative de quitter la partie : " + errorType.getMessage());
-                    RiseAndFallApplication.switchToView(View.MAIN);
-                    ((MainController) View.MAIN.getController()).showError(errorType.getMessage());
+                    this.switchToGameView(RiseAndFall.getGame().getState(), errorType.getMessage());
                 }
                 default -> LogManager.logError("Erreur inconnue : " + errorType.getMessage());
             }
         });
     }
 
+    /**
+     * Méthode appelée lorsque le paquet {@link PacketWaitingGames} est reçu.
+     * Elle met à jour la liste des parties en attente et change la vue de l'application pour afficher la liste des parties.
+     *
+     * @param sender Le socket connecté au serveur.
+     * @param packet Le paquet contenant les parties en attente.
+     */
     private void onWaitingGames(SocketWrapper sender, PacketWaitingGames<ClientGame> packet) {
         Platform.runLater(() -> {
             GameListController controller = View.GAME_LIST.getController();

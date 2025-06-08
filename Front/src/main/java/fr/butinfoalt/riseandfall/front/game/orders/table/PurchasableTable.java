@@ -1,7 +1,7 @@
-package fr.butinfoalt.riseandfall.front.orders.table;
+package fr.butinfoalt.riseandfall.front.game.orders.table;
 
 import fr.butinfoalt.riseandfall.front.components.HeightAdaptedTableView;
-import fr.butinfoalt.riseandfall.front.orders.amountselector.PurchasableItemAmountSelector;
+import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableItemAmountSelector;
 import fr.butinfoalt.riseandfall.gamelogic.data.PurchasableItem;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleFloatProperty;

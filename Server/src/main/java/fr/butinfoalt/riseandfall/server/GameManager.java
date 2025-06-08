@@ -222,6 +222,44 @@ public class GameManager {
     }
 
     /**
+     * Appelée lorsqu'une partie est mise à jour.
+     * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
+     * Cette méthode est une surcharge de la méthode {@link #handleGameUpdate(ServerGame game, ServerPlayer exceptPlayer)} avec exceptPlayer à null.
+     *
+     * @param game La partie mise à jour.
+     */
+    public void handleGameUpdate(ServerGame game) {
+        this.handleGameUpdate(game, null);
+    }
+
+    /**
+     * Appelée lorsqu'une partie est mise à jour.
+     * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
+     *
+     * @param game         La partie mise à jour.
+     * @param exceptPlayer Le joueur à qui on ne doit pas envoyer les mises à jour, ou null si aucun joueur ne doit être omis.
+     *                     Utilisé pour éviter d'envoyer une mise à jour à un joueur qui vient de rejoindre la partie et qui
+     *                     n'a pas encore reçu les données initiales.
+     */
+    public void handleGameUpdate(ServerGame game, ServerPlayer exceptPlayer) {
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("UPDATE game SET state = ?, next_action_at = ?, current_turn = ? WHERE id = ?")) {
+            statement.setString(1, game.getState().name());
+            statement.setTimestamp(2, game.getNextActionAt());
+            statement.setInt(3, game.getCurrentTurn());
+            statement.setInt(4, game.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de la mise à jour de la partie " + game.getName() + " dans la base de données.", e);
+        }
+
+        for (ServerPlayer player : game.getPlayers()) {
+            if (player != exceptPlayer) {
+                this.sendPlayerDataUpdates(player);
+            }
+        }
+    }
+
+    /**
      * Méthode appelée lorsqu'un client demande de créer ou de rejoindre une partie.
      * Elle vérifie si le client est authentifié, vérifie si la partie existe déjà, ou en crée une nouvelle si nécessaire.
      * Ensuite, elle envoie les données initiales de la partie au client.
@@ -287,6 +325,11 @@ public class GameManager {
             return;
         }
 
+        if (player.getGame().getState() != GameState.RUNNING) {
+            LogManager.logError("Le joueur " + player.getUser().getUsername() + " essaie de mettre à jour les ordres alors que la partie n'est pas en cours.");
+            return;
+        }
+
         // On vérifie coté serveur que le joueur a bien les ressources nécessaires pour exécuter les ordres
         float goldCapacity = player.getGoldAmount();
         int unitsCapacity = player.getAllowedUnitCount();
@@ -322,6 +365,7 @@ public class GameManager {
      * Méthode appelée lorsqu'un client demande de passer au tour suivant.
      * Elle vérifie si le joueur est dans une partie, puis passe au tour suivant.
      * Elle envoie ensuite les mises à jour de données aux joueurs de la partie.
+     * TODO : Ajouter un drapeau de débogage pour autoriser ou non ce paquet.
      *
      * @param sender Le socket du client qui a envoyé la demande.
      */
@@ -333,15 +377,22 @@ public class GameManager {
         }
 
         ServerGame game = player.getGame();
-        // TODO : À retirer lorsque le démarrage des parties sera implémenté
-        if (game.getState() == GameState.WAITING) {
-            LogManager.logMessage("Démarrage de la partie " + game.getName() + " pour le joueur " + player.getUser().getUsername() + ".");
-            game.start();
-        }
-        try {
-            game.nextTurn();
-        } catch (IllegalStateException e) {
-            LogManager.logError("Erreur lors du passage au tour suivant pour le joueur " + player.getUser().getUsername() + " dans la partie " + game.getName() + ": ", e);
+        switch (game.getState()) {
+            case WAITING -> {
+                LogManager.logMessage("[DEBUG] Le joueur " + player.getUser().getUsername() + " a démarré la partie " + game.getName() + ".");
+                game.start();
+            }
+            case RUNNING -> {
+                LogManager.logMessage("[DEBUG] Le joueur " + player.getUser().getUsername() + " a passé la partie " + game.getName() + " au tour suivant.");
+                try {
+                    game.nextTurn();
+                } catch (IllegalStateException e) {
+                    LogManager.logError("Erreur lors du passage au tour suivant pour le joueur " + player.getUser().getUsername() + " dans la partie " + game.getName() + ": ", e);
+                }
+            }
+            case ENDED -> {
+                LogManager.logError("Le joueur " + player.getUser().getUsername() + " a essayé de passer au tour suivant dans une partie qui est déjà terminée.");
+            }
         }
     }
 
@@ -390,28 +441,6 @@ public class GameManager {
                 LogManager.logError("Erreur lors de l'envoi du paquet de déconnexion au client " + sender.getName(), e);
             }
             this.sendWaitingGames(connection);
-        }
-    }
-
-    /**
-     * Appelée lorsqu'une partie est mise à jour.
-     * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
-     *
-     * @param game La partie mise à jour.
-     */
-    public void handleGameUpdate(ServerGame game) {
-        try (PreparedStatement statement = this.server.getDb().prepareStatement("UPDATE game SET state = ?, next_action_at = ?, current_turn = ? WHERE id = ?")) {
-            statement.setString(1, game.getState().name());
-            statement.setTimestamp(2, game.getNextActionAt());
-            statement.setInt(3, game.getCurrentTurn());
-            statement.setInt(4, game.getId());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            LogManager.logError("Erreur lors de la mise à jour de la partie " + game.getName() + " dans la base de données.", e);
-        }
-
-        for (ServerPlayer player : game.getPlayers()) {
-            this.sendPlayerDataUpdates(player);
         }
     }
 }
