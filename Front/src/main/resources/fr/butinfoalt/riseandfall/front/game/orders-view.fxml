@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsTable?>
+<?import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTable?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="fr.butinfoalt.riseandfall.front.game.orders.OrderController">
+    <ImageView fx:id="backgroundImageView" managed="false"/>
+    <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="root">
+        <VBox alignment="CENTER" spacing="20.0">
+            <VBox alignment="CENTER" spacing="10">
+                <TitleLabel>Vos ressources :</TitleLabel>
+                <Label fx:id="goldField"/>
+                <Label fx:id="intelligenceField"/>
+                <Label fx:id="unitsField"/>
+            </VBox>
+
+            <VBox alignment="CENTER" spacing="10">
+                <TitleLabel>Entrainement d'unités :</TitleLabel>
+
+                <!--Ce tableau est rempli dynamiquement avec les types d'unités-->
+                <PurchasableTable fx:id="unitTable"/>
+            </VBox>
+
+            <VBox alignment="CENTER" spacing="10">
+                <TitleLabel>Construction de bâtiments :</TitleLabel>
+
+                <!--Ce tableau est rempli dynamiquement avec les types de bâtiments-->
+                <BuildingsTable fx:id="buildingTable"/>
+            </VBox>
+
+            <VBox alignment="CENTER" spacing="10">
+                <TitleLabel>Résumé :</TitleLabel>
+                <Label fx:id="totalPrice"/>
+            </VBox>
+
+            <HBox alignment="CENTER" spacing="10">
+                <!-- Bouton Sauvegarder -->
+                <Button text="Sauvegarder" onAction="#handleSave"/>
+
+                <!-- Bouton Annuler -->
+                <Button text="Annuler" onAction="#switchBack"/>
+            </HBox>
+        </VBox>
+    </ScrollPane>
+</StackPane>

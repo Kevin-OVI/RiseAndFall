@@ -1,7 +1,10 @@
 package fr.butinfoalt.riseandfall.gamelogic.order;
 
 import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
+import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+
+import java.io.IOException;
 
 /**
  * Représente un ordre de création d'une unité.
@@ -45,7 +48,7 @@ public class OrderCreateUnit implements BaseOrder {
      * @return Le prix de l'ordre en or.
      */
     @Override
-    public int getPrice() {
+    public float getPrice() {
         return this.unitType.getPrice() * this.count;
     }
 
@@ -70,5 +73,18 @@ public class OrderCreateUnit implements BaseOrder {
     @Override
     public String toString() {
         return "OrderCreateUnit{unitType=%s, count=%d}".formatted(this.unitType, this.count);
+    }
+
+    /**
+     * Sérialise l'ordre de création d'unité dans un flux de données.
+     * On écrit d'abord l'identifiant du type d'unité, puis le nombre d'unités à créer.
+     *
+     * @param writeHelper L'outil d'écriture pour sérialiser les données.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la sérialisation.
+     */
+    @Override
+    public void toBytes(WriteHelper writeHelper) throws IOException {
+        writeHelper.writeInt(this.unitType.getId());
+        writeHelper.writeInt(this.count);
     }
 }

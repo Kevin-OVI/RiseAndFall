@@ -1,7 +1,10 @@
 package fr.butinfoalt.riseandfall.gamelogic.order;
 
 import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+
+import java.io.IOException;
 
 /**
  * Représente un ordre de création d'un bâtiment.
@@ -45,7 +48,7 @@ public class OrderCreateBuilding implements BaseOrder {
      * @return Le prix de l'ordre en or.
      */
     @Override
-    public int getPrice() {
+    public float getPrice() {
         return this.buildingType.getPrice() * this.count;
     }
 
@@ -70,5 +73,18 @@ public class OrderCreateBuilding implements BaseOrder {
     @Override
     public String toString() {
         return "OrderCreateBuilding{buildingType=%s, count=%d}".formatted(this.buildingType, this.count);
+    }
+
+    /**
+     * Sérialise l'ordre de création de bâtiment dans un flux de données.
+     * On écrit d'abord l'identifiant du type de bâtiment, puis le nombre de bâtiments à créer.
+     *
+     * @param writeHelper L'outil d'écriture pour sérialiser les données.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la sérialisation.
+     */
+    @Override
+    public void toBytes(WriteHelper writeHelper) throws IOException {
+        writeHelper.writeInt(this.buildingType.getId());
+        writeHelper.writeInt(this.count);
     }
 }

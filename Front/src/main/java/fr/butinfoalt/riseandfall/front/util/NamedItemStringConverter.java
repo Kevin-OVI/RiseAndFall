@@ -1,6 +1,6 @@
 package fr.butinfoalt.riseandfall.front.util;
 
-import fr.butinfoalt.riseandfall.gamelogic.NamedItem;
+import fr.butinfoalt.riseandfall.gamelogic.data.NamedItem;
 import javafx.util.StringConverter;
 
 /**
@@ -18,7 +18,7 @@ public class NamedItemStringConverter<T extends NamedItem> extends StringConvert
         if (item == null) {
             return "Non sélectionné";
         }
-        return item.getDisplayName();
+        return item.getName();
     }
 
     /**

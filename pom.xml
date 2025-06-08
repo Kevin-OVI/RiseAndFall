@@ -19,5 +19,6 @@
     <modules>
         <module>Front</module>
         <module>Common</module>
+        <module>Server</module>
     </modules>
 </project>

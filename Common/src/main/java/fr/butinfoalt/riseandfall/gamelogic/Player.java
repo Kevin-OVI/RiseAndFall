@@ -1,12 +1,19 @@
 package fr.butinfoalt.riseandfall.gamelogic;
 
-import fr.butinfoalt.riseandfall.gamelogic.map.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap;
-import fr.butinfoalt.riseandfall.gamelogic.map.EnumIntMap.Entry;
-import fr.butinfoalt.riseandfall.gamelogic.map.UnitType;
+import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
+import fr.butinfoalt.riseandfall.network.common.ISerializable;
+import fr.butinfoalt.riseandfall.network.common.ReadHelper;
+import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+import fr.butinfoalt.riseandfall.network.packets.data.OrderType;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap.Entry;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -14,19 +21,24 @@ import java.util.ArrayList;
  * Chaque joueur a une race, une quantité d'or, une quantité d'intelligence, des bâtiments et des unités.
  * Il peut également donner des ordres pour créer des bâtiments ou des unités.
  */
-public class Player {
+public abstract class Player implements Identifiable, ISerializable {
+    /**
+     * Identifiant du joueur dans la base de données.
+     */
+    private final int id;
+
     /**
      * Association entre les types de bâtiments et le nombre de bâtiments de chaque type.
      */
-    private final EnumIntMap<BuildingType> buildingMap;
+    protected final ObjectIntMap<BuildingType> buildingMap;
     /**
      * Association entre les types d'unités et le nombre d'unités de chaque type.
      */
-    private final EnumIntMap<UnitType> unitMap;
+    protected final ObjectIntMap<UnitType> unitMap;
     /**
      * Liste des ordres à exécuter au prochain tour pour le joueur.
      */
-    private final ArrayList<BaseOrder> pendingOrders = new ArrayList<>();
+    protected final ArrayList<BaseOrder> pendingOrders = new ArrayList<>();
     /**
      * Race du joueur
      */
@@ -35,25 +47,44 @@ public class Player {
      * Quantité d'or que possède le joueur.
      * Initialisé à 50 pièces d'or au début de la partie.
      */
-    private int goldAmount = 50;
+    protected float goldAmount = 50;
     /**
      * Quantité d'intelligence que possède le joueur.
      */
-    private int intelligence = 50;
+    private float intelligence = 0;
 
     /**
      * Constructeur de la classe Player.
      *
      * @param race La race choisie par le joueur.
      */
-    public Player(Race race) {
+    public Player(int id, Race race) {
+        this.id = id;
         this.race = race;
-        this.buildingMap = new EnumIntMap<>(BuildingType.class, buildingType -> buildingType.getAccessibleByRace() == null || buildingType.getAccessibleByRace() == this.race);
-        this.unitMap = new EnumIntMap<>(UnitType.class, unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race);
+        this.buildingMap = new ObjectIntMap<>(
+                ServerData.getBuildingTypes().stream()
+                        .filter(buildingType -> buildingType.getAccessibleByRace() == null || buildingType.getAccessibleByRace() == this.race)
+                        .collect(Collectors.toList())
+        );
+        this.unitMap = new ObjectIntMap<>(
+                ServerData.getUnitTypes().stream()
+                        .filter(unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race)
+                        .collect(Collectors.toList())
+        );
 
         for (Entry<BuildingType> entry : this.buildingMap) {
             entry.setValue(entry.getKey().getInitialAmount());
         }
+    }
+
+    /**
+     * Méthode pour obtenir l'identifiant du joueur.
+     *
+     * @return L'identifiant du joueur.
+     */
+    @Override
+    public int getId() {
+        return this.id;
     }
 
     /**
@@ -70,7 +101,7 @@ public class Player {
      *
      * @return La quantité d'or actuelle du joueur.
      */
-    public int getGoldAmount() {
+    public float getGoldAmount() {
         return this.goldAmount;
     }
 
@@ -79,8 +110,26 @@ public class Player {
      *
      * @param goldAmount La nouvelle quantité d'or à définir.
      */
-    public void setGoldAmount(int goldAmount) {
+    public void setGoldAmount(float goldAmount) {
         this.goldAmount = goldAmount;
+    }
+
+    /**
+     * Méthode pour ajouter une certaine quantité d'or au joueur.
+     *
+     * @param goldAmount La quantité d'or à ajouter.
+     */
+    public void addGoldAmount(float goldAmount) {
+        this.goldAmount += goldAmount;
+    }
+
+    /**
+     * Méthode pour retirer une certaine quantité d'or au joueur.
+     *
+     * @param goldAmount La quantité d'or à retirer.
+     */
+    public void removeGoldAmount(float goldAmount) {
+        this.goldAmount -= goldAmount;
     }
 
     /**
@@ -88,7 +137,7 @@ public class Player {
      *
      * @return La quantité d'intelligence actuelle du joueur.
      */
-    public int getIntelligence() {
+    public float getIntelligence() {
         return this.intelligence;
     }
 
@@ -97,11 +146,11 @@ public class Player {
      *
      * @param intelligence La nouvelle quantité d'intelligence à définir.
      */
-    public void setIntelligence(int intelligence) {
+    public void setIntelligence(float intelligence) {
         this.intelligence = intelligence;
     }
 
-    public void addIntelligence(int valeur) {
+    public void addIntelligence(float valeur) {
         this.intelligence += valeur;
     }
 
@@ -121,29 +170,11 @@ public class Player {
     }
 
     /**
-     * Méthode pour ajouter une certaine quantité d'or au joueur.
-     *
-     * @param goldAmount La quantité d'or à ajouter.
-     */
-    public void addGoldAmount(int goldAmount) {
-        this.goldAmount += goldAmount;
-    }
-
-    /**
-     * Méthode pour retirer une certaine quantité d'or au joueur.
-     *
-     * @param goldAmount La quantité d'or à retirer.
-     */
-    public void removeGoldAmount(int goldAmount) {
-        this.goldAmount -= goldAmount;
-    }
-
-    /**
      * Méthode pour obtenir la liste des bâtiments du joueur.
      *
      * @return La liste des bâtiments du joueur.
      */
-    public EnumIntMap<BuildingType> getBuildingMap() {
+    public ObjectIntMap<BuildingType> getBuildingMap() {
         return this.buildingMap;
     }
 
@@ -152,17 +183,8 @@ public class Player {
      *
      * @return La liste des unités du joueur.
      */
-    public EnumIntMap<UnitType> getUnitMap() {
+    public ObjectIntMap<UnitType> getUnitMap() {
         return this.unitMap;
-    }
-
-    /**
-     * Méthode pour ajouter un ordre à la liste des ordres en attente.
-     *
-     * @param order L'ordre à ajouter.
-     */
-    public void addPendingOrder(BaseOrder order) {
-        this.pendingOrders.add(order);
     }
 
     /**
@@ -175,35 +197,99 @@ public class Player {
     }
 
     /**
-     * Méthode pour supprimer les ordres en attente.
+     * Méthode pour ajouter un ordre à la liste des ordres en attente.
+     * Supprime tous les ordres en attente avant d'ajouter les nouveaux ordres.
+     *
+     * @param orders Liste des ordres à ajouter.
      */
-    public void clearPendingOrders() {
+    public void updatePendingOrders(List<BaseOrder> orders) {
         this.pendingOrders.clear();
+        this.pendingOrders.addAll(orders);
     }
 
     /**
-     * Méthode pour exécuter les ordres en attente.
-     * On commence par ajouter l'or produit par les bâtiments.
-     * Ensuite, on exécute chaque ordre en attente si le joueur a suffisamment d'or.
-     * Enfin, on vide la liste des ordres en attente.
+     * Méthode pour désérialiser une liste d'ordres à partir d'un flux de données.
+     * On lit d'abord le nombre d'ordres, puis on lit chaque ordre en fonction de son type.
+     *
+     * @param readHelper L'outil de lecture pour désérialiser les ordres.
+     * @return La liste des ordres désérialisés.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
-    public void executeOrders() {
-        for (Entry<BuildingType> entry : this.buildingMap) {
-            this.addGoldAmount(entry.getValue() * entry.getKey().getGoldProduction());
-            this.addIntelligence(entry.getValue() * entry.getKey().getIntelligenceProduction());
+    public static ArrayList<BaseOrder> deserializeOrders(ReadHelper readHelper) throws IOException {
+        int orderCount = readHelper.readInt();
+        ArrayList<BaseOrder> orders = new ArrayList<>(orderCount);
+        for (int i = 0; i < orderCount; i++) {
+            OrderType orderType = OrderType.values()[readHelper.readInt()];
+            orders.add(orderType.getDeserializer().deserialize(readHelper));
         }
+        return orders;
+    }
 
-        for (BaseOrder order : this.pendingOrders) {
-            if (this.goldAmount >= order.getPrice()) {
-                order.execute(this);
-                this.removeGoldAmount(order.getPrice());
-            }
+    /**
+     * Méthode pour sérialiser une liste d'ordres dans un flux de données.
+     * On écrit d'abord le nombre d'ordres, puis on écrit chaque ordre en fonction de son type.
+     *
+     * @param orders      La liste des ordres à sérialiser.
+     * @param writeHelper L'outil d'écriture pour sérialiser les ordres.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la sérialisation.
+     */
+    public static void serializeOrders(ArrayList<BaseOrder> orders, WriteHelper writeHelper) throws IOException {
+        writeHelper.writeInt(orders.size());
+        for (BaseOrder order : orders) {
+            writeHelper.writeInt(OrderType.getByClass(order.getClass()).ordinal());
+            order.toBytes(writeHelper);
         }
-        this.pendingOrders.clear();
+    }
+
+    /**
+     * Méthode pour sérialiser les données modifiables du joueur dans un flux de données.
+     * On écrit d'abord la quantité d'or, puis la quantité d'intelligence,
+     * ensuite on écrit chaque bâtiment et son nombre, puis chaque unité et son nombre.
+     * Enfin, on sérialise les ordres en attente.
+     *
+     * @param writeHelper L'outil d'écriture pour sérialiser les données.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la sérialisation.
+     */
+    public void serializeModifiableData(WriteHelper writeHelper) throws IOException {
+        writeHelper.writeFloat(this.goldAmount);
+        writeHelper.writeFloat(this.intelligence);
+        for (Entry<BuildingType> entry : this.buildingMap) {
+            writeHelper.writeInt(entry.getKey().getId());
+            writeHelper.writeInt(entry.getValue());
+        }
+        for (Entry<UnitType> entry : this.unitMap) {
+            writeHelper.writeInt(entry.getKey().getId());
+            writeHelper.writeInt(entry.getValue());
+        }
+        serializeOrders(this.pendingOrders, writeHelper);
+    }
+
+    /**
+     * Méthode pour sérialiser les données du joueur dans un flux de données.
+     *
+     * @param writeHelper Le helper d'écriture qui fournit les méthodes pour écrire les données.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de l'écriture des données.
+     */
+    @Override
+    public void toBytes(WriteHelper writeHelper) throws IOException {
+        writeHelper.writeInt(this.id);
+        writeHelper.writeInt(this.race.getId());
+        this.serializeModifiableData(writeHelper);
+    }
+
+    protected ToStringFormatter toStringFormatter() {
+        return new ToStringFormatter(this.getClass().getSimpleName())
+                .add("id", this.id)
+                .add("race", this.race)
+                .add("goldAmount", this.goldAmount)
+                .add("intelligence", this.intelligence)
+                .add("buildingMap", this.buildingMap)
+                .add("unitMap", this.unitMap)
+                .add("pendingOrders", this.pendingOrders);
     }
 
     @Override
     public String toString() {
-        return "Player{buildingMap=%s, unitMap=%s, pendingOrders=%s, goldAmount=%d, intelligence=%d}".formatted(this.buildingMap, this.unitMap, this.pendingOrders, this.goldAmount, this.intelligence);
+        return this.toStringFormatter().build();
     }
 }

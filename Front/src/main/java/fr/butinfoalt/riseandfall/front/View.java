@@ -15,24 +15,45 @@ import java.util.function.Consumer;
  */
 public enum View {
     /**
-     *
+     * Page de chargement de l'application.
      */
-    WELCOME("welcome-view.fxml", "Rise & Fall - Bienvenue"),
+    LOADING("authentification/loading-view.fxml", "Rise & Fall - Chargement"),
 
     /**
-     * Vue principale de l'application.
+     * Vue du LOGIN.
      */
-    MAIN("main-view.fxml", "Rise & Fall"),
+    LOGIN("authentification/login-view.fxml", "Rise & Fall - Login"),
+
+    /**
+     * Vue de l'inscription.
+     */
+    REGISTER("authentification/register-view.fxml", "Rise & Fall - Inscription"),
+
+    /**
+     * Vue de la liste des parties.
+     */
+    GAME_LIST("game/gamelist-view.fxml", "Rise & Fall - Liste des parties"),
+
+    /**
+     * Vue de la partie en attente.
+     */
+    WAITING_GAME("game/waiting-game-view.fxml", "Rise & Fall - Partie en attente"),
+
+    /**
+     * Vue principale lorsque le jeu est en cours
+     */
+    MAIN_RUNNING_GAME("game/main-running-game-view.fxml", "Rise & Fall"),
+
     /**
      * Vue de gestion des ordres.
      */
-    ORDERS("orders-view.fxml", "Rise & Fall - Définition des ordres"),
+    ORDERS("game/orders-view.fxml", "Rise & Fall - Définition des ordres"),
+
     /**
      * Vue de la description et des règles du jeu.
      */
     DESCRIPTION("description-view.fxml", "Rise & Fall - Description et règles du jeu"),
     ;
-
 
     private static final String GENERAL_STYLESHEET = Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/style.css")).toExternalForm();
 
