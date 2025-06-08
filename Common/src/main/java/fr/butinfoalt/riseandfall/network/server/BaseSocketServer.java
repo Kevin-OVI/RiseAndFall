@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.network.server;
 
 import fr.butinfoalt.riseandfall.network.common.*;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -122,17 +123,14 @@ public class BaseSocketServer extends Thread implements Closeable {
         for (SocketWrapper socketWrapper : this.connectedClients) {
             socketWrapper.close();
         }
-        for (SocketWrapper socketWrapper : this.connectedClients) {
-            try {
-                socketWrapper.waitForSocketClose();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
         try {
+            // Impossible d'utiliser forEach car une ConcurrentModificationException sera levée quand un client se déconnectera
+            while (!this.connectedClients.isEmpty()) {
+                this.connectedClients.iterator().next().waitForSocketClose();
+            }
             this.join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LogManager.logError("Interrompu lors de la fermeture du serveur", e);
         }
     }
 

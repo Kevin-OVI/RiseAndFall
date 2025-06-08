@@ -1,6 +1,5 @@
 package fr.butinfoalt.riseandfall.network.packets;
 
-import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
@@ -31,22 +30,16 @@ public class PacketServerData implements IPacket {
     private final List<BuildingType> buildingTypes;
 
     /**
-     * Liste des parties de jeu en attente
-     */
-    private final List<? extends Game> games;
-
-    /**
      * Constructeur du paquet de données du serveur
      *
      * @param raceList      Liste des races
      * @param unitTypes     Liste des types d'unités
      * @param buildingTypes Liste des types de bâtiments
      */
-    public PacketServerData(List<Race> raceList, List<UnitType> unitTypes, List<BuildingType> buildingTypes, List<? extends Game> games) {
+    public PacketServerData(List<Race> raceList, List<UnitType> unitTypes, List<BuildingType> buildingTypes) {
         this.races = raceList;
         this.unitTypes = unitTypes;
         this.buildingTypes = buildingTypes;
-        this.games = games;
     }
 
     /**
@@ -59,7 +52,6 @@ public class PacketServerData implements IPacket {
         this.races = readHelper.readSerializableList(Race::new);
         this.unitTypes = readHelper.readSerializableList(UnitType::new, this.races);
         this.buildingTypes = readHelper.readSerializableList(BuildingType::new, this.races);
-        this.games = readHelper.readSerializableList(Game::new);
     }
 
     /**
@@ -73,7 +65,6 @@ public class PacketServerData implements IPacket {
         writeHelper.writeSerializableList(this.races);
         writeHelper.writeSerializableList(this.unitTypes);
         writeHelper.writeSerializableList(this.buildingTypes);
-        writeHelper.writeSerializableList(this.games);
     }
 
     /**
@@ -101,14 +92,5 @@ public class PacketServerData implements IPacket {
      */
     public List<BuildingType> getBuildingTypes() {
         return this.buildingTypes;
-    }
-
-    /**
-     * Récupère la liste des parties de jeu en attente
-     *
-     * @return La liste des parties de jeu en attente
-     */
-    public List<? extends Game> getGames() {
-        return this.games;
     }
 }

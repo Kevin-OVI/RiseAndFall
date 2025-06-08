@@ -10,14 +10,10 @@ import fr.butinfoalt.riseandfall.server.data.User;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Timer;
 
 import static fr.butinfoalt.riseandfall.server.Environment.SERVER_PORT;
 
@@ -27,6 +23,9 @@ import static fr.butinfoalt.riseandfall.server.Environment.SERVER_PORT;
  * Elle initialise également la base de données et charge les données du serveur.
  */
 public class RiseAndFallServer extends BaseSocketServer {
+    /**
+     * Le gestionnaire de base de données pour interagir avec la base de données du serveur.
+     */
     private final DatabaseManager databaseManager;
 
     /**
@@ -43,6 +42,12 @@ public class RiseAndFallServer extends BaseSocketServer {
      * Le gestionnaire de jeu pour gérer les utilisateurs et les joueurs.
      */
     private UserManager userManager;
+
+    /**
+     * Timer pour gérer les tâches périodiques du serveur.
+     * Il peut être utilisé pour gérer les tours de jeu, le démarrage de parties, etc.
+     */
+    private final Timer timer = new Timer();
 
     /**
      * Constructeur de la classe BaseSocketServer.
@@ -62,12 +67,13 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this.authManager::onTokenAuthentification, PacketToken::new);
         this.registerSendPacket((byte) 2, PacketServerData.class);
         this.registerReceivePacket((byte) 3, PacketCreateOrJoinGame.class, this.gameManager::onCreateOrJoinGame, PacketCreateOrJoinGame::new);
-        this.registerSendPacket((byte) 4, PacketInitialGameData.class);
+        this.registerSendPacket((byte) 4, PacketJoinedGame.class);
         this.registerReceivePacket((byte) 5, PacketUpdateOrders.class, this.gameManager::onUpdateOrders, PacketUpdateOrders::new);
         this.registerSendPacket((byte) 6, PacketUpdateGameData.class);
-        this.registerReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
+        this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerSendPacket((byte) 8, PacketError.class);
         this.registerReceivePacket((byte) 9, PacketRegister.class, this.authManager::onRegister, PacketRegister::new);
+        this.registerSendPacket((byte) 10, PacketWaitingGames.class);
     }
 
     /**
@@ -106,10 +112,10 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    int price = set.getInt("price");
-                    int requiredIntelligence = set.getInt("required_intelligence");
-                    int goldProduction = set.getInt("gold_production");
-                    int intelligenceProduction = set.getInt("intelligence_production");
+                    float price = set.getInt("price");
+                    float requiredIntelligence = set.getInt("required_intelligence");
+                    float goldProduction = set.getInt("gold_production");
+                    float intelligenceProduction = set.getInt("intelligence_production");
                     int maxUnits = set.getInt("max_units");
                     int initialAmount = set.getInt("initial_amount");
                     int accessibleRaceId = set.getInt("accessible_race_id");
@@ -124,10 +130,10 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    int price = set.getInt("price");
-                    int requiredIntelligence = set.getInt("required_intelligence");
-                    int health = set.getInt("health");
-                    int damage = set.getInt("damage");
+                    float price = set.getInt("price");
+                    float requiredIntelligence = set.getInt("required_intelligence");
+                    float health = set.getInt("health");
+                    float damage = set.getInt("damage");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
                     unitTypes.add(new UnitType(id, name, description, price, requiredIntelligence, health, damage, accessibleRace));
@@ -139,14 +145,19 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     int turnInterval = set.getInt("turn_interval");
+                    int currentTurn = set.getInt("current_turn");
                     int minPlayers = set.getInt("min_players");
                     int maxPlayers = set.getInt("max_players");
-                    boolean isPrivate = false;
+                    boolean isPrivate = set.getString("password_hash") != null;
                     GameState state = GameState.valueOf(set.getString("state"));
-                    games.add(new ServerGame(id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, null, 0, new HashMap<>()));
+                    Timestamp nextActionAt = set.getTimestamp("next_action_at");
+                    games.add(new ServerGame(this, id, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, nextActionAt, currentTurn));
                 }
-                this.gameManager = new GameManager(this, new HashSet<>(games));
             }
+            // Nécessaire pour charger les joueurs juste après
+            ServerData.init(races, buildingTypes, unitTypes);
+            this.gameManager = new GameManager(this, games);
+
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM `user`")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
@@ -155,8 +166,6 @@ public class RiseAndFallServer extends BaseSocketServer {
                     users.add(new User(id, username));
                 }
             }
-            ServerData.init(races, buildingTypes, unitTypes, games);
-
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM `player`")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
@@ -164,18 +173,30 @@ public class RiseAndFallServer extends BaseSocketServer {
                     User user = Identifiable.getById(users, set.getInt("user_id"));
                     ServerGame game = Identifiable.getById(games, set.getInt("game_id"));
                     Race race = Identifiable.getById(races, set.getInt("race_id"));
-                    int gold = set.getInt("gold");
-                    int intelligence = set.getInt("intelligence");
+                    float gold = set.getFloat("gold");
+                    float intelligence = set.getFloat("intelligence");
                     ServerPlayer player = new ServerPlayer(id, user, game, race);
                     player.setGoldAmount(gold);
                     player.setIntelligence(intelligence);
                     players.add(player);
-                    game.addPlayer(player);
+                    // Ajout forcé car la partie peut avoir déjà démarré, mais on est dans un cas particulier car les données ne sont pas encore chargées
+                    game.forceAddPlayer(player);
+                }
+            }
+            // Redémarrage des actions en attente
+            for (ServerGame game : games) {
+                switch (game.getState()) {
+                    case WAITING -> {
+                        if (game.hasSufficientPlayers()) {
+                            game.scheduleGameStart();
+                        }
+                    }
+                    case RUNNING -> game.scheduleNextTurn();
                 }
             }
             this.userManager = new UserManager(this, users, players);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Erreur lors du chargement des données initiales", e);
         }
     }
 
@@ -188,20 +209,19 @@ public class RiseAndFallServer extends BaseSocketServer {
     @Override
     public void onClientConnected(SocketWrapper client) {
         super.onClientConnected(client);
-        System.out.println("Client connecté : " + client.getName());
+        LogManager.logMessage("Client connecté : " + client.getName());
         try {
             client.sendPacket(new PacketServerData(
                     ServerData.getRaces(),
                     ServerData.getUnitTypes(),
-                    ServerData.getBuildingTypes(),
-                    ServerData.getGames()
+                    ServerData.getBuildingTypes()
             ));
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi des données du serveur au client : " + e.getMessage());
+            LogManager.logError("Erreur lors de l'envoi des données du serveur au client :", e);
             try {
                 client.close();
             } catch (IOException ignored) {
-                System.err.println("Erreur lors de la fermeture de la connexion du client : " + client.getName());
+                LogManager.logError("Erreur lors de la fermeture de la connexion du client :", e);
             }
         }
     }
@@ -214,9 +234,8 @@ public class RiseAndFallServer extends BaseSocketServer {
     @Override
     protected void onClientDisconnected(SocketWrapper client) {
         super.onClientDisconnected(client);
-        this.gameManager.onClientDisconnected(client);
         this.authManager.onClientDisconnected(client);
-        System.out.println("Client déconnecté : " + client.getName());
+        LogManager.logMessage("Client déconnecté : " + client.getName());
     }
 
     /**
@@ -229,12 +248,15 @@ public class RiseAndFallServer extends BaseSocketServer {
     private void onGameAction(SocketWrapper sender, PacketGameAction packet) {
         switch (packet.getAction()) {
             case QUIT_GAME -> this.gameManager.onClientQuitGame(sender);
-            case LOG_OUT -> {
-                this.gameManager.onClientDisconnected(sender);
-                this.authManager.onClientDisconnected(sender);
-            }
+            case LOG_OUT -> this.authManager.onClientDisconnected(sender);
             case NEXT_TURN -> this.gameManager.onNextTurn(sender);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        this.timer.cancel();
     }
 
     /**
@@ -274,6 +296,15 @@ public class RiseAndFallServer extends BaseSocketServer {
     }
 
     /**
+     * Méthode pour obtenir le timer du serveur.
+     *
+     * @return Le timer du serveur.
+     */
+    public Timer getTimer() {
+        return this.timer;
+    }
+
+    /**
      * Méthode principale pour démarrer le serveur.
      * Elle charge le driver MySQL, établit la connexion à la base de données,
      * démarre le serveur et gère les tâches de fermeture.
@@ -300,7 +331,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                     try {
                         server.close();
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        LogManager.logError("Erreur lors de l'arrêt du serveur :", e);
                     }
                 });
                 LogManager.logMessage("Serveur démarré sur le port " + SERVER_PORT);
@@ -311,7 +342,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                 }
                 LogManager.logMessage("Serveur arrêté.");
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LogManager.logError("Erreur lors de l'exécution du serveur :", e);
             }
         }
     }

@@ -144,17 +144,11 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("EnumIntMap{");
-        boolean removeLastComma = false;
-        for (Entry<T> entry : this) {
-            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
-            removeLastComma = true;
+        ToStringFormatter formatter = new ToStringFormatter("ObjectIntMap");
+        for (T key : this.map.keySet()) {
+            formatter.add(key.toString(), this.map.get(key));
         }
-        if (removeLastComma) {
-            sb.setLength(sb.length() - 2);
-        }
-        sb.append("}");
-        return sb.toString();
+        return formatter.build();
     }
 
     /**
@@ -223,7 +217,7 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
          * Constructeur de l'entrée.
          *
          * @param objectIntMap L'instance de l'association sur laquelle l'entrée est associée.
-         * @param key        Le type d'énumération associé à l'entrée.
+         * @param key          Le type d'énumération associé à l'entrée.
          */
         private Entry(ObjectIntMap<T> objectIntMap, T key) {
             this.objectIntMap = objectIntMap;
@@ -291,7 +285,10 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
 
         @Override
         public String toString() {
-            return "Entry{enumIntMap=%s, key=%s, value=%s}".formatted(this.objectIntMap, this.key, this.getValue());
+            return new ToStringFormatter("ObjectIntMap.Entry")
+                    .add("key", this.key)
+                    .add("value", this.getValue())
+                    .build();
         }
     }
 }

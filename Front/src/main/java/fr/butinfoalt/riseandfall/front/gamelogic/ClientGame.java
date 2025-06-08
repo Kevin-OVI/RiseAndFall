@@ -1,9 +1,9 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
-import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 
-import java.sql.Timestamp;
+import java.io.IOException;
 
 /**
  * Classe représentant une partie côté client.
@@ -11,16 +11,13 @@ import java.sql.Timestamp;
  */
 public class ClientGame extends Game {
     /**
-     * Constructeur de la classe ClientGame.
+     * Constructeur de la classe ClientGame à partir d'un helper de lecture.
+     * Cette méthode est utilisée pour désérialiser les données de la partie à partir d'un flux de données.
      *
-     * @param id                Identifiant de la partie dans la base de données.
-     * @param name              Nom de la partie.
-     * @param turnInterval      Intervalle entre chaque tour (en minutes).
-     * @param state             État de la partie (en attente, en cours, terminée).
-     * @param lastTurnTimestamp Timestamp du dernier tour.
-     * @param currentTurn       Tour actuel de la partie.
+     * @param readHelper Le helper de lecture pour lire les données de la partie.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation des données de la partie.
      */
-    public ClientGame(int id, String name, int turnInterval, GameState state, Timestamp lastTurnTimestamp, int currentTurn) {
-        super(id, name, turnInterval, state, lastTurnTimestamp, currentTurn);
+    public ClientGame(ReadHelper readHelper) throws IOException {
+        super(readHelper);
     }
 }

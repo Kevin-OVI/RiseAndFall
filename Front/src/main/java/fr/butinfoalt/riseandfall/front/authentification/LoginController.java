@@ -69,12 +69,12 @@ public class LoginController {
             LogManager.logError("Impossible d'envoyer le packet d'authentification", e);
             return;
         }
-        RiseAndFallApplication.switchToView(View.LOADING, true);
+        RiseAndFallApplication.switchToView(View.LOADING);
     }
 
     @FXML
     public void register() {
-        RiseAndFallApplication.switchToView(View.REGISTER, false);
+        RiseAndFallApplication.switchToView(View.REGISTER);
     }
 
     /**

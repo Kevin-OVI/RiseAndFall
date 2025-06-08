@@ -4,6 +4,7 @@ import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -13,7 +14,7 @@ import java.sql.Timestamp;
  * Elle contient les informations de base sur la partie, telles que l'identifiant, le nom, l'intervalle entre les tours,
  * l'état de la partie, le timestamp du dernier tour et le tour actuel.
  */
-public class Game implements Identifiable, ISerializable {
+public abstract class Game implements Identifiable, ISerializable {
     /**
      * Identifiant de la partie dans la base de données.
      */
@@ -33,7 +34,7 @@ public class Game implements Identifiable, ISerializable {
     /**
      * Timestamp du dernier tour.
      */
-    protected Timestamp lastTurnTimestamp;
+    protected Timestamp nextActionAt;
     /**
      * Tour actuel de la partie.
      */
@@ -42,19 +43,19 @@ public class Game implements Identifiable, ISerializable {
     /**
      * Constructeur de la classe Game.
      *
-     * @param id                Identifiant de la partie dans la base de données.
-     * @param name              Nom de la partie.
-     * @param turnInterval      Intervalle entre chaque tour (en minutes).
-     * @param state             État de la partie (en attente, en cours, terminée).
-     * @param lastTurnTimestamp Timestamp du dernier tour.
-     * @param currentTurn       Tour actuel de la partie.
+     * @param id           Identifiant de la partie dans la base de données.
+     * @param name         Nom de la partie.
+     * @param turnInterval Intervalle entre chaque tour (en minutes).
+     * @param state        État de la partie (en attente, en cours, terminée).
+     * @param nextActionAt Timestamp de la prochaine action planifiée (tour ou démarrage de la partie).
+     * @param currentTurn  Tour actuel de la partie.
      */
-    public Game(int id, String name, int turnInterval, GameState state, Timestamp lastTurnTimestamp, int currentTurn) {
+    public Game(int id, String name, int turnInterval, GameState state, Timestamp nextActionAt, int currentTurn) {
         this.id = id;
         this.name = name;
         this.turnInterval = turnInterval;
         this.state = state;
-        this.lastTurnTimestamp = lastTurnTimestamp;
+        this.nextActionAt = nextActionAt;
         this.currentTurn = currentTurn;
     }
 
@@ -64,7 +65,7 @@ public class Game implements Identifiable, ISerializable {
         this.turnInterval = readHelper.readInt();
         this.state = GameState.values()[readHelper.readInt()];
         long ts = readHelper.readLong();
-        this.lastTurnTimestamp = ts == -1 ? null : new Timestamp(ts);
+        this.nextActionAt = ts == -1 ? null : new Timestamp(ts);
         this.currentTurn = readHelper.readInt();
     }
 
@@ -110,20 +111,8 @@ public class Game implements Identifiable, ISerializable {
      *
      * @return Le timestamp du dernier tour.
      */
-    public Timestamp getLastTurnTimestamp() {
-        return this.lastTurnTimestamp;
-    }
-
-    /**
-     * Méthode pour obtenir le temps restant avant le prochain tour.
-     *
-     * @return Le temps restant avant le prochain tour (en millisecondes).
-     */
-    public int timeUntilNextTurn() {
-        if (this.lastTurnTimestamp == null) {
-            return 0;
-        }
-        return (int) (this.lastTurnTimestamp.getTime() + this.turnInterval * 60 * 1000 - System.currentTimeMillis());
+    public Timestamp getNextActionAt() {
+        return this.nextActionAt;
     }
 
     /**
@@ -143,7 +132,7 @@ public class Game implements Identifiable, ISerializable {
      */
     public void serializeModifiableData(WriteHelper writeHelper) throws IOException {
         writeHelper.writeInt(this.state.ordinal());
-        writeHelper.writeLong(this.lastTurnTimestamp == null ? -1 : this.lastTurnTimestamp.getTime());
+        writeHelper.writeLong(this.nextActionAt == null ? -1 : this.nextActionAt.getTime());
         writeHelper.writeInt(this.currentTurn);
     }
 
@@ -155,8 +144,8 @@ public class Game implements Identifiable, ISerializable {
      */
     public void updateModifiableData(ReadHelper readHelper) throws IOException {
         this.state = GameState.values()[readHelper.readInt()];
-        long lastTurnTimestampValue = readHelper.readLong();
-        this.lastTurnTimestamp = lastTurnTimestampValue == -1 ? null : new Timestamp(lastTurnTimestampValue);
+        long nextActionAtValue = readHelper.readLong();
+        this.nextActionAt = nextActionAtValue == -1 ? null : new Timestamp(nextActionAtValue);
         this.currentTurn = readHelper.readInt();
     }
 
@@ -172,7 +161,22 @@ public class Game implements Identifiable, ISerializable {
         writeHelper.writeString(this.name);
         writeHelper.writeInt(this.turnInterval);
         writeHelper.writeInt(this.state.ordinal());
-        writeHelper.writeLong(this.lastTurnTimestamp == null ? -1 : this.lastTurnTimestamp.getTime());
+        writeHelper.writeLong(this.nextActionAt == null ? -1 : this.nextActionAt.getTime());
         writeHelper.writeInt(this.currentTurn);
+    }
+
+    protected ToStringFormatter toStringFormatter() {
+        return new ToStringFormatter(this.getClass().getSimpleName())
+                .add("id", this.id)
+                .add("name", this.name)
+                .add("turnInterval", this.turnInterval)
+                .add("state", this.state)
+                .add("nextActionAt", this.nextActionAt)
+                .add("currentTurn", this.currentTurn);
+    }
+
+    @Override
+    public String toString() {
+        return this.toStringFormatter().build();
     }
 }

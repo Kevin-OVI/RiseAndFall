@@ -106,6 +106,6 @@ public class UserManager {
      * @return L'utilisateur correspondant à l'identifiant, ou null si aucun utilisateur ne correspond.
      */
     public User getUser(int id) {
-        return this.getUser(id);
+        return this.users.get(id);
     }
 }

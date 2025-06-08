@@ -30,22 +30,22 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
     /**
      * Prix du bâtiment en or.
      */
-    private final int price;
+    private final float price;
 
     /**
      * La quantité d'intelligence requise pour construire le bâtiment.
      */
-    private final int requiredIntelligence;
+    private final float requiredIntelligence;
 
     /**
      * Production d'or du bâtiment par tour.
      */
-    private final int goldProduction;
+    private final float goldProduction;
 
     /**
      * Production d'intelligence du bâtiment par tour.
      */
-    private final int intelligenceProduction;
+    private final float intelligenceProduction;
 
     /**
      * Nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
@@ -77,7 +77,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      * @param initialAmount          Le nombre initial de bâtiments de ce type.
      * @param accessibleByRace       La race qui peut construire ce bâtiment.
      */
-    public BuildingType(int id, String name, String description, int price, int requiredIntelligence, int goldProduction, int intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
+    public BuildingType(int id, String name, String description, float price, float requiredIntelligence, float goldProduction, float intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -102,10 +102,10 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
         this.description = readHelper.readString();
-        this.price = readHelper.readInt();
-        this.requiredIntelligence = readHelper.readInt();
-        this.goldProduction = readHelper.readInt();
-        this.intelligenceProduction = readHelper.readInt();
+        this.price = readHelper.readFloat();
+        this.requiredIntelligence = readHelper.readFloat();
+        this.goldProduction = readHelper.readFloat();
+        this.intelligenceProduction = readHelper.readFloat();
         this.maxUnits = readHelper.readInt();
         this.initialAmount = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
@@ -147,7 +147,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      * @return Le prix du bâtiment en or.
      */
     @Override
-    public int getPrice() {
+    public float getPrice() {
         return this.price;
     }
 
@@ -157,7 +157,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      * @return La quantité d'intelligence requise pour construire le bâtiment.
      */
     @Override
-    public int getRequiredIntelligence() {
+    public float getRequiredIntelligence() {
         return this.requiredIntelligence;
     }
 
@@ -166,7 +166,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      *
      * @return La production d'or du bâtiment par tour.
      */
-    public int getGoldProduction() {
+    public float getGoldProduction() {
         return this.goldProduction;
     }
 
@@ -175,7 +175,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      *
      * @return La production d'intelligence du bâtiment par tour.
      */
-    public int getIntelligenceProduction() {
+    public float getIntelligenceProduction() {
         return this.intelligenceProduction;
     }
 
@@ -211,10 +211,10 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         writeHelper.writeInt(this.id);
         writeHelper.writeString(this.name);
         writeHelper.writeString(this.description);
-        writeHelper.writeInt(this.price);
-        writeHelper.writeInt(this.requiredIntelligence);
-        writeHelper.writeInt(this.goldProduction);
-        writeHelper.writeInt(this.intelligenceProduction);
+        writeHelper.writeFloat(this.price);
+        writeHelper.writeFloat(this.requiredIntelligence);
+        writeHelper.writeFloat(this.goldProduction);
+        writeHelper.writeFloat(this.intelligenceProduction);
         writeHelper.writeInt(this.maxUnits);
         writeHelper.writeInt(this.initialAmount);
         writeHelper.writeInt(this.accessibleByRace == null ? -1 : this.accessibleByRace.getId());

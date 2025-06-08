@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Paquet envoyé au client lorsqu'il rejoint une partie, ou lorsqu'il s'authentifie pour l'informer des parties qu'il a déjà rejointes.
  */
-public class PacketInitialGameData<G extends Game, P extends Player> implements IPacket {
+public class PacketJoinedGame<G extends Game, P extends Player> implements IPacket {
     private final G game;
     private final P player;
 
@@ -20,7 +20,7 @@ public class PacketInitialGameData<G extends Game, P extends Player> implements 
      * @param game   La partie
      * @param player Le joueur
      */
-    public PacketInitialGameData(G game, P player) {
+    public PacketJoinedGame(G game, P player) {
         this.game = game;
         this.player = player;
     }

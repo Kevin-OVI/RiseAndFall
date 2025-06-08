@@ -4,16 +4,16 @@ package fr.butinfoalt.riseandfall.util.counter;
  * Classe représentant un modificateur appliqué à un compteur.
  * Un modificateur est associé à un compteur et a une valeur delta qui modifie la valeur actuelle du compteur.
  */
-public class Modifier {
+public class Modifier<T extends Number> {
     /**
      * Le compteur auquel ce modificateur est associé.
      */
-    private final Counter counter;
+    private final Counter<T> counter;
     /**
      * La valeur delta du modificateur.
      * Elle représente la quantité à ajouter ou soustraire à la valeur actuelle du compteur.
      */
-    private int delta;
+    private T delta;
 
     /**
      * Constructeur de la classe Modifier.
@@ -22,7 +22,7 @@ public class Modifier {
      * @param counter Le compteur auquel ce modificateur est associé.
      * @param delta   La valeur delta du modificateur.
      */
-    Modifier(Counter counter, int delta) {
+    Modifier(Counter<T> counter, T delta) {
         this.counter = counter;
         this.delta = delta;
     }
@@ -32,7 +32,7 @@ public class Modifier {
      *
      * @return Le compteur associé à ce modificateur.
      */
-    public Counter getCounter() {
+    public Counter<T> getCounter() {
         return this.counter;
     }
 
@@ -41,7 +41,7 @@ public class Modifier {
      *
      * @return La valeur delta du modificateur.
      */
-    public int getDelta() {
+    public T getDelta() {
         return this.delta;
     }
 
@@ -51,11 +51,11 @@ public class Modifier {
      *
      * @param delta La nouvelle valeur delta du modificateur.
      */
-    public void setDelta(int delta) {
+    public void setDelta(T delta) {
         if (!this.counter.hasModifier(this)) {
             throw new IllegalStateException("This modifier got removed from the counter.");
         }
-        int previousDelta = this.delta;
+        T previousDelta = this.delta;
         this.delta = delta;
         this.counter.updateCurrentValue(previousDelta, delta);
     }
@@ -74,13 +74,13 @@ public class Modifier {
      * @param alternativeDelta La valeur delta alternative à utiliser pour le calcul.
      * @return La valeur actuelle du compteur après application de la valeur delta alternative.
      */
-    public int computeWithAlternativeDelta(int alternativeDelta) {
-        return this.counter.getCurrentValue() - this.delta + alternativeDelta;
+    public T computeWithAlternativeDelta(T alternativeDelta) {
+        return this.counter.computeNewValue(this.delta, alternativeDelta).getValue();
     }
 
     @Override
     public String toString() {
         // On n'affiche pas le compteur pour éviter les boucles infinies
-        return "Modifier{delta=%d}".formatted(this.delta);
+        return "Modifier{delta=%s}".formatted(this.delta);
     }
 }

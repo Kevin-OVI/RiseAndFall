@@ -1,12 +1,13 @@
-package fr.butinfoalt.riseandfall.front.orders;
+package fr.butinfoalt.riseandfall.front.game.orders;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.front.orders.amountselector.PurchasableItemAmountSelector;
-import fr.butinfoalt.riseandfall.front.orders.table.BuildingsTable;
-import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTable;
-import fr.butinfoalt.riseandfall.front.orders.table.PurchasableTableRow;
+import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableItemAmountSelector;
+import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsTable;
+import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTable;
+import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTableRow;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
@@ -17,11 +18,11 @@ import fr.butinfoalt.riseandfall.network.packets.PacketUpdateOrders;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.counter.Counter;
 import fr.butinfoalt.riseandfall.util.counter.Modifier;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class OrderController {
      */
     public void loadPendingOrders() {
         ClientPlayer player = RiseAndFall.getPlayer();
-        int playerIntelligence = player.getIntelligence();
+        float playerIntelligence = player.getIntelligence();
         this.pendingUnits = player.getUnitMap().createEmptyClone();
         this.pendingBuildings = player.getBuildingMap().createEmptyClone();
 
@@ -105,18 +106,18 @@ public class OrderController {
 
         this.intelligenceField.setText("Intelligence : " + playerIntelligence);
 
-        Counter goldCounter = new Counter(player.getGoldAmount());
+        Counter<Float> goldCounter = Counter.of(player.getGoldAmount());
         goldCounter.addListener(goldAmount -> {
             this.goldField.setText("Or restant : " + goldAmount);
             this.totalPrice.setText("Prix total : " + (goldCounter.getInitialValue() - goldAmount));
         });
-        Counter allowedUnitsCounter = new Counter(player.getAllowedUnitCount());
+        Counter<Integer> allowedUnitsCounter = Counter.of(player.getAllowedUnitCount());
         allowedUnitsCounter.addListener(allowedCount -> this.unitsField.setText("Entrainements d'unités restants : " + allowedCount));
-        Counter allowedBuildingsCounter = new Counter(5);
+        Counter<Integer> allowedBuildingsCounter = Counter.of(5);
 
         this.unitTable.getItems().clear();
         for (ObjectIntMap.Entry<UnitType> entry : this.pendingUnits) {
-            Modifier unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
+            Modifier<Integer> unitsModifier = allowedUnitsCounter.addModifier(-entry.getValue());
             PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter, playerIntelligence,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
@@ -125,7 +126,7 @@ public class OrderController {
 
         this.buildingTable.getItems().clear();
         for (ObjectIntMap.Entry<BuildingType> entry : pendingBuildings) {
-            Modifier buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
+            Modifier<Integer> buildingModifier = allowedBuildingsCounter.addModifier(-entry.getValue());
             PurchasableItemAmountSelector<BuildingType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter, playerIntelligence,
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> buildingModifier.setDelta(-amount));
@@ -143,7 +144,7 @@ public class OrderController {
      */
     @FXML
     private void switchBack() {
-        RiseAndFallApplication.switchToPreviousView();
+        RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
     }
 
     /**
@@ -169,8 +170,7 @@ public class OrderController {
         try {
             RiseAndFall.getClient().sendPacket(new PacketUpdateOrders(newOrders));
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi du paquet de mise à jour des ordres : ");
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de l'envoi du paquet de mise à jour des ordres", e);
             return;
         }
         RiseAndFall.getPlayer().updatePendingOrders(newOrders);

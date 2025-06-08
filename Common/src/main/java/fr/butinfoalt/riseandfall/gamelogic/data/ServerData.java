@@ -1,6 +1,6 @@
 package fr.butinfoalt.riseandfall.gamelogic.data;
 
-import fr.butinfoalt.riseandfall.gamelogic.Game;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.util.List;
 
@@ -15,21 +15,16 @@ public final class ServerData {
      */
     private static List<Race> races;
     /**
-     * Liste des types de bâtiments
+     * Liste des bâtiments
      */
     private static List<BuildingType> buildingTypes;
     /**
-     * Liste des types d'unités
+     * Liste des unités
      */
     private static List<UnitType> unitTypes;
 
     /**
-     * Liste des games en attente
-     */
-    private static List<? extends Game> games;
-
-    /**
-     * Constructeur privé pour empêcher l'instanciation de cette classe.
+     * On interdit la création d'instances de cette classe.
      */
     private ServerData() {
     }
@@ -43,43 +38,23 @@ public final class ServerData {
      * @param buildingTypes Liste des types de bâtiments
      * @param unitTypes     Liste des types d'unités
      */
-    public static void init(List<Race> races, List<BuildingType> buildingTypes, List<UnitType> unitTypes, List<? extends Game> games) {
+    public static void init(List<Race> races, List<BuildingType> buildingTypes, List<UnitType> unitTypes) {
         ServerData.races = races;
         ServerData.buildingTypes = buildingTypes;
         ServerData.unitTypes = unitTypes;
-        ServerData.games = games;
 
-        System.out.println("Races: " + races.toString());
-        System.out.println("Building types: " + buildingTypes.toString());
-        System.out.println("Unit types: " + unitTypes.toString());
-        System.out.println("Games: " + games.toString());
+        LogManager.logMessage("%d races, %d types de bâtiments et %d types d'unités chargées".formatted(races.size(), buildingTypes.size(), unitTypes.size()));
     }
 
-    /**
-     * Récupère la liste des races
-     */
     public static List<Race> getRaces() {
         return races;
     }
 
-    /**
-     * Récupère la liste des types de bâtiments
-     */
     public static List<BuildingType> getBuildingTypes() {
         return buildingTypes;
     }
 
-    /**
-     * Récupère la liste des types d'unités
-     */
     public static List<UnitType> getUnitTypes() {
         return unitTypes;
-    }
-
-    /**
-     * Récupère la liste des games
-     */
-    public static List<? extends Game> getGames() {
-        return games;
     }
 }

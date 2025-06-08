@@ -2,6 +2,8 @@ package fr.butinfoalt.riseandfall.util.logging;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Une classe utilitaire pour gérer les logs de l'application.
@@ -59,8 +61,9 @@ public class LogManager {
             methodName = lastNonLoggerElement.getMethodName();
             lineNumber = lastNonLoggerElement.getLineNumber();
         }
+        String lineStart = String.format("[%s %s.%s:%d]", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()), className, methodName, lineNumber);
         for (String line : message.split("\n")) {
-            stream.printf("[%s.%s:%d] %s%n", className, methodName, lineNumber, line);
+            stream.printf("%s %s%n", lineStart, line);
         }
     }
 

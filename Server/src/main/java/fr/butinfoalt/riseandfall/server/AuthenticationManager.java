@@ -3,7 +3,6 @@ package fr.butinfoalt.riseandfall.server;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
-import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
@@ -13,7 +12,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Classe responsable de la gestion de l'authentification des clients.
@@ -106,14 +108,15 @@ public class AuthenticationManager {
      */
     private User getUserFromCredentials(String username, String password) {
         String hashedPassword = hashPassword(password);
-        System.out.println("Mot de passe haché : " + hashedPassword);
         try {
             try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT id FROM user WHERE username = ? AND password_hash = ?")) {
                 statement.setString(1, username);
                 statement.setString(2, hashedPassword);
                 ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
-                    return new User(resultSet.getInt("id"), username);
+                    User user = this.server.getUserManager().getUser(resultSet.getInt("id"));
+                    LogManager.logMessage("Utilisateur authentifié : " + user);
+                    return user;
                 }
             }
         } catch (Exception e) {
@@ -129,11 +132,11 @@ public class AuthenticationManager {
      * @return L'utilisateur associé au token, ou null si aucun utilisateur n'est trouvé.
      */
     private User getUserFromToken(String token) {
-        try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT user.id, user.username FROM user JOIN user_token ON user.id = user_token.user_id WHERE token = ?")) {
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT user.id FROM user JOIN user_token ON user.id = user_token.user_id WHERE token = ?")) {
             statement.setString(1, token);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return new User(resultSet.getInt("user.id"), resultSet.getString("user.username"));
+                return this.server.getUserManager().getUser(resultSet.getInt("user.id"));
             }
         } catch (Exception e) {
             LogManager.logError("Erreur lors de la récupération de l'utilisateur à partir du token", e);
@@ -173,8 +176,9 @@ public class AuthenticationManager {
             statement.execute();
             ResultSet resultSet = statement.getResultSet();
             if (resultSet.next()) {
-                System.out.println(resultSet.getInt("id"));
-                return new User(resultSet.getInt("id"), username);
+                User user = new User(resultSet.getInt("id"), username);
+                LogManager.logMessage("Nouvel utilisateur créé : " + user);
+                return user;
             }
             LogManager.logError("Erreur lors de la création de l'utilisateur, aucun id retourné");
         } catch (Exception e) {
@@ -215,7 +219,7 @@ public class AuthenticationManager {
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du token", e);
         }
-        sendGamePacket(sender, user);
+        this.server.getGameManager().sendJoinGamePacket(sender, user);
     }
 
     /**
@@ -241,7 +245,7 @@ public class AuthenticationManager {
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du token", e);
         }
-        sendGamePacket(sender, user);
+        this.server.getGameManager().sendJoinGamePacket(sender, user);
     }
 
     /**
@@ -279,7 +283,7 @@ public class AuthenticationManager {
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du token", e);
         }
-        sendGamePacket(sender, user);
+        this.server.getGameManager().sendJoinGamePacket(sender, user);
     }
 
     /**
@@ -315,32 +319,5 @@ public class AuthenticationManager {
      */
     public synchronized void onClientDisconnected(SocketWrapper client) {
         this.userConnections.remove(client);
-    }
-
-    public ServerPlayer getPlayerFromUser(User user) {
-        ServerGame[] games = server.getGameManager().getGames();
-        for (ServerGame game : games) {
-            Collection<ServerPlayer> players = game.getPlayers();
-            for (ServerPlayer player : players) {
-                if (player.getUser().getId() == user.getId()) {
-                    return player;
-                }
-            }
-        }
-        return null;
-    }
-
-    public void sendGamePacket(SocketWrapper sender, User user) {
-        ServerPlayer player = getPlayerFromUser(user);
-        if (player != null) {
-            ServerGame game = player.getGame();
-            try {
-                sender.sendPacket(new PacketInitialGameData<>(game, player));
-                sender.sendPacket(new PacketUpdateGameData(game, player));
-                server.getGameManager().addConnectionToGame(player, sender);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }

@@ -34,8 +34,8 @@ public class ClientPlayer extends Player {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture des données.
      */
     public void updateModifiableData(ReadHelper readHelper) throws IOException {
-        this.setGoldAmount(readHelper.readInt());
-        this.setIntelligence(readHelper.readInt());
+        this.setGoldAmount(readHelper.readFloat());
+        this.setIntelligence(readHelper.readFloat());
         int size = this.buildingMap.size();
         for (int i = 0; i < size; i++) {
             BuildingType buildingType = Identifiable.getById(ServerData.getBuildingTypes(), readHelper.readInt());

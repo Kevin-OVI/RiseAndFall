@@ -30,22 +30,22 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
     /**
      * Prix de l'unité en or.
      */
-    private final int price;
+    private final float price;
 
     /**
      * La quantité d'intelligence requise pour construire l'unité.
      */
-    private final int requiredIntelligence;
+    private final float requiredIntelligence;
 
     /**
      * Points de vie de l'unité.
      */
-    private final int health;
+    private final float health;
 
     /**
      * Dégâts infligés par l'unité.
      */
-    private final int damage;
+    private final float damage;
 
     /**
      * Race qui peut construire cette unité.
@@ -66,7 +66,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      * @param damage               La quantité de dégâts qu'inflige l'unité
      * @param accessibleByRace     La race qui peut construire cette unité.
      */
-    public UnitType(int id, String name, String description, int price, int requiredIntelligence, int health, int damage, Race accessibleByRace) {
+    public UnitType(int id, String name, String description, float price, float requiredIntelligence, float health, float damage, Race accessibleByRace) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -89,10 +89,10 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
         this.id = readHelper.readInt();
         this.name = readHelper.readString();
         this.description = readHelper.readString();
-        this.price = readHelper.readInt();
-        this.requiredIntelligence = readHelper.readInt();
-        this.health = readHelper.readInt();
-        this.damage = readHelper.readInt();
+        this.price = readHelper.readFloat();
+        this.requiredIntelligence = readHelper.readFloat();
+        this.health = readHelper.readFloat();
+        this.damage = readHelper.readFloat();
         int unitAccessibleRaceId = readHelper.readInt();
         this.accessibleByRace = Identifiable.getByIdOrNull(races, unitAccessibleRaceId);
     }
@@ -132,7 +132,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      * @return Le prix de l'unité en or.
      */
     @Override
-    public int getPrice() {
+    public float getPrice() {
         return this.price;
     }
 
@@ -142,7 +142,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      * @return La quantité d'intelligence requise pour construire l'unité.
      */
     @Override
-    public int getRequiredIntelligence() {
+    public float getRequiredIntelligence() {
         return this.requiredIntelligence;
     }
 
@@ -151,7 +151,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      *
      * @return Les points de vie de l'unité.
      */
-    public int getHealth() {
+    public float getHealth() {
         return this.health;
     }
 
@@ -160,7 +160,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      *
      * @return Les dégâts infligés par l'unité.
      */
-    public int getDamage() {
+    public float getDamage() {
         return this.damage;
     }
 
@@ -178,10 +178,10 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
         writeHelper.writeInt(this.id);
         writeHelper.writeString(this.name);
         writeHelper.writeString(this.description);
-        writeHelper.writeInt(this.price);
-        writeHelper.writeInt(this.requiredIntelligence);
-        writeHelper.writeInt(this.health);
-        writeHelper.writeInt(this.damage);
+        writeHelper.writeFloat(this.price);
+        writeHelper.writeFloat(this.requiredIntelligence);
+        writeHelper.writeFloat(this.health);
+        writeHelper.writeFloat(this.damage);
         writeHelper.writeInt(this.accessibleByRace != null ? this.accessibleByRace.getId() : -1);
     }
 

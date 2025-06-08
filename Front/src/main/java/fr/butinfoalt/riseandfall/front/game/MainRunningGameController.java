@@ -1,20 +1,24 @@
-package fr.butinfoalt.riseandfall.front;
+package fr.butinfoalt.riseandfall.front.game;
 
+import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.front.View;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+
 import java.util.AbstractMap;
 import java.util.Map;
 
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.front.orders.OrderController;
+import fr.butinfoalt.riseandfall.front.game.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -28,7 +32,7 @@ import java.io.IOException;
  * Il gère l'affichage des ressources du joueur, la navigation vers les autres vues,
  * ainsi que les actions principales comme terminer un tour ou quitter la partie.
  */
-public class MainController {
+public class MainRunningGameController {
     /**
      * Champ pour le composant de la quantité d'or.
      */
@@ -102,25 +106,8 @@ public class MainController {
         try {
             RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.NEXT_TURN));
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi du paquet de fin de tour :");
-            e.printStackTrace();
+            LogManager.logError("Erreur lors de l'envoi du paquet de fin de tour", e);
         }
-    }
-
-    /**
-     * Méthode appelée par JavaFX lorsque l'utilisateur clique sur le bouton "Quitter".
-     * Elle réinitialise l'état du joueur et retourne à la vue précédente.
-     */
-    @FXML
-    public void handleQuitGame() {
-        try {
-            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.QUIT_GAME));
-        } catch (IOException e) {
-            System.err.println("Erreur lors de l'envoi du paquet pour quitter la partie :");
-            e.printStackTrace();
-        }
-        RiseAndFall.resetPlayer();
-        RiseAndFallApplication.switchToView(View.GAME_LIST, true);
     }
 
     /**
@@ -193,5 +180,9 @@ public class MainController {
         buildingsVBox.getChildren().setAll(buildingTableView);
 
         updateFields();
+    }
+
+    public void showError(String message) {
+        // TODO : implémenter une méthode pour afficher les erreurs à l'utilisateur
     }
 }

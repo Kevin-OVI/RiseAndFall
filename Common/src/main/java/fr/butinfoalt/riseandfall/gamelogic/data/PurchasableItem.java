@@ -10,12 +10,12 @@ public interface PurchasableItem extends NamedItem {
      *
      * @return Le prix de l'objet en or.
      */
-    int getPrice();
+    float getPrice();
 
     /**
      * Obtient la quantité d'intelligence requise pour construire l'unité.
      *
      * @return La quantité d'intelligence requise pour construire l'unité.
      */
-    int getRequiredIntelligence();
+    float getRequiredIntelligence();
 }

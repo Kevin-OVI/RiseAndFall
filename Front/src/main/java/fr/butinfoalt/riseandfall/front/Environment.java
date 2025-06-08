@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 public class Environment {
     public static final int SERVER_PORT;
     public static final InetAddress SERVER_HOST;
+    public static String authTokenFile = "auth_token.txt";
 
     static {
         Dotenv dotenv = Dotenv.load();
