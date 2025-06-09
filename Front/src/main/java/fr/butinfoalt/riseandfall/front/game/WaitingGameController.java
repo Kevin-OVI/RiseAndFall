@@ -1,8 +1,8 @@
 package fr.butinfoalt.riseandfall.front.game;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
-import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.View;
+import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
@@ -55,7 +55,7 @@ public class WaitingGameController implements ViewController {
     /**
      * Met à jour le champ affichant le temps restant avant le début de la partie.
      */
-    public void updateStartingIn() {
+    private void updateStartingIn() {
         Timestamp timestamp = RiseAndFall.getGame().getNextActionAt();
         if (timestamp == null) {
             this.startingInField.setText("Il n'y a pas assez de joueurs pour commencer la partie");
@@ -63,12 +63,13 @@ public class WaitingGameController implements ViewController {
         } else {
             long timeRemaining = timestamp.getTime() - System.currentTimeMillis();
             if (timeRemaining <= 0) {
-                this.startingInField.setText("La partie va commencer dans quelques instants !");
+                timeRemaining = 0;
                 this.updateTimer.stop();
-            } else {
-                this.startingInField.setText(String.format("La partie commence dans %02d secondes", timeRemaining / 1000));
-                this.updateTimer.start(); // Ne fait rien si le timer est déjà en cours
             }
+            int minutes = (int) (timeRemaining / 60000);
+            int seconds = (int) ((timeRemaining % 60000) / 1000);
+            this.startingInField.setText(String.format("La partie commence dans %02d:%02d", minutes, seconds));
+            this.updateTimer.start(); // Ne fait rien si le timer est déjà en cours
         }
     }
 
