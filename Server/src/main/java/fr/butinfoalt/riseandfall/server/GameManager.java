@@ -9,15 +9,13 @@ import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
+import fr.butinfoalt.riseandfall.server.data.GameNameGenerator;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +42,11 @@ public class GameManager {
     public GameManager(RiseAndFallServer server, List<ServerGame> games) {
         this.server = server;
         this.games = games;
+
+        if (games.stream().noneMatch(game -> game.getState() == GameState.WAITING)) {
+            // Si aucune partie n'est en attente, on en crée une nouvelle
+            this.newRandomGame();
+        }
     }
 
     /**
@@ -91,16 +94,48 @@ public class GameManager {
     }
 
     /**
-     * Crée une nouvelle partie de jeu.
+     * Crée une nouvelle partie et l'enregistre en base de données.
      *
      * @param name Le nom de la partie.
      * @return La nouvelle partie créée.
      */
     public synchronized ServerGame newGame(String name) {
         LogManager.logMessage("Création de la partie : " + name);
-        ServerGame game = new ServerGame(this.server, 0, name, 15, 1, 30, false, GameState.WAITING, null, 0);
-        this.games.add(game);
-        return game;
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO game(name) VALUES (?) RETURNING id, turn_interval, current_turn, min_players, max_players, state, password_hash IS NOT NULL as is_private, state, next_action_at")) {
+            statement.setString(1, name);
+            statement.execute();
+            ResultSet resultSet = statement.getResultSet();
+            if (resultSet.next()) {
+                int gameId = resultSet.getInt("id");
+                int turnInterval = resultSet.getInt("turn_interval");
+                int currentTurn = resultSet.getInt("current_turn");
+                int minPlayers = resultSet.getInt("min_players");
+                int maxPlayers = resultSet.getInt("max_players");
+                boolean isPrivate = resultSet.getBoolean("is_private");
+                GameState state = GameState.valueOf(resultSet.getString("state"));
+                Timestamp nextActionAt = resultSet.getTimestamp("next_action_at");
+
+                ServerGame game = new ServerGame(this.server, gameId, name, maxPlayers, minPlayers, turnInterval, isPrivate, state, nextActionAt, currentTurn);
+                this.games.add(game);
+                LogManager.logMessage("Partie créée avec succès : " + name + " (ID: " + gameId + ")");
+                return game;
+            } else {
+                LogManager.logError("Erreur lors de la création de la partie : aucune ligne retournée.");
+            }
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de la création de la partie " + name + " dans la base de données.", e);
+        }
+        return null;
+    }
+
+    /**
+     * Crée une nouvelle partie de jeu avec un nom aléatoire.
+     *
+     * @return La nouvelle partie créée.
+     */
+    public ServerGame newRandomGame() {
+        String gameName = GameNameGenerator.generateGameName();
+        return this.newGame(gameName);
     }
 
     /**
