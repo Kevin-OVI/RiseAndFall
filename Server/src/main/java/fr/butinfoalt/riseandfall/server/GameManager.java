@@ -288,6 +288,17 @@ public class GameManager {
         }
 
         for (ServerPlayer player : game.getPlayers()) {
+            try (PreparedStatement statement = this.server.getDb().prepareStatement("UPDATE player SET gold = ?, intelligence = ? WHERE id = ?")) {
+                statement.setFloat(1, player.getGoldAmount());
+                statement.setFloat(2, player.getIntelligence());
+                statement.setInt(3, player.getId());
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                LogManager.logError("Erreur lors de la mise à jour des données du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
+            }
+        }
+
+        for (ServerPlayer player : game.getPlayers()) {
             if (player != exceptPlayer) {
                 this.sendPlayerDataUpdates(player);
             }
