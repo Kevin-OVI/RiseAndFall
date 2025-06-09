@@ -5,6 +5,7 @@ import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+import fr.butinfoalt.riseandfall.network.packets.data.OrderDeserializationContext;
 import fr.butinfoalt.riseandfall.network.packets.data.OrderType;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap.Entry;
@@ -212,15 +213,16 @@ public abstract class Player implements Identifiable, ISerializable {
      * On lit d'abord le nombre d'ordres, puis on lit chaque ordre en fonction de son type.
      *
      * @param readHelper L'outil de lecture pour désérialiser les ordres.
+     * @param context    Le contexte de désérialisation des ordres, contenant les informations nécessaires pour la désérialisation.
      * @return La liste des ordres désérialisés.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
-    public static ArrayList<BaseOrder> deserializeOrders(ReadHelper readHelper) throws IOException {
+    public static ArrayList<BaseOrder> deserializeOrders(ReadHelper readHelper, OrderDeserializationContext context) throws IOException {
         int orderCount = readHelper.readInt();
         ArrayList<BaseOrder> orders = new ArrayList<>(orderCount);
         for (int i = 0; i < orderCount; i++) {
             OrderType orderType = OrderType.values()[readHelper.readInt()];
-            orders.add(orderType.getDeserializer().deserialize(readHelper));
+            orders.add(orderType.getDeserializer().deserialize(readHelper, context));
         }
         return orders;
     }

@@ -1,11 +1,13 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
+import fr.butinfoalt.riseandfall.front.ClientDataDeserializer;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
+import fr.butinfoalt.riseandfall.network.packets.data.OrderDeserializationContext;
 
 import java.io.IOException;
 
@@ -46,6 +48,6 @@ public class ClientPlayer extends Player {
             UnitType unitType = Identifiable.getById(ServerData.getUnitTypes(), readHelper.readInt());
             this.unitMap.set(unitType, readHelper.readInt());
         }
-        this.updatePendingOrders(deserializeOrders(readHelper));
+        this.updatePendingOrders(deserializeOrders(readHelper, new OrderDeserializationContext(this, ClientDataDeserializer.INSTANCE)));
     }
 }
