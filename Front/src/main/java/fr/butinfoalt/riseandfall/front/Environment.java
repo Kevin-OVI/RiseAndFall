@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import java.net.InetAddress;
@@ -9,6 +10,7 @@ public class Environment {
     public static final int SERVER_PORT;
     public static final InetAddress SERVER_HOST;
     public static String authTokenFile = "auth_token.txt";
+    public static final boolean DEBUG_MODE;
 
     static {
         Dotenv dotenv = Dotenv.load();
@@ -19,5 +21,10 @@ public class Environment {
             throw new RuntimeException(e);
         }
         SERVER_PORT = Integer.parseInt(dotenv.get("SERVER_PORT"));
+        String debugMode = dotenv.get("DEBUG_MODE");
+        DEBUG_MODE = debugMode != null && debugMode.equalsIgnoreCase("true");
+        if (DEBUG_MODE) {
+            LogManager.logMessage("Mode debug activé !");
+        }
     }
 }

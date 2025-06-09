@@ -1,18 +1,21 @@
 package fr.butinfoalt.riseandfall.front.game;
 
+import fr.butinfoalt.riseandfall.front.Environment;
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
+import fr.butinfoalt.riseandfall.front.game.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.front.game.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
@@ -54,6 +57,18 @@ public class MainRunningGameController {
      */
     @FXML
     public ImageView backgroundImageView;
+
+    /**
+     * Conteneur pour les boutons de la barre d'outils.
+     */
+    @FXML
+    public HBox buttonsContainer;
+
+    /**
+     * Bouton pour passer au tour suivant.
+     */
+    @FXML
+    public Button nextTurnButton;
 
     /**
      * Méthode appelée par JavaFX quand on clique sur le bouton pour ouvrir la page de description.
@@ -111,6 +126,10 @@ public class MainRunningGameController {
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
+
+        if (!Environment.DEBUG_MODE) {
+            this.buttonsContainer.getChildren().remove(this.nextTurnButton);
+        }
     }
 
     public void showError(String message) {

@@ -365,11 +365,15 @@ public class GameManager {
      * Méthode appelée lorsqu'un client demande de passer au tour suivant.
      * Elle vérifie si le joueur est dans une partie, puis passe au tour suivant.
      * Elle envoie ensuite les mises à jour de données aux joueurs de la partie.
-     * TODO : Ajouter un drapeau de débogage pour autoriser ou non ce paquet.
      *
      * @param sender Le socket du client qui a envoyé la demande.
      */
     public synchronized void onNextTurn(SocketWrapper sender) {
+        if (!Environment.DEBUG_MODE) {
+            LogManager.logError("Le paquet de passage au tour suivant manuel n'est autorisé qu'en mode débogage.");
+            return;
+        }
+
         ServerPlayer player = this.getPlayerInRunningGame(sender);
         if (player == null) {
             LogManager.logError("La connexion " + sender.getName() + " n'est pas dans une partie. Impossible de passer au tour suivant.");
