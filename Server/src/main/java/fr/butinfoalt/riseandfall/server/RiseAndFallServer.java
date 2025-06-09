@@ -2,6 +2,8 @@ package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
+import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
+import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
@@ -181,6 +183,26 @@ public class RiseAndFallServer extends BaseSocketServer {
                     players.add(player);
                     // Ajout forcé car la partie peut avoir déjà démarré, mais on est dans un cas particulier car les données ne sont pas encore chargées
                     game.forceAddPlayer(player);
+                }
+            }
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM building_creation_order")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    BuildingType buildingType = Identifiable.getById(buildingTypes, set.getInt("building_type_id"));
+                    int amount = set.getInt("amount");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    player.getPendingOrders().add(new OrderCreateBuilding(buildingType, amount));
+                }
+            }
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM unit_creation_order")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    UnitType unitType = Identifiable.getById(unitTypes, set.getInt("unit_type_id"));
+                    int amount = set.getInt("amount");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    player.getPendingOrders().add(new OrderCreateUnit(unitType, amount));
                 }
             }
             // Redémarrage des actions en attente

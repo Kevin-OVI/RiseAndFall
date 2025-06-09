@@ -9,15 +9,13 @@ import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
+import fr.butinfoalt.riseandfall.server.data.GameNameGenerator;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +42,11 @@ public class GameManager {
     public GameManager(RiseAndFallServer server, List<ServerGame> games) {
         this.server = server;
         this.games = games;
+
+        if (games.stream().noneMatch(game -> game.getState() == GameState.WAITING)) {
+            // Si aucune partie n'est en attente, on en crée une nouvelle
+            this.newRandomGame();
+        }
     }
 
     /**
@@ -91,16 +94,48 @@ public class GameManager {
     }
 
     /**
-     * Crée une nouvelle partie de jeu.
+     * Crée une nouvelle partie et l'enregistre en base de données.
      *
      * @param name Le nom de la partie.
      * @return La nouvelle partie créée.
      */
     public synchronized ServerGame newGame(String name) {
         LogManager.logMessage("Création de la partie : " + name);
-        ServerGame game = new ServerGame(this.server, 0, name, 15, 1, 30, false, GameState.WAITING, null, 0);
-        this.games.add(game);
-        return game;
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO game(name) VALUES (?) RETURNING id, turn_interval, current_turn, min_players, max_players, state, password_hash IS NOT NULL as is_private, state, next_action_at")) {
+            statement.setString(1, name);
+            statement.execute();
+            ResultSet resultSet = statement.getResultSet();
+            if (resultSet.next()) {
+                int gameId = resultSet.getInt("id");
+                int turnInterval = resultSet.getInt("turn_interval");
+                int currentTurn = resultSet.getInt("current_turn");
+                int minPlayers = resultSet.getInt("min_players");
+                int maxPlayers = resultSet.getInt("max_players");
+                boolean isPrivate = resultSet.getBoolean("is_private");
+                GameState state = GameState.valueOf(resultSet.getString("state"));
+                Timestamp nextActionAt = resultSet.getTimestamp("next_action_at");
+
+                ServerGame game = new ServerGame(this.server, gameId, name, maxPlayers, minPlayers, turnInterval, isPrivate, state, nextActionAt, currentTurn);
+                this.games.add(game);
+                LogManager.logMessage("Partie créée avec succès : " + name + " (ID: " + gameId + ")");
+                return game;
+            } else {
+                LogManager.logError("Erreur lors de la création de la partie : aucune ligne retournée.");
+            }
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de la création de la partie " + name + " dans la base de données.", e);
+        }
+        return null;
+    }
+
+    /**
+     * Crée une nouvelle partie de jeu avec un nom aléatoire.
+     *
+     * @return La nouvelle partie créée.
+     */
+    public ServerGame newRandomGame() {
+        String gameName = GameNameGenerator.generateGameName();
+        return this.newGame(gameName);
     }
 
     /**
@@ -232,6 +267,20 @@ public class GameManager {
         this.handleGameUpdate(game, null);
     }
 
+    private void clearPendingOrders(ServerPlayer player) {
+        for (String statement : new String[]{
+                "DELETE FROM building_creation_order WHERE player_id = ?",
+                "DELETE FROM unit_creation_order WHERE player_id = ?",
+        }) {
+            try (PreparedStatement preparedStatement = this.server.getDb().prepareStatement(statement)) {
+                preparedStatement.setInt(1, player.getId());
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                LogManager.logError("Erreur lors de la suppression des ordres en attente du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
+            }
+        }
+    }
+
     /**
      * Appelée lorsqu'une partie est mise à jour.
      * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
@@ -250,6 +299,19 @@ public class GameManager {
             statement.executeUpdate();
         } catch (SQLException e) {
             LogManager.logError("Erreur lors de la mise à jour de la partie " + game.getName() + " dans la base de données.", e);
+        }
+
+        for (ServerPlayer player : game.getPlayers()) {
+            try (PreparedStatement statement = this.server.getDb().prepareStatement("UPDATE player SET gold = ?, intelligence = ? WHERE id = ?")) {
+                statement.setFloat(1, player.getGoldAmount());
+                statement.setFloat(2, player.getIntelligence());
+                statement.setInt(3, player.getId());
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                LogManager.logError("Erreur lors de la mise à jour des données du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
+            }
+            this.clearPendingOrders(player);
+            // TODO : Sauvegarder les bâtiments et unités déjà créés par le joueur
         }
 
         for (ServerPlayer player : game.getPlayers()) {
@@ -357,6 +419,35 @@ public class GameManager {
             return;
         }
 
+
+        // Si on arrive ici, c'est que le joueur a les ressources nécessaires pour exécuter les ordres
+
+        // On retire les anciens ordres en attente du joueur
+        this.clearPendingOrders(player);
+
+        // On ajoute les nouveaux ordres
+        for (BaseOrder order : newOrders) {
+            if (order instanceof OrderCreateBuilding orderCreateBuilding) {
+                try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO building_creation_order (player_id, building_type_id, amount) VALUES (?, ?, ?)")) {
+                    statement.setInt(1, player.getId());
+                    statement.setInt(2, orderCreateBuilding.getBuildingType().getId());
+                    statement.setInt(3, orderCreateBuilding.getCount());
+                    statement.executeUpdate();
+                } catch (SQLException e) {
+                    LogManager.logError("Erreur lors de l'ajout de l'ordre de création de bâtiment pour le joueur " + player.getUser().getUsername() + ".", e);
+                }
+            } else if (order instanceof OrderCreateUnit orderCreateUnit) {
+                try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO unit_creation_order (player_id, unit_type_id, amount) VALUES (?, ?, ?)")) {
+                    statement.setInt(1, player.getId());
+                    statement.setInt(2, orderCreateUnit.getUnitType().getId());
+                    statement.setInt(3, orderCreateUnit.getCount());
+                    statement.executeUpdate();
+                } catch (SQLException e) {
+                    LogManager.logError("Erreur lors de l'ajout de l'ordre de création d'unité pour le joueur " + player.getUser().getUsername() + ".", e);
+                }
+            }
+        }
+
         player.updatePendingOrders(newOrders);
         this.sendPlayerDataUpdates(player);
     }
@@ -365,11 +456,15 @@ public class GameManager {
      * Méthode appelée lorsqu'un client demande de passer au tour suivant.
      * Elle vérifie si le joueur est dans une partie, puis passe au tour suivant.
      * Elle envoie ensuite les mises à jour de données aux joueurs de la partie.
-     * TODO : Ajouter un drapeau de débogage pour autoriser ou non ce paquet.
      *
      * @param sender Le socket du client qui a envoyé la demande.
      */
     public synchronized void onNextTurn(SocketWrapper sender) {
+        if (!Environment.DEBUG_MODE) {
+            LogManager.logError("Le paquet de passage au tour suivant manuel n'est autorisé qu'en mode débogage.");
+            return;
+        }
+
         ServerPlayer player = this.getPlayerInRunningGame(sender);
         if (player == null) {
             LogManager.logError("La connexion " + sender.getName() + " n'est pas dans une partie. Impossible de passer au tour suivant.");

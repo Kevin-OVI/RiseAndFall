@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front.game;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
+import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
@@ -15,7 +16,7 @@ import javafx.scene.image.ImageView;
 import java.io.IOException;
 import java.sql.Timestamp;
 
-public class WaitingGameController {
+public class WaitingGameController implements ViewController {
     /**
      * Timer pour mettre à jour le temps restant avant le début de la partie.
      */
@@ -54,7 +55,7 @@ public class WaitingGameController {
     /**
      * Met à jour le champ affichant le temps restant avant le début de la partie.
      */
-    public void updateStartingIn() {
+    private void updateStartingIn() {
         Timestamp timestamp = RiseAndFall.getGame().getNextActionAt();
         if (timestamp == null) {
             this.startingInField.setText("Il n'y a pas assez de joueurs pour commencer la partie");
@@ -62,27 +63,34 @@ public class WaitingGameController {
         } else {
             long timeRemaining = timestamp.getTime() - System.currentTimeMillis();
             if (timeRemaining <= 0) {
-                this.startingInField.setText("La partie va commencer dans quelques instants !");
+                timeRemaining = 0;
                 this.updateTimer.stop();
-            } else {
-                this.startingInField.setText(String.format("La partie commence dans %02d secondes", timeRemaining / 1000));
-                this.updateTimer.start(); // Ne fait rien si le timer est déjà en cours
             }
+            int minutes = (int) (timeRemaining / 60000);
+            int seconds = (int) ((timeRemaining % 60000) / 1000);
+            this.startingInField.setText(String.format("La partie commence dans %02d:%02d", minutes, seconds));
+            this.updateTimer.start(); // Ne fait rien si le timer est déjà en cours
         }
     }
 
     /**
-     * Met à jour les champs de la vue, notamment la race du joueur et lance le timer de mise à jour du temps restant.
+     * Met à jour les champs de la vue à l'affichage.
      */
-    public void updateFields() {
+    @Override
+    public void onDisplayed(String errorMessage) {
+        ViewController.super.onDisplayed(errorMessage);
         this.raceField.setText("Race : " + RiseAndFall.getPlayer().getRace().getName());
         updateStartingIn();
+
+        // TODO : Afficher les messages d'erreur à l'utilisateur
     }
 
     /**
-     * Arrête le timer de mise à jour du temps restant avant le début de la partie.
+     * Arrête le timer de mise à jour du temps restant avant le début de la partie quand la vue est masquée.
      */
-    public void stopUpdateTimer() {
+    @Override
+    public void onHidden() {
+        ViewController.super.onHidden();
         this.updateTimer.stop();
     }
 
@@ -97,16 +105,6 @@ public class WaitingGameController {
             LogManager.logError("Erreur lors de l'envoi du paquet pour quitter la partie", e);
             return;
         }
-        this.updateTimer.stop();
         RiseAndFallApplication.switchToView(View.LOADING);
-    }
-
-    /**
-     * Méthode pour afficher une erreur à l'utilisateur.
-     *
-     * @param message Le message d'erreur à afficher.
-     */
-    public void showError(String message) {
-        // TODO : implémenter une méthode pour afficher les erreurs à l'utilisateur
     }
 }

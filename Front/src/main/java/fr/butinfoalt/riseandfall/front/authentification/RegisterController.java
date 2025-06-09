@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front.authentification;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
+import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketRegister;
@@ -18,7 +19,7 @@ import java.io.IOException;
 /**
  * Contrôleur de la vue d'inscription.
  */
-public class RegisterController {
+public class RegisterController implements ViewController {
     /**
      * Champ pour le composant de l'image de fond.
      */
@@ -68,14 +69,24 @@ public class RegisterController {
         RiseAndFallApplication.switchToView(View.LOGIN);
     }
 
+    @Override
+    public void onDisplayed(String errorMessage) {
+        ViewController.super.onDisplayed(errorMessage);
+        this.showError(errorMessage);
+    }
+
     /**
      * Méthode pour afficher un message d'erreur.
      *
      * @param error Le message d'erreur à afficher.
      */
-    public void showError(String error) {
-        errorMessage.setText(error);
-        errorMessage.setVisible(true);
+    private void showError(String error) {
+        if (error == null) {
+            this.errorMessage.setVisible(false);
+        } else {
+            this.errorMessage.setText(error);
+            this.errorMessage.setVisible(true);
+        }
     }
 
     /**

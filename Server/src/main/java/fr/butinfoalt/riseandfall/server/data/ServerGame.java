@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.server.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.server.GameManager;
 import fr.butinfoalt.riseandfall.server.RiseAndFallServer;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
@@ -119,7 +120,9 @@ public class ServerGame extends Game {
         this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
         this.scheduleNextTurn();
 
-        this.server.getGameManager().handleGameUpdate(this);
+        GameManager gameManager = this.server.getGameManager();
+        gameManager.handleGameUpdate(this);
+        gameManager.newRandomGame();
     }
 
     /**

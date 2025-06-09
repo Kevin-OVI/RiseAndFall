@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.front.authentification;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
@@ -9,7 +10,7 @@ import javafx.stage.Stage;
 /**
  * Contrôleur de la vue de chargement.
  */
-public class LoadingController {
+public class LoadingController implements ViewController {
     /**
      * Champ pour le composant de l'image de fond.
      */

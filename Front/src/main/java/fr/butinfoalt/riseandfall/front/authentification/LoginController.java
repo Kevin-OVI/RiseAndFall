@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front.authentification;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
+import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
@@ -18,7 +19,7 @@ import java.io.IOException;
 /**
  * Contrôleur de la vue de chargement.
  */
-public class LoginController {
+public class LoginController implements ViewController {
     /**
      * Champ pour le composant de l'image de fond.
      */
@@ -69,6 +70,7 @@ public class LoginController {
             LogManager.logError("Impossible d'envoyer le packet d'authentification", e);
             return;
         }
+        this.showError(null); // On cache le message d'erreur
         RiseAndFallApplication.switchToView(View.LOADING);
     }
 
@@ -77,11 +79,21 @@ public class LoginController {
         RiseAndFallApplication.switchToView(View.REGISTER);
     }
 
+    @Override
+    public void onDisplayed(String errorMessage) {
+        ViewController.super.onDisplayed(errorMessage);
+        this.showError(errorMessage);
+    }
+
     /**
      * Methode pour afficher une erreur de login
      */
-    public void showError(String error) {
-        errorMessage.setText(error);
-        errorMessage.setVisible(true);
+    private void showError(String error) {
+        if (error == null) {
+            this.errorMessage.setVisible(false);
+        } else {
+            this.errorMessage.setText(error);
+            this.errorMessage.setVisible(true);
+        }
     }
 }

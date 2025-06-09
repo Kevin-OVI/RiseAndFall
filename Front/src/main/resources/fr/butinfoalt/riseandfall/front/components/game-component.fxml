@@ -7,7 +7,7 @@
       fx:controller="fr.butinfoalt.riseandfall.front.game.gamelist.GameComponentController"
       spacing="20"
       alignment="CENTER_LEFT"
-      maxWidth="400"
+      maxWidth="600"
       style="-fx-padding: 10; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-background-color: white;">
     <Label fx:id="partyNameLabel" style="-fx-font-size: 16;" />
     <Label fx:id="turnInterval" style="-fx-font-size: 16;" />

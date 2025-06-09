@@ -2,12 +2,13 @@ package fr.butinfoalt.riseandfall.front.game.orders;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
-import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
-import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableItemAmountSelector;
 import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsTable;
 import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTable;
 import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTableRow;
+import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
+import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 /**
  * Contrôleur pour la vue de gestion des ordres.
  */
-public class OrderController {
+public class OrderController implements ViewController {
     /**
      * Liste des unités en attente de création.
      */
@@ -90,7 +91,10 @@ public class OrderController {
      * pour afficher les unités et bâtiments en attente de création,
      * ainsi que la quantité d'or disponible.
      */
-    public void loadPendingOrders() {
+    @Override
+    public void onDisplayed(String errorMessage) {
+        ViewController.super.onDisplayed(errorMessage);
+
         ClientPlayer player = RiseAndFall.getPlayer();
         float playerIntelligence = player.getIntelligence();
         this.pendingUnits = player.getUnitMap().createEmptyClone();
@@ -137,6 +141,8 @@ public class OrderController {
         goldCounter.setDispatchChanges(true);
         allowedBuildingsCounter.setDispatchChanges(true);
         allowedUnitsCounter.setDispatchChanges(true);
+
+        // TODO : Afficher les messages d'erreur à l'utilisateur
     }
 
     /**
