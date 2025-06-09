@@ -87,10 +87,10 @@ CREATE TABLE building_creation_order (
 CREATE TABLE unit_creation_order (
     id SERIAL PRIMARY KEY,
     player_id BIGINT UNSIGNED NOT NULL,
-    unit_id BIGINT UNSIGNED NOT NULL,
+    unit_type_id BIGINT UNSIGNED NOT NULL,
     amount INT NOT NULL,
     FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (unit_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (unit_type_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 

@@ -267,6 +267,20 @@ public class GameManager {
         this.handleGameUpdate(game, null);
     }
 
+    private void clearPendingOrders(ServerPlayer player) {
+        for (String statement : new String[]{
+                "DELETE FROM building_creation_order WHERE player_id = ?",
+                "DELETE FROM unit_creation_order WHERE player_id = ?",
+        }) {
+            try (PreparedStatement preparedStatement = this.server.getDb().prepareStatement(statement)) {
+                preparedStatement.setInt(1, player.getId());
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                LogManager.logError("Erreur lors de la suppression des ordres en attente du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
+            }
+        }
+    }
+
     /**
      * Appelée lorsqu'une partie est mise à jour.
      * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
@@ -296,6 +310,8 @@ public class GameManager {
             } catch (SQLException e) {
                 LogManager.logError("Erreur lors de la mise à jour des données du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
             }
+            this.clearPendingOrders(player);
+            // TODO : Sauvegarder les bâtiments et unités déjà créés par le joueur
         }
 
         for (ServerPlayer player : game.getPlayers()) {
@@ -401,6 +417,35 @@ public class GameManager {
         if (goldCapacity < 0 || unitsCapacity < 0 || buildingsCapacity < 0) {
             LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez de ressources pour exécuter les ordres demandés.");
             return;
+        }
+
+
+        // Si on arrive ici, c'est que le joueur a les ressources nécessaires pour exécuter les ordres
+
+        // On retire les anciens ordres en attente du joueur
+        this.clearPendingOrders(player);
+
+        // On ajoute les nouveaux ordres
+        for (BaseOrder order : newOrders) {
+            if (order instanceof OrderCreateBuilding orderCreateBuilding) {
+                try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO building_creation_order (player_id, building_type_id, amount) VALUES (?, ?, ?)")) {
+                    statement.setInt(1, player.getId());
+                    statement.setInt(2, orderCreateBuilding.getBuildingType().getId());
+                    statement.setInt(3, orderCreateBuilding.getCount());
+                    statement.executeUpdate();
+                } catch (SQLException e) {
+                    LogManager.logError("Erreur lors de l'ajout de l'ordre de création de bâtiment pour le joueur " + player.getUser().getUsername() + ".", e);
+                }
+            } else if (order instanceof OrderCreateUnit orderCreateUnit) {
+                try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO unit_creation_order (player_id, unit_type_id, amount) VALUES (?, ?, ?)")) {
+                    statement.setInt(1, player.getId());
+                    statement.setInt(2, orderCreateUnit.getUnitType().getId());
+                    statement.setInt(3, orderCreateUnit.getCount());
+                    statement.executeUpdate();
+                } catch (SQLException e) {
+                    LogManager.logError("Erreur lors de l'ajout de l'ordre de création d'unité pour le joueur " + player.getUser().getUsername() + ".", e);
+                }
+            }
         }
 
         player.updatePendingOrders(newOrders);
