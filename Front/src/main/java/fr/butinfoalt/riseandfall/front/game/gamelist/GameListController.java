@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.front.game.gamelist;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.NamedItemStringConverter;
@@ -25,7 +26,7 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.util.List;
 
-public class GameListController {
+public class GameListController implements ViewController {
     /**
      * Label d'instructions.
      */
@@ -48,6 +49,12 @@ public class GameListController {
      * Animation de clignotement des instructions.
      */
     private Timeline instructionsBlinkTransition;
+
+    /**
+     * Champ pour le composant du message d'erreur.
+     */
+    @FXML
+    public Label errorMessage;
 
     @FXML
     public void initialize() {
@@ -93,6 +100,7 @@ public class GameListController {
             return;
         }
 
+        this.showError(null);
         try {
             RiseAndFall.getClient().sendPacket(new PacketCreateOrJoinGame(this.raceChoiceBox.getValue(), gameId));
         } catch (IOException e) {
@@ -100,7 +108,25 @@ public class GameListController {
         }
     }
 
-    public void showError(String message) {
-        // TODO : Afficher un message d'erreur à l'utilisateur
+    @Override
+    public void onDisplayed(String errorMessage) {
+        ViewController.super.onDisplayed(errorMessage);
+        if (errorMessage != null) {
+            this.showError(errorMessage);
+        }
+    }
+
+    /**
+     * Méthode pour afficher un message d'erreur.
+     *
+     * @param error Le message d'erreur à afficher.
+     */
+    public void showError(String error) {
+        if (error == null) {
+            this.errorMessage.setVisible(false);
+        } else {
+            this.errorMessage.setText(error);
+            this.errorMessage.setVisible(true);
+        }
     }
 }

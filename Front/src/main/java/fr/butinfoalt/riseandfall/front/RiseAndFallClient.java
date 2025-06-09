@@ -1,11 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
-import fr.butinfoalt.riseandfall.front.authentification.LoginController;
-import fr.butinfoalt.riseandfall.front.authentification.RegisterController;
-import fr.butinfoalt.riseandfall.front.game.MainRunningGameController;
-import fr.butinfoalt.riseandfall.front.game.WaitingGameController;
 import fr.butinfoalt.riseandfall.front.game.gamelist.GameListController;
-import fr.butinfoalt.riseandfall.front.game.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
@@ -108,25 +103,17 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param errorMessage Message d'erreur à afficher, ou null si aucune erreur n'est à afficher.
      */
     private void switchToGameView(GameState gameState, String errorMessage) {
-        WaitingGameController waitingGameController = View.WAITING_GAME.getController();
-        waitingGameController.stopUpdateTimer();
         switch (gameState) {
             case WAITING -> {
-                RiseAndFallApplication.switchToView(View.WAITING_GAME);
-                waitingGameController.updateFields();
-                if (errorMessage != null) {
-                    waitingGameController.showError(errorMessage);
-                }
+                RiseAndFallApplication.switchToView(View.WAITING_GAME, errorMessage);
             }
             case RUNNING -> {
-                RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
-                MainRunningGameController controller = View.MAIN_RUNNING_GAME.getController();
-                controller.updateFields();
-                if (errorMessage != null) {
-                    controller.showError(errorMessage);
+                View displayView = RiseAndFallApplication.getCurrentView();
+                if (displayView != View.MAIN_RUNNING_GAME && displayView != View.ORDERS) {
+                    displayView = View.MAIN_RUNNING_GAME;
                 }
-                OrderController orderController = View.ORDERS.getController();
-                orderController.loadPendingOrders();
+
+                RiseAndFallApplication.switchToView(displayView, errorMessage);
             }
             case ENDED -> {
                 // TODO : Afficher un message de fin de partie (victoire, défaite)
@@ -199,14 +186,12 @@ public class RiseAndFallClient extends BaseSocketClient {
         Platform.runLater(() -> {
             switch (errorType) {
                 case LOGIN_GENERIC_ERROR, LOGIN_INVALID_CREDENTIALS, LOGIN_INVALID_SESSION -> {
-                    RiseAndFallApplication.switchToView(View.LOGIN);
-                    ((LoginController) View.LOGIN.getController()).showError(errorType.getMessage());
+                    RiseAndFallApplication.switchToView(View.LOGIN, errorType.getMessage());
                 }
                 case REGISTER_GENERIC_ERROR, REGISTER_USERNAME_TAKEN -> {
-                    RiseAndFallApplication.switchToView(View.REGISTER);
-                    ((RegisterController) View.REGISTER.getController()).showError(errorType.getMessage());
+                    RiseAndFallApplication.switchToView(View.REGISTER, errorType.getMessage());
                 }
-                case JOINING_GAME_FAILED, JOINING_GAME_NOT_FOUND -> {
+                case JOINING_GAME_FAILED, JOINING_GAME_NOT_FOUND, JOINING_NON_WAITING, JOINING_GAME_FULL -> {
                     GameListController controller = View.GAME_LIST.getController();
                     controller.showError(errorType.getMessage());
                     // Le basculement vers la vue de la liste des parties aura lieu après la réception du paquet PacketWaitingGames

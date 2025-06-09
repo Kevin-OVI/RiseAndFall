@@ -3,8 +3,8 @@ package fr.butinfoalt.riseandfall.front.game;
 import fr.butinfoalt.riseandfall.front.Environment;
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
+import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
-import fr.butinfoalt.riseandfall.front.game.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
@@ -23,7 +23,7 @@ import java.io.IOException;
 /**
  * Contrôleur pour la vue principale de l'application.
  */
-public class MainRunningGameController {
+public class MainRunningGameController implements ViewController {
     /**
      * Champ pour le composant de la quantité d'or.
      */
@@ -85,8 +85,6 @@ public class MainRunningGameController {
     @FXML
     public void switchToOrders() {
         RiseAndFallApplication.switchToView(View.ORDERS);
-        OrderController orderController = View.ORDERS.getController();
-        orderController.loadPendingOrders();
     }
 
     /**
@@ -104,7 +102,10 @@ public class MainRunningGameController {
     /**
      * Méthode pour mettre à jour l'affichage des ressources du joueur.
      */
-    public void updateFields() {
+    @Override
+    public void onDisplayed(String errorMessage) {
+        ViewController.super.onDisplayed(errorMessage);
+
         ClientPlayer player = RiseAndFall.getPlayer();
         this.goldField.setText("Or : " + player.getGoldAmount());
         this.intelligenceField.setText("Intelligence : " + player.getIntelligence());
@@ -120,6 +121,8 @@ public class MainRunningGameController {
             Label label = new Label(entry.getKey().getName() + " : " + entry.getValue());
             this.buildingsVBox.getChildren().add(label);
         }
+
+        // TODO : Afficher les messages d'erreur à l'utilisateur
     }
 
     @FXML
@@ -130,9 +133,5 @@ public class MainRunningGameController {
         if (!Environment.DEBUG_MODE) {
             this.buttonsContainer.getChildren().remove(this.nextTurnButton);
         }
-    }
-
-    public void showError(String message) {
-        // TODO : implémenter une méthode pour afficher les erreurs à l'utilisateur
     }
 }
