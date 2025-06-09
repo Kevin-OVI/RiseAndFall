@@ -1,5 +1,5 @@
 -- Détruire les tables existantes
-DROP TABLE IF EXISTS unit_creation_order, building_creation_order, unit_type, building_type, player, game, user_token, user, race;
+DROP TABLE IF EXISTS attack_player_order_unit, attack_player_order, unit_creation_order, building_creation_order, unit_type, building_type, player, game, user_token, user, race;
 
 -- Créer les tables nécessaires
 CREATE TABLE race (
@@ -90,6 +90,22 @@ CREATE TABLE unit_creation_order (
     unit_type_id BIGINT UNSIGNED NOT NULL,
     amount INT NOT NULL,
     FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (unit_type_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE attack_player_order (
+    id SERIAL PRIMARY KEY,
+    player_id BIGINT UNSIGNED NOT NULL,
+    target_player_id BIGINT UNSIGNED NOT NULL,
+    FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE attack_player_order_unit (
+    id SERIAL PRIMARY KEY,
+    order_id BIGINT UNSIGNED NOT NULL,
+    unit_type_id BIGINT UNSIGNED NOT NULL,
+    amount INT NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES attack_player_order(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (unit_type_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 

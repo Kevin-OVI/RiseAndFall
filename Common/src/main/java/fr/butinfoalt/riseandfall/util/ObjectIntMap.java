@@ -7,7 +7,7 @@ import java.util.*;
  *
  * @param <T> Le type d'objet à associer aux entiers.
  */
-public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
+public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneable {
     /**
      * Un LinkedHashMap pour stocker l'association entre les objets et les entiers de manière ordonnée.
      */
@@ -146,6 +146,15 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
             formatter.add(key.toString(), this.map.get(key));
         }
         return formatter.build();
+    }
+
+    @Override
+    public ObjectIntMap<T> clone() {
+        try {
+            return (ObjectIntMap<T>) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError("Cloning not supported", e);
+        }
     }
 
     /**

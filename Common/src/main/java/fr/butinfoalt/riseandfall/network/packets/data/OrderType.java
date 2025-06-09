@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.network.packets.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
+import fr.butinfoalt.riseandfall.gamelogic.order.OrderAttackPlayer;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import fr.butinfoalt.riseandfall.network.common.IContextDeserializer;
@@ -15,7 +16,8 @@ import java.util.Map;
  */
 public enum OrderType {
     CREATE_BUILDING(OrderCreateBuilding.class, OrderCreateBuilding::new),
-    CREATE_UNIT(OrderCreateUnit.class, OrderCreateUnit::new);
+    CREATE_UNIT(OrderCreateUnit.class, OrderCreateUnit::new),
+    ATTACK_PLAYER(OrderAttackPlayer.class, OrderAttackPlayer::new);
 
     /**
      * Map statique pour associer les classes d'ordres à leurs types.

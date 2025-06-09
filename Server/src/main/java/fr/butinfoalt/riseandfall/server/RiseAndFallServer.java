@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
+import fr.butinfoalt.riseandfall.gamelogic.order.OrderAttackPlayer;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
@@ -9,6 +10,7 @@ import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
@@ -211,6 +213,27 @@ public class RiseAndFallServer extends BaseSocketServer {
                     player.getPendingOrders().add(new OrderCreateUnit(unitType, amount));
                 }
             }
+            try (PreparedStatement attackStatement = this.getDb().prepareStatement("SELECT * FROM attack_player_order")) {
+                ResultSet set = attackStatement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    int targetPlayerId = set.getInt("target_player_id");
+                    int orderId = set.getInt("id");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    ServerPlayer targetPlayer = Identifiable.getById(players, targetPlayerId);
+                    ObjectIntMap<UnitType> usingUnits = player.getUnitMap().createEmptyClone();
+                    try (PreparedStatement unitStatement = this.getDb().prepareStatement("SELECT * FROM attack_player_order_unit WHERE attack_player_order_id = ?")) {
+                        unitStatement.setInt(1, orderId);
+                        ResultSet unitSet = unitStatement.executeQuery();
+                        while (unitSet.next()) {
+                            UnitType unitType = Identifiable.getById(unitTypes, unitSet.getInt("unit_type_id"));
+                            usingUnits.set(unitType, unitSet.getInt("amount"));
+                        }
+                    }
+                    player.getPendingOrders().add(new OrderAttackPlayer(targetPlayer, usingUnits));
+                }
+            }
+
             // Redémarrage des actions en attente
             for (ServerGame game : games) {
                 switch (game.getState()) {
