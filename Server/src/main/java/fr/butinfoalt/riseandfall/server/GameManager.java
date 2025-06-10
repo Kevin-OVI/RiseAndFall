@@ -285,7 +285,9 @@ public class GameManager {
 
     public void sendDiscoverPlayerPacket(SocketWrapper sender, User user) {
         ServerPlayer player = getPlayerInRunningGame(user);
-        this.sendDiscoveredPlayers(sender, player, player.getGame());
+        if (player != null) {
+            this.sendDiscoveredPlayers(sender, player, player.getGame());
+        }
     }
 
     /**
