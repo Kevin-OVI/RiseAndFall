@@ -1,8 +1,10 @@
 package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
+import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
@@ -14,6 +16,7 @@ import fr.butinfoalt.riseandfall.network.packets.data.OrderDeserializationContex
 import fr.butinfoalt.riseandfall.server.data.GameNameGenerator;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
@@ -284,6 +287,20 @@ public class GameManager {
         }
     }
 
+    private void clearBuildingsAndUnits(ServerPlayer player) {
+        for (String statement : new String[]{
+                "DELETE FROM player_building WHERE player_id = ?",
+                "DELETE FROM player_unit WHERE player_id = ?",
+        }) {
+            try (PreparedStatement preparedStatement = this.server.getDb().prepareStatement(statement)) {
+                preparedStatement.setInt(1, player.getId());
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                LogManager.logError("Erreur lors de la suppression des bâtiments et unités du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
+            }
+        }
+    }
+
     /**
      * Appelée lorsqu'une partie est mise à jour.
      * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
@@ -314,7 +331,32 @@ public class GameManager {
                 LogManager.logError("Erreur lors de la mise à jour des données du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
             }
             this.clearPendingOrders(player);
-            // TODO : Sauvegarder les bâtiments et unités déjà créés par le joueur
+
+            this.clearBuildingsAndUnits(player);
+
+            try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO player_building (player_id, building_id, quantity) VALUES (?, ?, ?)")) {
+                for (ObjectIntMap.Entry<BuildingType> entry : player.getBuildingMap()) {
+                    statement.setInt(1, player.getId());
+                    statement.setInt(2, entry.getKey().getId());
+                    statement.setInt(3, entry.getValue());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            } catch (SQLException e) {
+                LogManager.logError("Erreur lors de la sauvegarde des bâtiments pour le joueur " + player.getUser().getUsername() + ".", e);
+            }
+
+            try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO player_unit (player_id, unit_id, quantity) VALUES (?, ?, ?)")) {
+                for (ObjectIntMap.Entry<UnitType> entry : player.getUnitMap()) {
+                    statement.setInt(1, player.getId());
+                    statement.setInt(2, entry.getKey().getId());
+                    statement.setInt(3, entry.getValue());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            } catch (SQLException e) {
+                LogManager.logError("Erreur lors de la sauvegarde des unites pour le joueur " + player.getUser().getUsername() + ".", e);
+            }
         }
 
         for (ServerPlayer player : game.getPlayers()) {

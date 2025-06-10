@@ -84,7 +84,7 @@ CREATE TABLE player_building (
     FOREIGN KEY (building_id) REFERENCES building_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE player_building (
+CREATE TABLE player_unit (
     id SERIAL PRIMARY KEY,
     player_id BIGINT UNSIGNED NOT NULL,
     unit_id BIGINT UNSIGNED NOT NULL,
