@@ -5,8 +5,8 @@ import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableItemAmountSelector;
 import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsTable;
-import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTable;
 import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTableRow;
+import fr.butinfoalt.riseandfall.front.game.orders.table.UnitsTable;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
@@ -65,7 +65,7 @@ public class OrderController implements ViewController {
      * Tableau contenant les unités.
      */
     @FXML
-    private PurchasableTable<UnitType> unitTable;
+    private UnitsTable unitTable;
 
     /**
      * Tableau contenant les bâtiments.

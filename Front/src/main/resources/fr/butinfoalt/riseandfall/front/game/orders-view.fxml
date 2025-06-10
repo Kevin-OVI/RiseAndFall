@@ -2,7 +2,7 @@
 
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
 <?import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsTable?>
-<?import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTable?>
+<?import fr.butinfoalt.riseandfall.front.game.orders.table.UnitsTable?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
@@ -26,7 +26,7 @@
         <TitleLabel>Entrainement d'unités :</TitleLabel>
 
         <!--Ce tableau est rempli dynamiquement avec les types d'unités-->
-        <PurchasableTable fx:id="unitTable"/>
+        <UnitsTable fx:id="unitTable"/>
     </VBox>
 
     <VBox alignment="CENTER" spacing="10">

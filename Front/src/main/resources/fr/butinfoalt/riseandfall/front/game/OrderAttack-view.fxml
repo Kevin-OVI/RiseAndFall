@@ -1,0 +1,22 @@
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
+      fx:controller="fr.butinfoalt.riseandfall.front.game.orders.OrderAttackController">
+    <ImageView fx:id="backgroundImageView" managed="false"/>
+
+    <VBox.margin>
+        <Insets top="20"/>
+    </VBox.margin>
+    <VBox alignment="CENTER" spacing="10">
+        <TitleLabel>Qui attaquez-vous ?:</TitleLabel>
+
+        <ChoiceBox fx:id="targetPlayer"/>
+    </VBox>
+    <VBox alignment="CENTER" spacing="10">
+        <TitleLabel>Nombre d'unité:</TitleLabel>
+        <Label fx:id="totalUnit"/>
+

@@ -1,38 +1,35 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
+import fr.butinfoalt.riseandfall.gamelogic.data.NamedItem;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
-public class OtherClientPlayer extends ClientPlayer {
+public class OtherClientPlayer extends ClientPlayer implements NamedItem {
     /**
      * Nom du joueur.
      */
-    private final String playerName;
+    private final String name;
 
     /**
      * Constructeur de la classe OtherClientPlayer.
      *
      * @param id         L'identifiant unique du joueur.
      * @param race       La race choisie par le joueur.
-     * @param playerName Le nom du joueur.
+     * @param name Le nom du joueur.
      */
-    public OtherClientPlayer(int id, Race race, String playerName) {
+    public OtherClientPlayer(int id, Race race, String name) {
         super(id, race);
-        this.playerName = playerName;
-    }
-
-    /**
-     * Méthode pour obtenir le nom du joueur.
-     *
-     * @return Le nom du joueur.
-     */
-    public String getPlayerName() {
-        return this.playerName;
+        this.name = name;
     }
 
     @Override
     protected ToStringFormatter toStringFormatter() {
         return super.toStringFormatter()
-                .add("playerName", this.playerName);
+                .add("name", this.name);
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 }
