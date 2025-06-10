@@ -1,11 +1,9 @@
 package fr.butinfoalt.riseandfall.network.packets.data;
 
-import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
-import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
 import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
-import fr.butinfoalt.riseandfall.network.common.IDeserializer;
+import fr.butinfoalt.riseandfall.network.common.IContextDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,8 +14,8 @@ import java.util.Map;
  * Chaque type d'ordre est associé à une classe d'ordre et à un désérialiseur.
  */
 public enum OrderType {
-    CREATE_BUILDING(OrderCreateBuilding.class, readHelper -> new OrderCreateBuilding(Identifiable.getById(ServerData.getBuildingTypes(), readHelper.readInt()), readHelper.readInt())),
-    CREATE_UNIT(OrderCreateUnit.class, readHelper -> new OrderCreateUnit(Identifiable.getById(ServerData.getUnitTypes(), readHelper.readInt()), readHelper.readInt()));
+    CREATE_BUILDING(OrderCreateBuilding.class, OrderCreateBuilding::new),
+    CREATE_UNIT(OrderCreateUnit.class, OrderCreateUnit::new);
 
     /**
      * Map statique pour associer les classes d'ordres à leurs types.
@@ -32,7 +30,7 @@ public enum OrderType {
     /**
      * Désérialiseur associé à ce type d'ordre.
      */
-    private final IDeserializer<? extends BaseOrder> deserializer;
+    private final IContextDeserializer<? extends BaseOrder, OrderDeserializationContext> deserializer;
 
     /**
      * Constructeur de l'énumération OrderType.
@@ -41,7 +39,7 @@ public enum OrderType {
      * @param deserializer Désérialiseur associé à ce type d'ordre.
      * @param <T>          Type d'ordre.
      */
-    <T extends BaseOrder> OrderType(Class<T> orderClass, IDeserializer<T> deserializer) {
+    <T extends BaseOrder> OrderType(Class<T> orderClass, IContextDeserializer<? extends BaseOrder, OrderDeserializationContext> deserializer) {
         this.orderClass = orderClass;
         this.deserializer = deserializer;
     }
@@ -51,7 +49,7 @@ public enum OrderType {
      *
      * @return Le désérialiseur associé à ce type d'ordre.
      */
-    public IDeserializer<? extends BaseOrder> getDeserializer() {
+    public IContextDeserializer<? extends BaseOrder, OrderDeserializationContext> getDeserializer() {
         return this.deserializer;
     }
 

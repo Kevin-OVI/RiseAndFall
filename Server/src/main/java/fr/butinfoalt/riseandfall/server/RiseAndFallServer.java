@@ -52,6 +52,12 @@ public class RiseAndFallServer extends BaseSocketServer {
     private final Timer timer = new Timer();
 
     /**
+     * Désérialiseur de données spécifique au serveur.
+     * Il est utilisé pour désérialiser les données côté serveur.
+     */
+    private final ServerDataDeserializer dataDeserializer = new ServerDataDeserializer(this);
+
+    /**
      * Constructeur de la classe BaseSocketServer.
      * Initialise le serveur socket sur le port spécifié.
      *
@@ -70,7 +76,7 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerSendPacket((byte) 2, PacketServerData.class);
         this.registerReceivePacket((byte) 3, PacketCreateOrJoinGame.class, this.gameManager::onCreateOrJoinGame, PacketCreateOrJoinGame::new);
         this.registerSendPacket((byte) 4, PacketJoinedGame.class);
-        this.registerReceivePacket((byte) 5, PacketUpdateOrders.class, this.gameManager::onUpdateOrders, PacketUpdateOrders::new);
+        this.registerReceivePacket((byte) 5, PacketUpdateOrders.class, this.gameManager::onUpdateOrders);
         this.registerSendPacket((byte) 6, PacketUpdateGameData.class);
         this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerSendPacket((byte) 8, PacketError.class);
@@ -324,6 +330,15 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     public Timer getTimer() {
         return this.timer;
+    }
+
+    /**
+     * Méthode pour obtenir le désérialiseur de données spécifique au serveur.
+     *
+     * @return Le désérialiseur de données spécifique au serveur.
+     */
+    public ServerDataDeserializer getDataDeserializer() {
+        return this.dataDeserializer;
     }
 
     /**

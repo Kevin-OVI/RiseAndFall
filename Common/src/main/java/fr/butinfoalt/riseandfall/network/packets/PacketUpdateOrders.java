@@ -5,6 +5,7 @@ import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.network.common.IPacket;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+import fr.butinfoalt.riseandfall.network.packets.data.OrderDeserializationContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,10 +33,11 @@ public class PacketUpdateOrders implements IPacket {
      * Constructeur du paquet de mise à jour des ordres pour la désérialisation.
      *
      * @param readHelper Le helper de lecture pour lire les données du paquet.
+     * @param context    Le contexte de désérialisation des ordres.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
-    public PacketUpdateOrders(ReadHelper readHelper) throws IOException {
-        this.orders = Player.deserializeOrders(readHelper);
+    public PacketUpdateOrders(ReadHelper readHelper, OrderDeserializationContext context) throws IOException {
+        this.orders = Player.deserializeOrders(readHelper, context);
     }
 
     /**

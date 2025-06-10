@@ -29,7 +29,7 @@ CREATE TABLE game (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     turn_interval INT NOT NULL DEFAULT 15,
-    current_turn INT NOT NULL DEFAULT 0,
+    current_turn INT NOT NULL DEFAULT 1,
     min_players INT NOT NULL DEFAULT 3,
     max_players INT NOT NULL DEFAULT 30,
     password_hash VARCHAR(255) DEFAULT NULL,

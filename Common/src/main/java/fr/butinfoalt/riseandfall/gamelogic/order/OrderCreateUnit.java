@@ -1,8 +1,12 @@
 package fr.butinfoalt.riseandfall.gamelogic.order;
 
 import fr.butinfoalt.riseandfall.gamelogic.Player;
+import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
+import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
+import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+import fr.butinfoalt.riseandfall.network.packets.data.OrderDeserializationContext;
 
 import java.io.IOException;
 
@@ -29,6 +33,18 @@ public class OrderCreateUnit implements BaseOrder {
     public OrderCreateUnit(UnitType unitType, int count) {
         this.unitType = unitType;
         this.count = count;
+    }
+
+    /**
+     * Constructeur de l'ordre de création d'unité à partir d'un flux de données.
+     * On lit d'abord l'identifiant du type d'unité, puis le nombre d'unités à créer.
+     *
+     * @param readHelper     L'outil de lecture pour désérialiser les données.
+     * @param ignoredContext Le contexte de désérialisation, ignoré ici.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
+     */
+    public OrderCreateUnit(ReadHelper readHelper, OrderDeserializationContext ignoredContext) throws IOException {
+        this(Identifiable.getById(ServerData.getUnitTypes(), readHelper.readInt()), readHelper.readInt());
     }
 
     /**

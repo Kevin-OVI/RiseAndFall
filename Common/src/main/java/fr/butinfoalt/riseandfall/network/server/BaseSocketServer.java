@@ -75,6 +75,18 @@ public class BaseSocketServer extends Thread implements Closeable {
     }
 
     /**
+     * Enregistre un paquet à recevoir avec un gestionnaire brut.
+     *
+     * @param packetId                Identifiant du paquet.
+     * @param packetClass             Classe du paquet.
+     * @param packetDecoderAndHandler Gestionnaire brut de paquets, qui gère la désérialisation et le traitement du paquet.
+     * @param <T>                     Type de paquet.
+     */
+    public <T extends IPacket> void registerReceivePacket(byte packetId, Class<T> packetClass, IRawHandler packetDecoderAndHandler) {
+        packetRegistry.registerReceivePacket(packetId, packetClass, packetDecoderAndHandler);
+    }
+
+    /**
      * Enregistre un paquet à envoyer et à recevoir.
      *
      * @param packetId      Identifiant du paquet.
