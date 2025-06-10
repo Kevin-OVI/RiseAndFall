@@ -101,7 +101,7 @@ public class RiseAndFallServer extends BaseSocketServer {
             List<BuildingType> buildingTypes = new ArrayList<>();
             List<UnitType> unitTypes = new ArrayList<>();
 
-            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, gold_multiplier, intelligence_multiplier, damage_multiplier, health_multiplier FROM race ORDER BY id")) {
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM race ORDER BY id")) {
 
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
@@ -116,35 +116,36 @@ public class RiseAndFallServer extends BaseSocketServer {
                 }
             }
 
-            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, price, required_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type ORDER BY id")) {
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM building_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
 
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    float price = set.getInt("price");
-                    float requiredIntelligence = set.getInt("required_intelligence");
-                    float goldProduction = set.getInt("gold_production");
-                    float intelligenceProduction = set.getInt("intelligence_production");
+                    float price = set.getFloat("price");
+                    float requiredIntelligence = set.getFloat("required_intelligence");
+                    float goldProduction = set.getFloat("gold_production");
+                    float intelligenceProduction = set.getFloat("intelligence_production");
+                    float resistance = set.getFloat("resistance");
                     int maxUnits = set.getInt("max_units");
                     int initialAmount = set.getInt("initial_amount");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
-                    buildingTypes.add(new BuildingType(id, name, description, price, requiredIntelligence, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleRace));
+                    buildingTypes.add(new BuildingType(id, name, description, price, requiredIntelligence, goldProduction, intelligenceProduction, resistance, maxUnits, initialAmount, accessibleRace));
                 }
             }
 
-            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, price, required_intelligence, health, damage, accessible_race_id FROM unit_type ORDER BY id")) {
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM unit_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    float price = set.getInt("price");
-                    float requiredIntelligence = set.getInt("required_intelligence");
-                    float health = set.getInt("health");
-                    float damage = set.getInt("damage");
+                    float price = set.getFloat("price");
+                    float requiredIntelligence = set.getFloat("required_intelligence");
+                    float health = set.getFloat("health");
+                    float damage = set.getFloat("damage");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
                     unitTypes.add(new UnitType(id, name, description, price, requiredIntelligence, health, damage, accessibleRace));

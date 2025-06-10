@@ -26,14 +26,30 @@ public class ClientGame extends Game {
         super(readHelper);
     }
 
+    /**
+     * Ajoute un joueur à la liste des joueurs découverts par le client.
+     *
+     * @param player Le joueur à ajouter.
+     */
     public void addOtherPlayer(OtherClientPlayer player) {
         this.otherPlayers.put(player.getId(), player);
     }
 
+    /**
+     * Obtient un joueur découvert par son identifiant.
+     *
+     * @param playerId L'identifiant du joueur à récupérer.
+     * @return Le joueur découvert correspondant à l'identifiant, ou null si aucun joueur n'est trouvé.
+     */
     public OtherClientPlayer getOtherPlayer(int playerId) {
         return this.otherPlayers.get(playerId);
     }
 
+    /**
+     * Obtient une collection non modifiable de tous les joueurs découverts par le client.
+     *
+     * @return Une collection de tous les joueurs découverts.
+     */
     public Collection<OtherClientPlayer> getOtherPlayers() {
         return Collections.unmodifiableCollection(this.otherPlayers.values());
     }

@@ -22,6 +22,10 @@ public class BuildingsTable extends PurchasableTable<BuildingType> {
      */
     private final TableColumn<PurchasableTableRow<BuildingType>, Number> intelligenceProductionColumn;
     /**
+     * Colonne pour afficher la résistance du bâtiment.
+     */
+    private final TableColumn<PurchasableTableRow<BuildingType>, Number> resistanceColumn;
+    /**
      * Colonne pour afficher la capacité d'hébergement du bâtiment.
      */
     private final TableColumn<PurchasableTableRow<BuildingType>, Number> hostingCapacityColumn;
@@ -42,6 +46,10 @@ public class BuildingsTable extends PurchasableTable<BuildingType> {
         this.intelligenceProductionColumn = new TableColumn<>("Production d'intelligence");
         this.intelligenceProductionColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getIntelligenceProduction() * race.getIntelligenceMultiplier()));
         this.getColumns().add(this.intelligenceProductionColumn);
+
+        this.resistanceColumn = new TableColumn<>("Résistance");
+        this.resistanceColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getResistance()));
+        this.getColumns().add(this.resistanceColumn);
 
         this.hostingCapacityColumn = new TableColumn<>("Capacité d'hébergement");
         this.hostingCapacityColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getItem().getMaxUnits()));

@@ -50,10 +50,11 @@ public class OrderCreateBuilding implements BaseOrder {
     /**
      * Exécute l'ordre de création de bâtiment sur le joueur donné.
      *
-     * @param player Le joueur sur lequel exécuter l'ordre.
+     * @param player  Le joueur sur lequel exécuter l'ordre.
+     * @param context Le contexte d'exécution de l'ordre, globalement utilité pour ce tour pour toute la partie.
      */
     @Override
-    public void execute(Player player) {
+    public void execute(Player player, IOrderExecutionContext context) {
         player.getBuildingMap().increment(this.buildingType, this.count);
     }
 

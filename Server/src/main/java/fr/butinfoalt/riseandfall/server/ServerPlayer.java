@@ -6,6 +6,7 @@ import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.server.orders.OrderExecutionContext;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
@@ -39,7 +40,7 @@ public class ServerPlayer extends Player {
     /**
      * Exécute les ordres en attente pour le joueur.
      */
-    public void executeOrders() {
+    public void executeOrders(OrderExecutionContext context) {
         float addGold = 0, addIntelligence = 0;
         for (ObjectIntMap.Entry<BuildingType> entry : this.buildingMap) {
             addGold += entry.getValue() * entry.getKey().getGoldProduction();
@@ -51,7 +52,7 @@ public class ServerPlayer extends Player {
 
         for (BaseOrder order : this.pendingOrders) {
             if (this.goldAmount >= order.getPrice()) {
-                order.execute(this);
+                order.execute(this, context);
                 this.removeGoldAmount(order.getPrice());
             }
         }

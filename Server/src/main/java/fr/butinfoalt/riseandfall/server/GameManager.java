@@ -263,6 +263,14 @@ public class GameManager {
         }
     }
 
+    /**
+     * Envoie la liste des joueurs découverts à un joueur et une connexion spécifique.
+     * Cette méthode est utilisée pour envoyer les informations des joueurs aux clients lorsqu'ils rejoignent une partie.
+     *
+     * @param connection La connexion du client qui recevra les paquets de découverte des joueurs.
+     * @param player     Le joueur à qui correspond la connexion.
+     * @param game       La partie dans laquelle est le joueur.
+     */
     private void sendDiscoveredPlayers(SocketWrapper connection, ServerPlayer player, ServerGame game) {
         // On envoie la liste de tous les autres joueurs puisqu'il n'y a pas d'espions.
         for (ServerPlayer otherPlayer : game.getPlayers()) {
@@ -277,12 +285,27 @@ public class GameManager {
         }
     }
 
+    /**
+     * Envoie la liste des joueurs découverts à un joueur et à tous ses clients connectés.
+     * Cette méthode est utilisée pour envoyer les informations des joueurs aux clients lorsqu'ils
+     * rejoignent une partie ou que la partie démarre.
+     *
+     * @param player Le joueur pour lequel on envoie les paquets de découverte des joueurs.
+     * @param game   La partie dans laquelle est le joueur.
+     */
     private void sendDiscoveredPlayers(ServerPlayer player, ServerGame game) {
         for (SocketWrapper connection : this.getConnectionsFor(player)) {
             this.sendDiscoveredPlayers(connection, player, game);
         }
     }
 
+    /**
+     * Envoie un paquet de découverte de joueur à un client spécifique.
+     * Cette méthode est utilisée pour envoyer les informations d'un joueur découvert à un client.
+     *
+     * @param sender Le socket du client qui recevra le paquet de découverte du joueur.
+     * @param user   L'utilisateur pour lequel on envoie le paquet de découverte du joueur.
+     */
     public void sendDiscoverPlayerPacket(SocketWrapper sender, User user) {
         ServerPlayer player = getPlayerInRunningGame(user);
         if (player != null) {
@@ -301,6 +324,12 @@ public class GameManager {
         this.handleGameUpdate(game, null);
     }
 
+    /**
+     * Supprime les ordres en attente du joueur dans la base de données.
+     * Cette méthode est appelée pour nettoyer les ordres en attente lorsque le joueur met à jour ses ordres.
+     *
+     * @param player Le joueur dont on veut supprimer les ordres en attente.
+     */
     private void clearPendingOrders(ServerPlayer player) {
         for (String statement : new String[]{
                 "DELETE FROM building_creation_order WHERE player_id = ?",
@@ -356,6 +385,12 @@ public class GameManager {
         }
     }
 
+    /**
+     * Appelée lorsque la partie démarre.
+     * Elle envoie les joueurs découverts à tous les joueurs de la partie.
+     *
+     * @param game La partie qui vient de démarrer.
+     */
     public void handleGameStart(ServerGame game) {
         for (ServerPlayer player : game.getPlayers()) {
             this.sendDiscoveredPlayers(player, game);

@@ -11,9 +11,10 @@ public interface BaseOrder extends ISerializable {
     /**
      * Exécute l'ordre sur le joueur donné.
      *
-     * @param player Le joueur sur lequel exécuter l'ordre.
+     * @param player  Le joueur sur lequel exécuter l'ordre.
+     * @param context Le contexte d'exécution de l'ordre, globalement utilité pour ce tour pour toute la partie.
      */
-    void execute(Player player);
+    void execute(Player player, IOrderExecutionContext context);
 
     /**
      * Obtient le prix de l'ordre en or.

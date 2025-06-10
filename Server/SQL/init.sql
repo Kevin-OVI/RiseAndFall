@@ -57,6 +57,7 @@ CREATE TABLE building_type (
     required_intelligence DECIMAL(10, 2) NOT NULL DEFAULT 0,
     gold_production DECIMAL(10, 2) NOT NULL,
     intelligence_production DECIMAL(10, 2) NOT NULL,
+    resistance DECIMAL(10, 2) NOT NULL,
     max_units INT NOT NULL,
     initial_amount INT NOT NULL,
     accessible_race_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'NULL si accessible à toutes les races, renseigné si accessible uniquement par une race particulière. Suppression en cascade pour ne pas rendre accessible à tous les bâtiments privés.',
@@ -121,19 +122,19 @@ VALUES
     (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes le problèmes sont leurs économie', 0.5, 1.25, 1.25, 1.5),
     (7, 'Primotaures', 'Premières créatures du monde, les primotaures sont riches mais pacifiques', 2, 1, 0.5, 1.75);
 
-INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id)
+INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, resistance, max_units, initial_amount, accessible_race_id)
 VALUES
-    ('Carrière', 'Structure permettant d''extraire des ressources minérales pour financer l''économie du royaume', 10, 0, 5, 0, 0, 4, NULL),
-    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume', 20, 30, 10, 0, 0, 0, NULL),
-    ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 3, 1, NULL),
-    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 0, 0, NULL),
-    ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 10, 10, 0, 0, 2, 0, 1),
-    ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 10, 0, 0, 2, 0, 2),
-    ('Donjon', 'Endroit qui respire la violence permettant de former des futur combattants', 10, 10, 0, 0, 4, 0, 3),
-    ('Tour de Mage', 'Endroit où les prochains mages sont formés', 10, 10, 1, 5, 1, 1, 4),
-    ('Mine', 'Mine d''or où les nains adultes passent 100% de leurs temps', 13, 10, 5, 1, 0, 0, 5),
-    ('Tente', 'Endroit où les futurs combattants sont formés', 10, 10, 10, 1, 5, 5, 6),
-    ('Labyrinthe', 'Endroit Mystique', 10, 3, 10, 1, 1, 1, 7);
+    ('Carrière', 'Structure permettant d''extraire des ressources minérales pour financer l''économie du royaume', 10, 0, 5, 0, 100, 0, 4, NULL),
+    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume', 20, 30, 10, 0, 120, 0, 0, NULL),
+    ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 150, 3, 1, NULL),
+    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 80, 0, 0, NULL),
+    ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 10, 10, 0, 0, 90, 2, 0, 1),
+    ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 10, 0, 0, 130, 2, 0, 2),
+    ('Donjon', 'Endroit qui respire la violence permettant de former des futur combattants', 10, 10, 0, 0, 200, 4, 0, 3),
+    ('Tour de Mage', 'Endroit où les prochains mages sont formés', 10, 10, 1, 5, 110, 1, 1, 4),
+    ('Mine', 'Mine d''or où les nains adultes passent 100% de leurs temps', 13, 10, 5, 1, 180, 0, 0, 5),
+    ('Tente', 'Endroit où les futurs combattants sont formés', 10, 10, 10, 1, 70, 5, 5, 6),
+    ('Labyrinthe', 'Endroit Mystique', 10, 3, 10, 1, 160, 1, 1, 7);
 
 INSERT INTO unit_type (name, description, price, required_intelligence, health, damage, accessible_race_id)
 VALUES

@@ -222,6 +222,13 @@ public class RiseAndFallClient extends BaseSocketClient {
         });
     }
 
+    /**
+     * Méthode appelée lorsque le paquet {@link PacketDiscoverPlayer} est reçu.
+     * Elle ajoute un nouveau joueur découvert à la liste des joueurs du jeu.
+     *
+     * @param sender Le socket connecté au serveur.
+     * @param packet Le paquet contenant les informations du joueur découvert.
+     */
     private void onDiscoverPlayer(SocketWrapper sender, PacketDiscoverPlayer packet) {
         System.out.println("Découverte d'un nouveau joueur : " + packet.getPlayerName() + " (ID: " + packet.getPlayerId() + ")");
         RiseAndFall.getGame().addOtherPlayer(new OtherClientPlayer(packet.getPlayerId(), packet.getPlayerRace(), packet.getPlayerName()));

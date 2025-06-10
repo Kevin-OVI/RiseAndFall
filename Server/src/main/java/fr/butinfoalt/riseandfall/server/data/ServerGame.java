@@ -5,6 +5,7 @@ import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.server.GameManager;
 import fr.butinfoalt.riseandfall.server.RiseAndFallServer;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
+import fr.butinfoalt.riseandfall.server.orders.OrderExecutionContext;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
@@ -194,9 +195,11 @@ public class ServerGame extends Game {
         if (this.state != GameState.RUNNING) {
             throw new IllegalStateException("Cannot proceed to the next turn when the game is not running.");
         }
+        OrderExecutionContext context = new OrderExecutionContext(this);
         for (ServerPlayer player : this.players.values()) {
-            player.executeOrders();
+            player.executeOrders(context);
         }
+        context.executeAttacks();
         // TODO : Condition de Victoire pour arrêter la partie si nécessaire, pour le moment la partie ne s'arrête jamais.
         this.currentTurn++;
         LogManager.logMessage("Passage au tour %d de la partie %s.".formatted(this.currentTurn, this.name));

@@ -55,9 +55,17 @@ public class OrderAttackPlayer implements BaseOrder {
         }
     }
 
+    /**
+     * Exécute l'ordre d'attaque sur le joueur cible.
+     * La méthode appelle le contexte d'exécution pour ajouter l'attaque avec les unités utilisées,
+     * car il s'agit d'une intéraction entre joueurs qui nécessite une gestion spécifique dans le contexte de la partie.
+     *
+     * @param player  Le joueur sur lequel exécuter l'ordre.
+     * @param context Le contexte d'exécution de l'ordre, globalement utilité pour ce tour pour toute la partie.
+     */
     @Override
-    public void execute(Player player) {
-
+    public void execute(Player player, IOrderExecutionContext context) {
+        context.addAttack(player, this.targetPlayer, this.usingUnits);
     }
 
     /**

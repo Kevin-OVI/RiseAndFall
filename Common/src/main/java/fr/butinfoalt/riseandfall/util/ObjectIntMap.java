@@ -79,6 +79,13 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
     }
 
     /**
+     * Permet de réinitialiser toutes les valeurs de l'association à 0.
+     */
+    public void reset() {
+        this.map.replaceAll((k, v) -> 0);
+    }
+
+    /**
      * Permet d'obtenir un ensemble contenant toutes les clés de l'association.
      *
      * @return Un ensemble contenant toutes les clés de l'association.
@@ -148,6 +155,10 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
         return formatter.build();
     }
 
+    /**
+     * Permet de cloner l'association.
+     * @return Une nouvelle instance d'ObjectIntMap contenant les mêmes clés et valeurs que l'instance actuelle.
+     */
     @Override
     public ObjectIntMap<T> clone() {
         try {

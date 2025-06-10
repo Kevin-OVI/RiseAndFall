@@ -268,6 +268,14 @@ public class AuthenticationManager {
         this.onUserConnected(sender, user, new PacketToken(generateTokenToUser(user)));
     }
 
+    /**
+     * Méthode appelée lorsque l'utilisateur est connecté.
+     * Elle enregistre l'utilisateur dans la map des connexions et envoie les paquets nécessaires au client.
+     *
+     * @param sender      Le socket du client qui s'est connecté.
+     * @param user        L'utilisateur qui s'est connecté.
+     * @param tokenToSend Le token d'authentification à envoyer au client.
+     */
     private void onUserConnected(SocketWrapper sender, User user, PacketToken tokenToSend) {
         this.userConnections.put(sender, user);
         try {
