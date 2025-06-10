@@ -84,6 +84,7 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerSendPacket((byte) 8, PacketError.class);
         this.registerReceivePacket((byte) 9, PacketRegister.class, this.authManager::onRegister, PacketRegister::new);
         this.registerSendPacket((byte) 10, PacketWaitingGames.class);
+        this.registerSendPacket((byte) 11, PacketDiscoverPlayer.class);
     }
 
     /**

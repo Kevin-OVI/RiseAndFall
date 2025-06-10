@@ -263,6 +263,31 @@ public class GameManager {
         }
     }
 
+    private void sendDiscoveredPlayers(SocketWrapper connection, ServerPlayer player, ServerGame game) {
+        // On envoie la liste de tous les autres joueurs puisqu'il n'y a pas d'espions.
+        for (ServerPlayer otherPlayer : game.getPlayers()) {
+            if (otherPlayer != player) {
+                System.out.println("Envoi du paquet de découverte du joueur " + otherPlayer.getUser().getUsername() + " à la connexion " + connection.getName());
+                try {
+                    connection.sendPacket(new PacketDiscoverPlayer(otherPlayer.getId(), otherPlayer.getRace(), otherPlayer.getUser().getUsername()));
+                } catch (IOException e) {
+                    LogManager.logError("Erreur lors de l'envoi du paquet de découverte du joueur " + otherPlayer.getUser().getUsername() + " à la connexion " + connection.getName(), e);
+                }
+            }
+        }
+    }
+
+    private void sendDiscoveredPlayers(ServerPlayer player, ServerGame game) {
+        for (SocketWrapper connection : this.getConnectionsFor(player)) {
+            this.sendDiscoveredPlayers(connection, player, game);
+        }
+    }
+
+    public void sendDiscoverPlayerPacket(SocketWrapper sender, User user) {
+        ServerPlayer player = getPlayerInRunningGame(user);
+        this.sendDiscoveredPlayers(sender, player, player.getGame());
+    }
+
     /**
      * Appelée lorsqu'une partie est mise à jour.
      * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
@@ -329,6 +354,12 @@ public class GameManager {
         }
     }
 
+    public void handleGameStart(ServerGame game) {
+        for (ServerPlayer player : game.getPlayers()) {
+            this.sendDiscoveredPlayers(player, game);
+        }
+    }
+
     /**
      * Méthode appelée lorsqu'un client demande de créer ou de rejoindre une partie.
      * Elle vérifie si le client est authentifié, vérifie si la partie existe déjà, ou en crée une nouvelle si nécessaire.
@@ -346,8 +377,12 @@ public class GameManager {
 
         ServerPlayer player = this.getPlayerInRunningGame(user);
         if (player != null) {
+            ServerGame game = player.getGame();
             // L'utilisateur est déjà dans une partie en cours, on lui envoie les données de cette partie là
-            this.sendJoinGamePacket(player.getGame(), player, user);
+            this.sendJoinGamePacket(game, player, user);
+            if (game.getState() != GameState.WAITING) {
+                this.sendDiscoveredPlayers(sender, player, game);
+            }
             return;
         }
 
@@ -369,6 +404,9 @@ public class GameManager {
         } else {
             // Tous les tests sont passés, et la partie a bien été rejointe.
             this.sendJoinGamePacket(game, player, user);
+            if (game.getState() != GameState.WAITING) {
+                this.sendDiscoveredPlayers(player, game);
+            }
             return;
         }
         // Si on arrive ici, c'est qu'il y a eu une erreur lors de la jointure de la partie
@@ -436,6 +474,11 @@ public class GameManager {
                 }
                 case OrderAttackPlayer orderAttackPlayer -> {
                     for (ObjectIntMap.Entry<UnitType> entry : orderAttackPlayer.getUsingUnits()) {
+                        if (((ServerPlayer) orderAttackPlayer.getTargetPlayer()).getGame() != player.getGame()) {
+                            LogManager.logError("Le joueur " + player.getUser().getUsername() + " essaie d'attaquer un joueur qui n'est pas dans la même partie.");
+                            return;
+                        }
+
                         if (remainingUnits.decrement(entry.getKey(), entry.getValue()) < 0) {
                             LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez d'unités de type " + entry.getKey() + " pour exécuter l'ordre d'attaque avec " + entry.getValue() + " unités.");
                             return;

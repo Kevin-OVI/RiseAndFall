@@ -15,7 +15,7 @@ public class RiseAndFall {
     /**
      * Instance du joueur contrôlé par ce client.
      */
-    private static ClientPlayer player;
+    private static CurrentClientPlayer player;
     /**
      * Instance de la partie actuelle.
      */
@@ -31,7 +31,7 @@ public class RiseAndFall {
      *
      * @return Le joueur actuel.
      */
-    public static ClientPlayer getPlayer() {
+    public static CurrentClientPlayer getPlayer() {
         return player;
     }
 
@@ -82,7 +82,7 @@ public class RiseAndFall {
      *
      * @param packet Le paquet contenant les données de la partie.
      */
-    public static void initGame(PacketJoinedGame<ClientGame, ClientPlayer> packet) {
+    public static void initGame(PacketJoinedGame<ClientGame, CurrentClientPlayer> packet) {
         game = packet.getGame();
         player = packet.getPlayer();
     }

@@ -122,6 +122,7 @@ public class ServerGame extends Game {
 
         GameManager gameManager = this.server.getGameManager();
         gameManager.handleGameUpdate(this);
+        gameManager.handleGameStart(this);
         gameManager.newRandomGame();
     }
 
