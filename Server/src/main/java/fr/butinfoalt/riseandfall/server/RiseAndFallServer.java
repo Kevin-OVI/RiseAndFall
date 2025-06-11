@@ -246,7 +246,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                     ServerPlayer player = Identifiable.getById(players, playerId);
                     ServerPlayer targetPlayer = Identifiable.getById(players, targetPlayerId);
                     ObjectIntMap<UnitType> usingUnits = player.getUnitMap().createEmptyClone();
-                    try (PreparedStatement unitStatement = this.getDb().prepareStatement("SELECT * FROM attack_player_order_unit WHERE attack_player_order_id = ?")) {
+                    try (PreparedStatement unitStatement = this.getDb().prepareStatement("SELECT * FROM attack_player_order_unit WHERE order_id = ?")) {
                         unitStatement.setInt(1, orderId);
                         ResultSet unitSet = unitStatement.executeQuery();
                         while (unitSet.next()) {

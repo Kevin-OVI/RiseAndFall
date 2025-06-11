@@ -271,6 +271,6 @@ public class AttackManager {
      * @return Le résultat du produit en croix, arrondi à l'entier supérieur.
      */
     public static int crossProduct(float part, float total, int value) {
-        return (int) Math.ceil(crossProduct(part, total, (float) value));
+        return (int) Math.ceil((part / total) * value);
     }
 }

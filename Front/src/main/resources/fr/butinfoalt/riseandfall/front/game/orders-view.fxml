@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
-<?import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsTable?>
-<?import fr.butinfoalt.riseandfall.front.game.orders.table.UnitsTable?>
+<?import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsPurchaseTable?>
+<?import fr.butinfoalt.riseandfall.front.game.orders.table.UnitsPurchaseTable?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
@@ -26,14 +26,14 @@
         <TitleLabel>Entrainement d'unités :</TitleLabel>
 
         <!--Ce tableau est rempli dynamiquement avec les types d'unités-->
-        <UnitsTable fx:id="unitTable"/>
+        <UnitsPurchaseTable fx:id="unitTable"/>
     </VBox>
 
     <VBox alignment="CENTER" spacing="10">
         <TitleLabel>Construction de bâtiments :</TitleLabel>
 
         <!--Ce tableau est rempli dynamiquement avec les types de bâtiments-->
-        <BuildingsTable fx:id="buildingTable"/>
+        <BuildingsPurchaseTable fx:id="buildingTable"/>
     </VBox>
 
     <VBox alignment="CENTER" spacing="10">

@@ -118,6 +118,7 @@ public class ServerGame extends Game {
         LogManager.logMessage("Démarrage de la partie %s avec %d joueurs.".formatted(this.name, this.players.size()));
         this.state = GameState.RUNNING;
 
+        System.out.println(this.turnInterval);
         this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
         this.scheduleNextTurn();
 

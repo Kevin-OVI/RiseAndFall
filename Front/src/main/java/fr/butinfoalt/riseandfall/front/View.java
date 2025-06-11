@@ -50,6 +50,11 @@ public enum View {
     ORDERS("game/orders-view.fxml", "Rise & Fall - Définition des ordres"),
 
     /**
+     * Vue de gestion d'une attaque
+     */
+    ORDERS_ATTACK("game/order-attack-view.fxml", "Rise & Fall - Attaque"),
+
+    /**
      * Vue de la description et des règles du jeu.
      */
     DESCRIPTION("description-view.fxml", "Rise & Fall - Description et règles du jeu"),

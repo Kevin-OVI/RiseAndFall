@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.front.game.orders.table;
 
+import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableItemAmountSelector;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
@@ -12,29 +13,29 @@ import javafx.scene.control.TableColumn;
  * Tableau affichant des bâtiments achetables.
  * Il hérite de PurchasableTable et ajoute des colonnes spécifiques pour les bâtiments.
  */
-public class BuildingsTable extends PurchasableTable<BuildingType> {
+public class BuildingsPurchaseTable extends PurchasableTable<BuildingType> {
     /**
      * Colonne pour afficher la production d'or du bâtiment.
      */
-    private final TableColumn<PurchasableTableRow<BuildingType>, Number> goldProductionColumn;
+    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, Number> goldProductionColumn;
     /**
      * Colonne pour afficher la production d'intelligence du bâtiment.
      */
-    private final TableColumn<PurchasableTableRow<BuildingType>, Number> intelligenceProductionColumn;
+    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, Number> intelligenceProductionColumn;
     /**
      * Colonne pour afficher la résistance du bâtiment.
      */
-    private final TableColumn<PurchasableTableRow<BuildingType>, Number> resistanceColumn;
+    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, Number> resistanceColumn;
     /**
      * Colonne pour afficher la capacité d'hébergement du bâtiment.
      */
-    private final TableColumn<PurchasableTableRow<BuildingType>, Number> hostingCapacityColumn;
+    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, Number> hostingCapacityColumn;
 
     /**
      * Constructeur de la classe BuildingsTable.
      * Ajoute au tableau les colonnes spécifiques aux bâtiments (production d'or, production d'intelligence et capacité d'hébergement).
      */
-    public BuildingsTable() {
+    public BuildingsPurchaseTable() {
         super();
 
         Race race = RiseAndFall.getPlayer().getRace();

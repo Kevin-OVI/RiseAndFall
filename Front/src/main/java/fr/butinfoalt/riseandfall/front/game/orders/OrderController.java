@@ -4,10 +4,11 @@ import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableItemAmountSelector;
-import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsTable;
-import fr.butinfoalt.riseandfall.front.game.orders.table.PurchasableTableRow;
-import fr.butinfoalt.riseandfall.front.game.orders.table.UnitsTable;
+import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsPurchaseTable;
+import fr.butinfoalt.riseandfall.front.game.orders.table.ItemTableRow;
+import fr.butinfoalt.riseandfall.front.game.orders.table.UnitsPurchaseTable;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
+import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
@@ -65,13 +66,13 @@ public class OrderController implements ViewController {
      * Tableau contenant les unités.
      */
     @FXML
-    private UnitsTable unitTable;
+    private UnitsPurchaseTable unitTable;
 
     /**
      * Tableau contenant les bâtiments.
      */
     @FXML
-    private BuildingsTable buildingTable;
+    private BuildingsPurchaseTable buildingTable;
 
     /**
      * Champ pour le composant contenant le prix total.
@@ -125,7 +126,7 @@ public class OrderController implements ViewController {
             PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter, playerIntelligence,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
-            unitTable.getItems().add(new PurchasableTableRow<>(entry.getKey(), selector));
+            unitTable.getItems().add(new ItemTableRow<>(entry.getKey(), selector));
         }
 
         this.buildingTable.getItems().clear();
@@ -135,7 +136,7 @@ public class OrderController implements ViewController {
                     (amount) -> buildingModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> buildingModifier.setDelta(-amount));
             allowedBuildingsCounter.addListener(value -> selector.updateButtonsState());
-            this.buildingTable.getItems().add(new PurchasableTableRow<>(entry.getKey(), selector));
+            this.buildingTable.getItems().add(new ItemTableRow<>(entry.getKey(), selector));
         }
 
         goldCounter.setDispatchChanges(true);
@@ -160,6 +161,10 @@ public class OrderController implements ViewController {
     @FXML
     private void handleSave() {
         ArrayList<BaseOrder> newOrders = new ArrayList<>();
+        CurrentClientPlayer player = RiseAndFall.getPlayer();
+        player.getPendingOrders().stream()
+                .filter(baseOrder -> !(baseOrder instanceof OrderCreateUnit || baseOrder instanceof OrderCreateBuilding))
+                .forEach(newOrders::add);
 
         for (ObjectIntMap.Entry<UnitType> entry : this.pendingUnits) {
             int nbTroops = entry.getValue();

@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.front.game.orders.table;
 
+import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableItemAmountSelector;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
@@ -11,11 +12,11 @@ import javafx.scene.control.TableColumn;
  * Tableau affichant des unités achetables.
  * Il hérite de PurchasableTable et ajoute des colonnes spécifiques pour les unités.
  */
-public class UnitsTable extends PurchasableTable<UnitType> {
-    private final TableColumn<PurchasableTableRow<UnitType>, Number> healthColumn;
-    private final TableColumn<PurchasableTableRow<UnitType>, Number> damageColumn;
+public class UnitsPurchaseTable extends PurchasableTable<UnitType> {
+    private final TableColumn<ItemTableRow<UnitType, PurchasableItemAmountSelector<UnitType>>, Number> healthColumn;
+    private final TableColumn<ItemTableRow<UnitType, PurchasableItemAmountSelector<UnitType>>, Number> damageColumn;
 
-    public UnitsTable() {
+    public UnitsPurchaseTable() {
         super();
 
         Race race = RiseAndFall.getPlayer().getRace();

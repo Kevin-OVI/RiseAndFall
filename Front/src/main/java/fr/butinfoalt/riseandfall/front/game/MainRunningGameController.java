@@ -112,6 +112,11 @@ public class MainRunningGameController implements ViewController {
         RiseAndFallApplication.switchToView(View.ORDERS);
     }
 
+    @FXML
+    public void createAttack() {
+        RiseAndFallApplication.switchToView(View.ORDERS_ATTACK);
+    }
+
     /**
      * Méthode appelée par JavaFX quand on clique sur le bouton pour passer au tour suivant.
      */

@@ -276,7 +276,6 @@ public class GameManager {
         // On envoie la liste de tous les autres joueurs puisqu'il n'y a pas d'espions.
         for (ServerPlayer otherPlayer : game.getPlayers()) {
             if (otherPlayer != player) {
-                System.out.println("Envoi du paquet de découverte du joueur " + otherPlayer.getUser().getUsername() + " à la connexion " + connection.getName());
                 try {
                     connection.sendPacket(new PacketDiscoverPlayer(otherPlayer.getId(), otherPlayer.getRace(), otherPlayer.getUser().getUsername()));
                 } catch (IOException e) {
@@ -612,7 +611,7 @@ public class GameManager {
                 ResultSet resultSet = attackStatement.getResultSet();
                 Iterator<OrderAttackPlayer> iterator = attackPlayerOrders.iterator();
 
-                try (PreparedStatement unitsStatement = this.server.getDb().prepareStatement("INSERT INTO attack_player_order_unit (attack_id, unit_type_id, amount) VALUES (?, ?, ?)")) {
+                try (PreparedStatement unitsStatement = this.server.getDb().prepareStatement("INSERT INTO attack_player_order_unit (order_id, unit_type_id, amount) VALUES (?, ?, ?)")) {
                     while (resultSet.next()) {
                         assert iterator.hasNext() : "Le nombre d'ordres d'attaque ne correspond pas au nombre de résultats retournés par la base de données.";
                         OrderAttackPlayer orderAttackPlayer = iterator.next();

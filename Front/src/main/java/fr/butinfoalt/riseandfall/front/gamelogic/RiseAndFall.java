@@ -2,7 +2,6 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
-import fr.butinfoalt.riseandfall.network.packets.PacketJoinedGame;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -76,14 +75,11 @@ public class RiseAndFall {
         return client;
     }
 
-    /**
-     * Méthode pour initialiser la partie.
-     * Appelée lors de la réception du paquet {@link PacketJoinedGame}.
-     *
-     * @param packet Le paquet contenant les données de la partie.
-     */
-    public static void initGame(PacketJoinedGame<ClientGame, CurrentClientPlayer> packet) {
-        game = packet.getGame();
-        player = packet.getPlayer();
+    public static void setPlayer(CurrentClientPlayer player) {
+        RiseAndFall.player = player;
+    }
+
+    public static void setGame(ClientGame game) {
+        RiseAndFall.game = game;
     }
 }

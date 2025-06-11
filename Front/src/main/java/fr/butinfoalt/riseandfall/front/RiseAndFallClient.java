@@ -3,7 +3,6 @@ package fr.butinfoalt.riseandfall.front;
 import fr.butinfoalt.riseandfall.front.game.gamelist.GameListController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
-import fr.butinfoalt.riseandfall.front.gamelogic.OtherClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
@@ -35,7 +34,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this::onToken, PacketToken::new);
         this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, PacketServerData::new);
         this.registerSendPacket((byte) 3, PacketCreateOrJoinGame.class);
-        this.registerReceivePacket((byte) 4, PacketJoinedGame.class, this::onJoinedGame, this::decodePacketJoinedGame);
+        this.registerReceivePacket((byte) 4, PacketJoinedGame.class, this::onJoinedGame);
         this.registerSendPacket((byte) 5, PacketUpdateOrders.class);
         this.registerReceivePacket((byte) 6, PacketUpdateGameData.class, this::onUpdateGameData);
         this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
@@ -43,19 +42,6 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendPacket((byte) 9, PacketRegister.class);
         this.registerReceivePacket((byte) 10, PacketWaitingGames.class, this::onWaitingGames, readHelper -> new PacketWaitingGames<>(readHelper, ClientGame::new));
         this.registerReceivePacket((byte) 11, PacketDiscoverPlayer.class, this::onDiscoverPlayer, PacketDiscoverPlayer::new);
-    }
-
-    /**
-     * Décode les données du paquet PacketInitialGameData.
-     *
-     * @param readHelper L'outil de lecture pour désérialiser le paquet.
-     * @return Un objet PacketInitialGameData contenant les données du jeu et du joueur.
-     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
-     */
-    private PacketJoinedGame<ClientGame, CurrentClientPlayer> decodePacketJoinedGame(ReadHelper readHelper) throws IOException {
-        ClientGame clientGame = new ClientGame(readHelper);
-        CurrentClientPlayer player = new CurrentClientPlayer(readHelper);
-        return new PacketJoinedGame<>(clientGame, player);
     }
 
     /**
@@ -134,15 +120,17 @@ public class RiseAndFallClient extends BaseSocketClient {
     }
 
     /**
-     * Méthode appelée lorsque le paquet {@link PacketJoinedGame} est reçu.
-     * Elle initialise les données du jeu et du joueur, puis change la vue de l'application pour afficher l'écran principal.
+     * Décode les données du paquet PacketInitialGameData, initialise le jeu et le joueur,
+     * puis change la vue de l'application pour afficher l'écran principal.
      *
-     * @param client Le socket connecté au serveur.
-     * @param packet Le paquet reçu.
+     * @param client     Le socket connecté au serveur.
+     * @param readHelper L'outil de lecture pour désérialiser le paquet.
      */
-    private void onJoinedGame(SocketWrapper client, PacketJoinedGame<ClientGame, CurrentClientPlayer> packet) {
-        RiseAndFall.initGame(packet);
-        Platform.runLater(() -> this.switchToGameView(packet.getGame().getState()));
+    private void onJoinedGame(SocketWrapper client, ReadHelper readHelper) throws IOException {
+        ClientGame game = new ClientGame(readHelper);
+        RiseAndFall.setGame(game);
+        RiseAndFall.setPlayer(new CurrentClientPlayer(readHelper));
+        Platform.runLater(() -> this.switchToGameView(game.getState()));
     }
 
     /**
@@ -230,9 +218,6 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param packet Le paquet contenant les informations du joueur découvert.
      */
     private void onDiscoverPlayer(SocketWrapper sender, PacketDiscoverPlayer packet) {
-        System.out.println("Découverte d'un nouveau joueur : " + packet.getPlayerName() + " (ID: " + packet.getPlayerId() + ")");
-        RiseAndFall.getGame().addOtherPlayer(new OtherClientPlayer(packet.getPlayerId(), packet.getPlayerRace(), packet.getPlayerName()));
-
-        System.out.println(RiseAndFall.getGame().getOtherPlayers());
+        RiseAndFall.getGame().addOtherPlayer(packet.getPlayerId(), packet.getPlayerRace(), packet.getPlayerName());
     }
 }

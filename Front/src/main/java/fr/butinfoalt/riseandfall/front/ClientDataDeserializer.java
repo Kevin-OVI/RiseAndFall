@@ -3,7 +3,6 @@ package fr.butinfoalt.riseandfall.front;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.data.DataDeserializer;
-import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 /**
  * Désérialiseur de données spécifique au client.
@@ -28,7 +27,6 @@ public class ClientDataDeserializer implements DataDeserializer {
         if (player != null && player.getId() == playerId) {
             return player;
         }
-        LogManager.logError("Tentative de récupération d'un joueur avec l'ID " + playerId + ", mais le joueur n'est pas connu du client !");
-        return null;
+        return RiseAndFall.getGame().getOtherPlayer(playerId);
     }
 }

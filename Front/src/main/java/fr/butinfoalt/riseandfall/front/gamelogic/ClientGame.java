@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
+import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 
 import java.io.IOException;
@@ -31,18 +32,25 @@ public class ClientGame extends Game {
      *
      * @param player Le joueur à ajouter.
      */
-    public void addOtherPlayer(OtherClientPlayer player) {
-        this.otherPlayers.put(player.getId(), player);
+    public void addOtherPlayer(int playerId, Race race, String name) {
+        OtherClientPlayer otherPlayer = otherPlayers.get(playerId);
+        if (otherPlayer == null) {
+            this.otherPlayers.put(playerId, new OtherClientPlayer(playerId, race, name));
+        } else {
+            otherPlayer.setRace(race);
+            otherPlayer.setName(name);
+        }
     }
 
     /**
      * Obtient un joueur découvert par son identifiant.
      *
      * @param playerId L'identifiant du joueur à récupérer.
-     * @return Le joueur découvert correspondant à l'identifiant, ou null si aucun joueur n'est trouvé.
+     * @return Le joueur découvert correspondant à l'identifiant, ou un joueur factice créé s'il n'a pas été découvert.
+     * Il sera mis à jour par {@link #addOtherPlayer(int, Race, String)} s'il est découvert plus tard.
      */
     public OtherClientPlayer getOtherPlayer(int playerId) {
-        return this.otherPlayers.get(playerId);
+        return this.otherPlayers.computeIfAbsent(playerId, OtherClientPlayer::new);
     }
 
     /**

@@ -41,9 +41,9 @@ public abstract class Player implements Identifiable, ISerializable {
      */
     protected final ArrayList<BaseOrder> pendingOrders = new ArrayList<>();
     /**
-     * Race du joueur
+     * Race du joueur (non final car elle peut être modifiée coté client)
      */
-    private final Race race;
+    protected Race race;
     /**
      * Quantité d'or que possède le joueur.
      * Initialisé à 50 pièces d'or au début de la partie.

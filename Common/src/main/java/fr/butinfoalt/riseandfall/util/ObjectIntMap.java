@@ -86,6 +86,20 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
     }
 
     /**
+     * Permet de vérifier si toutes les valeurs de l'association sont égales à 0.
+     *
+     * @return true si toutes les valeurs sont égales à 0, false sinon.
+     */
+    public boolean isReset() {
+        for (int value : this.map.values()) {
+            if (value != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Permet d'obtenir un ensemble contenant toutes les clés de l'association.
      *
      * @return Un ensemble contenant toutes les clés de l'association.
@@ -157,15 +171,16 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
 
     /**
      * Permet de cloner l'association.
+     *
      * @return Une nouvelle instance d'ObjectIntMap contenant les mêmes clés et valeurs que l'instance actuelle.
      */
     @Override
     public ObjectIntMap<T> clone() {
-        try {
-            return (ObjectIntMap<T>) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError("Cloning not supported", e);
+        ObjectIntMap<T> cloned = this.createEmptyClone();
+        for (Map.Entry<T, Integer> entry : this.map.entrySet()) {
+            cloned.set(entry.getKey(), entry.getValue());
         }
+        return cloned;
     }
 
     /**

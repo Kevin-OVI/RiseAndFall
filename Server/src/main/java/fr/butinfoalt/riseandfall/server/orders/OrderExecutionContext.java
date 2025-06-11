@@ -1,7 +1,6 @@
 package fr.butinfoalt.riseandfall.server.orders;
 
 import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.gamelogic.order.IOrderExecutionContext;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
@@ -56,7 +55,7 @@ public class OrderExecutionContext implements IOrderExecutionContext {
     @Override
     public void addAttack(Player attacker, Player target, ObjectIntMap<UnitType> usingUnits) {
         ObjectIntMap<UnitType> remaining = this.defenseUnits.get(attacker);
-        ObjectIntMap<UnitType> attackUnits = this.attacksTowards.computeIfAbsent(target, p -> new HashMap<>()).computeIfAbsent(attacker, p -> new ObjectIntMap<>(ServerData.getUnitTypes()));
+        ObjectIntMap<UnitType> attackUnits = this.attacksTowards.computeIfAbsent(target, p -> new HashMap<>()).computeIfAbsent(attacker, p -> p.getUnitMap().createEmptyClone());
 
         for (ObjectIntMap.Entry<UnitType> entry : usingUnits) {
             remaining.decrement(entry.getKey(), entry.getValue());
