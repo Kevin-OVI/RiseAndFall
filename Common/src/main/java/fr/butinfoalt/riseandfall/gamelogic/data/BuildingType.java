@@ -245,7 +245,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
                 .add("name", this.name)
                 .add("description", this.description)
                 .add("price", this.price)
-                .add("requiredIntelligence)", this.requiredIntelligence)
+                .add("requiredIntelligence", this.requiredIntelligence)
                 .add("goldProduction", this.goldProduction)
                 .add("intelligenceProduction", this.intelligenceProduction)
                 .add("resistance", this.resistance)
