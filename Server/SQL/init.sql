@@ -29,7 +29,7 @@ CREATE TABLE game (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     turn_interval INT NOT NULL DEFAULT 15,
-    current_turn INT NOT NULL DEFAULT 0,
+    current_turn INT NOT NULL DEFAULT 1,
     min_players INT NOT NULL DEFAULT 3,
     max_players INT NOT NULL DEFAULT 30,
     password_hash VARCHAR(255) DEFAULT NULL,
@@ -74,6 +74,24 @@ CREATE TABLE unit_type (
     damage DECIMAL(10, 2) NOT NULL,
     accessible_race_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'NULL si accessible à toutes les races, renseigné si accessible uniquement par une race particulière. Suppression en cascade pour ne pas rendre accessible à tous les bâtiments privés.',
     FOREIGN KEY (accessible_race_id) REFERENCES race(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE player_building (
+    id SERIAL PRIMARY KEY,
+    player_id BIGINT UNSIGNED NOT NULL,
+    building_id BIGINT UNSIGNED NOT NULL,
+    quantity INT NOT NULL,
+    FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (building_id) REFERENCES building_type(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE player_unit (
+    id SERIAL PRIMARY KEY,
+    player_id BIGINT UNSIGNED NOT NULL,
+    unit_id BIGINT UNSIGNED NOT NULL,
+    quantity INT NOT NULL,
+    FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (unit_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE building_creation_order (

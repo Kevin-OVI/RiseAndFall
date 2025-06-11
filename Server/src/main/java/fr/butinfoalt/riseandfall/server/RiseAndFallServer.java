@@ -195,6 +195,28 @@ public class RiseAndFallServer extends BaseSocketServer {
                     game.forceAddPlayer(player);
                 }
             }
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM player_building")){
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    BuildingType buildingType = Identifiable.getById(buildingTypes, set.getInt("building_id"));
+                    int amount = set.getInt("quantity");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    player.getBuildingMap().set(buildingType, amount);
+                }
+            }
+
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM player_unit")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    UnitType unitType = Identifiable.getById(unitTypes, set.getInt("unit_id"));
+                    int amount = set.getInt("quantity");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    player.getUnitMap().set(unitType, amount);
+                }
+            }
+
             try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM building_creation_order")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
