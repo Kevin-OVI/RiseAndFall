@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.server.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.server.Environment;
 import fr.butinfoalt.riseandfall.server.GameManager;
 import fr.butinfoalt.riseandfall.server.RiseAndFallServer;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
@@ -248,7 +249,7 @@ public class ServerGame extends Game {
 
         if (this.state == GameState.WAITING && this.hasSufficientPlayers() && this.delayedTask == null) {
             LogManager.logMessage("Suffisamment de joueurs pour démarrer la partie %s, planification du démarrage.".formatted(this.name));
-            this.nextActionAt = new Timestamp(System.currentTimeMillis() + 60_000L); // Démarrage prévu dans 1 minute
+            this.nextActionAt = new Timestamp(System.currentTimeMillis() + (Environment.DEBUG_MODE ? 10_000L : 60_000L)); // Démarrage prévu dans 1 minute (10 secondes si en mode débogage)
             this.scheduleGameStart();
             this.server.getGameManager().handleGameUpdate(this, player);
         }

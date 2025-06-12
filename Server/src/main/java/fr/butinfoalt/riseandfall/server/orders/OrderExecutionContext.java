@@ -69,18 +69,16 @@ public class OrderExecutionContext implements IOrderExecutionContext {
      * et applique les dégâts sur les unités et bâtiments de la cible.
      */
     public void executeAttacks() {
-        for (ServerPlayer player : this.game.getPlayers()) {
-            Map<Player, ObjectIntMap<UnitType>> attacksTowardsTarget = this.attacksTowards.get(player);
-            if (attacksTowardsTarget == null) {
-                continue;
-            }
-            ObjectIntMap<UnitType> defenseUnits = this.defenseUnits.get(player);
-            AttackManager attackManager = new AttackManager(player, defenseUnits, attacksTowardsTarget);
+        for (Map.Entry<Player, Map<Player, ObjectIntMap<UnitType>>> entry : this.attacksTowards.entrySet()) {
+            Player target = entry.getKey();
+            Map<Player, ObjectIntMap<UnitType>> attacksTowardsTarget = entry.getValue();
+            ObjectIntMap<UnitType> defenseUnits = this.defenseUnits.get(target);
+            AttackManager attackManager = new AttackManager(target, defenseUnits, attacksTowardsTarget);
             attackManager.applyAttackersLosses();
             if (attackManager.isTargetEliminated()) {
                 // Si le joueur est éliminé, on supprime ses bâtiments et unités
-                player.getBuildingMap().reset();
-                player.getUnitMap().reset();
+                target.getBuildingMap().reset();
+                target.getUnitMap().reset();
                 continue;
             }
             attackManager.applyDamageOnTargetUnits();

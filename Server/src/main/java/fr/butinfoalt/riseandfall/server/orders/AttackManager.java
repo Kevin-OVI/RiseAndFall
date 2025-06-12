@@ -4,7 +4,6 @@ import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
-import fr.butinfoalt.riseandfall.server.ServerPlayer;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 
 import java.util.HashMap;
@@ -21,7 +20,7 @@ public class AttackManager {
     /**
      * Joueur cible de l'attaque.
      */
-    private final ServerPlayer targetPlayer;
+    private final Player targetPlayer;
     /**
      * Unités de défense de la cible, associées à leur nombre.
      */
@@ -89,7 +88,7 @@ public class AttackManager {
      * @param targetDefenseUnits   Unités de défense de la cible, associées à leur nombre.
      * @param attacksTowardsTarget Attaques dirigées vers la cible, association entre les joueurs attaquants et les types d'unités utilisées par chacun d'eux.
      */
-    public AttackManager(ServerPlayer targetPlayer, ObjectIntMap<UnitType> targetDefenseUnits, Map<Player, ObjectIntMap<UnitType>> attacksTowardsTarget) {
+    public AttackManager(Player targetPlayer, ObjectIntMap<UnitType> targetDefenseUnits, Map<Player, ObjectIntMap<UnitType>> attacksTowardsTarget) {
         this.targetPlayer = targetPlayer;
         this.targetDefenseUnits = targetDefenseUnits;
         this.attacksTowardsTarget = attacksTowardsTarget;
@@ -190,16 +189,19 @@ public class AttackManager {
      * dégâts totaux infligés par les unités en défense de la cible.
      */
     void applyAttackersLosses() {
+        // Si aucun dégât n'est infligé par les unités de la cible, il n'y a pas de pertes à appliquer.
+        if (this.totalTargetDamage <= 0) return;
         for (Map.Entry<Player, Float> entry : this.attackersHealth.entrySet()) {
             Player attacker = entry.getKey();
-            float damageTowardsAttacker = crossProduct(entry.getValue(), this.totalAttackersUnitsHealth, this.totalTargetDamage);
-            float healthMultiplier = attacker.getRace().getHealthMultiplier();
+            float attackerUnitsHealth = entry.getValue();
+            float damageTowardsAttacker = crossProduct(attackerUnitsHealth, this.totalAttackersUnitsHealth, this.totalTargetDamage);
+            if (damageTowardsAttacker > entry.getValue()) {
+                damageTowardsAttacker = entry.getValue();
+            }
             ObjectIntMap<UnitType> attackerUnits = attacker.getUnitMap();
-            for (ObjectIntMap.Entry<UnitType> unitEntry : this.attacksTowardsTarget.get(attacker)) {
-                UnitType unitType = unitEntry.getKey();
-                int count = unitEntry.getValue();
-                float unitHealth = unitType.getHealth() * count * healthMultiplier;
-                attackerUnits.decrement(unitType, crossProduct(unitHealth, damageTowardsAttacker, count));
+            for (ObjectIntMap.Entry<UnitType> attackingUnitEntry : this.attacksTowardsTarget.get(attacker)) {
+                UnitType unitType = attackingUnitEntry.getKey();
+                attackerUnits.decrement(unitType, crossProduct(damageTowardsAttacker, attackerUnitsHealth, attackingUnitEntry.getValue()));
             }
         }
     }

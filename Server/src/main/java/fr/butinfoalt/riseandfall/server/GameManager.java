@@ -183,6 +183,7 @@ public class GameManager {
             return null;
         }
         ServerPlayer player = new ServerPlayer(playerId, user, game, race);
+        this.server.getUserManager().addPlayer(player);
         game.addPlayer(player);
         return player;
     }
