@@ -40,6 +40,7 @@
         <Button text="Description" onAction="#switchToDescriptionPage"/>
         <Button text="Modifier les ordres" onAction="#switchToOrders"/>
         <Button text="Créer une attaque" onAction="#createAttack"/>
+        <Button text="Chat" onAction="#switchToChat"/>
 
         <!-- Bouton pour passer au tour suivant -->
         <Button fx:id="nextTurnButton" text="Tour suivant" onAction="#handleEndTurn"/>

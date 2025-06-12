@@ -128,6 +128,19 @@ CREATE TABLE attack_player_order_unit (
     FOREIGN KEY (unit_type_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+CREATE TABLE chat_message (
+    id SERIAL PRIMARY KEY,
+    sender_player_id BIGINT UNSIGNED NOT NULL,
+    receiver_player_id BIGINT UNSIGNED NOT NULL,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (sender_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (receiver_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    INDEX idx_receiver_sent_at (receiver_player_id, sent_at),
+    INDEX idx_sender_sent_at (sender_player_id, sent_at)
+);
+
 
 -- Insertion des données statiques
 INSERT INTO race (id, name, description, gold_multiplier, intelligence_multiplier, damage_multiplier, health_multiplier)

@@ -2,6 +2,8 @@ package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
+import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
 import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
@@ -282,6 +284,27 @@ public class GameManager {
                 } catch (IOException e) {
                     LogManager.logError("Erreur lors de l'envoi du paquet de découverte du joueur " + otherPlayer.getUser().getUsername() + " à la connexion " + connection.getName(), e);
                 }
+            }
+        }
+        sendChat(connection, player, game);
+    }
+
+    private void sendChat(SocketWrapper connection, ServerPlayer player, ServerGame game) {
+        Player gamePlayer = null;
+        for (ServerPlayer serverPlayer : game.getPlayers()) {
+            System.out.println("Vérification du joueur " + serverPlayer.getUser().getUsername() + " avec l'ID " + serverPlayer.getId() + " contre l'ID du joueur " + player.getId());
+            if (serverPlayer.getId() != player.getId()) {
+                gamePlayer = serverPlayer;
+                break;
+            }
+        }
+        Chat chat = new Chat(1, gamePlayer);
+        for (SocketWrapper conn : this.getConnectionsFor(player)) {
+            try {
+                connection.sendPacket(new PacketChats(chat.getId(), chat.getReceiver().getId()));
+                System.out.println("Envoi du paquet de chat au joueur " + player.getUser().getUsername() + " à la connexion " + connection.getName());
+            } catch (IOException e) {
+                LogManager.logError("Erreur lors de l'envoi du paquet de chat au joueur " + player.getUser().getUsername() + " à la connexion " + connection.getName(), e);
             }
         }
     }

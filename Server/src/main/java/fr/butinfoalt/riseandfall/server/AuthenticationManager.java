@@ -322,4 +322,8 @@ public class AuthenticationManager {
     public synchronized void onClientDisconnected(SocketWrapper client) {
         this.userConnections.remove(client);
     }
+
+    public void onChatMessage(SocketWrapper socketWrapper, PacketMessage packetMessage) {
+        System.out.println("Message de " + this.getUser(socketWrapper) + " : " + packetMessage.getMessage());
+    }
 }

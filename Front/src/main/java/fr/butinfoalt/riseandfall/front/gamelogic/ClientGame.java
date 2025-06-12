@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
+import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 
 import java.io.IOException;
@@ -15,6 +16,8 @@ import java.util.HashMap;
  */
 public class ClientGame extends Game {
     private final HashMap<Integer, OtherClientPlayer> otherPlayers = new HashMap<>();
+
+    private final HashMap<Integer, Chat> chats = new HashMap<>();
 
     /**
      * Constructeur de la classe ClientGame à partir d'un helper de lecture.
@@ -60,5 +63,17 @@ public class ClientGame extends Game {
      */
     public Collection<OtherClientPlayer> getOtherPlayers() {
         return Collections.unmodifiableCollection(this.otherPlayers.values());
+    }
+
+    public void addChat(Chat chat) {
+        this.chats.put(chat.getId(), chat);
+    }
+
+    public Chat getChat(int chatId) {
+        return this.chats.get(chatId);
+    }
+
+    public Collection<Chat> getChats() {
+        return Collections.unmodifiableCollection(this.chats.values());
     }
 }

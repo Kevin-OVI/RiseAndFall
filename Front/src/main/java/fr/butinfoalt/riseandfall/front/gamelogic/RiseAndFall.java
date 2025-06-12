@@ -2,9 +2,12 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
+import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
+import fr.butinfoalt.riseandfall.network.packets.PacketJoinedGame;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Classe principale du jeu RiseAndFall coté client.
@@ -24,6 +27,11 @@ public class RiseAndFall {
      * Instance du client socket.
      */
     private static RiseAndFallClient client;
+
+    /**
+     * Liste des chats du joueur.
+     */
+    private static Map<Integer, Chat> chatList;
 
     /**
      * Méthode pour obtenir le joueur actuel.
@@ -81,5 +89,23 @@ public class RiseAndFall {
 
     public static void setGame(ClientGame game) {
         RiseAndFall.game = game;
+    }
+
+    /**
+     * Méthode pour obtenir la liste des chats du joueur.
+     *
+     * @return La liste des chats du joueur.
+     */
+    public static Map<Integer, Chat> getChatList() {
+        return chatList;
+    }
+
+    /**
+     * Méthode pour initialiser la liste des chats du joueur.
+     *
+     * @param chatList La liste des chats à initialiser.
+     */
+    public static void setChatList(Map<Integer, Chat> chatList) {
+        RiseAndFall.chatList = chatList;
     }
 }

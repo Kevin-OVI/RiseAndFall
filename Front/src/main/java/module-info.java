@@ -27,4 +27,6 @@ module fr.butinfoalt.riseandfall.front {
     exports fr.butinfoalt.riseandfall.front.game.gamelist;
     exports fr.butinfoalt.riseandfall.front.game;
     opens fr.butinfoalt.riseandfall.front.game to javafx.fxml;
+    opens fr.butinfoalt.riseandfall.front.chat to javafx.fxml;
+
 }

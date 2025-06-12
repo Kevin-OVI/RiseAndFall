@@ -118,6 +118,14 @@ public class MainRunningGameController implements ViewController {
     }
 
     /**
+     * Méthode appelée par JavaFX quand on clique sur le bouton pour afficher la page du Chat.
+     */
+    @FXML
+    public void switchToChat() {
+        RiseAndFallApplication.switchToView(View.CHAT);
+    }
+
+    /**
      * Méthode appelée par JavaFX quand on clique sur le bouton pour passer au tour suivant.
      */
     @FXML
