@@ -146,6 +146,7 @@ VALUES
     ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume', 20, 15, 10, 0, 120, 0, 0, NULL),
     ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 100, 3, 1, NULL),
     ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 80, 0, 0, NULL),
+    ('Rampart','Sert de protection au royaume', 60, 10, 0, 0, 50, 0, 1, NULL)
     ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 15, 10, 0, 0, 80, 15, 0, 1),
     ('Tour obscur','Ancienne tour de mage rempli de rituel sinistre',40 ,4 ,0 ,20 ,150 ,0 ,0 ,1),
     ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 6, 0, 0, 80, 5, 0, 2),
@@ -164,10 +165,10 @@ VALUES
 INSERT INTO unit_type (name, description, price, required_intelligence, health, damage, accessible_race_id)
 VALUES
     ('Guerrier', 'Une unité de combat robuste et polyvalente', 10, 0, 10.0, 20.0, NULL),
-    ('Génie', 'Un combattant expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 20, 20, 30.0, 30.0, 2),
-    ('Zombie', 'Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels avec ses griffes et ses morsures infectieuses', 30, 10, 10.0, 30.0, 1),
+    ('Génie', 'Un combattant expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 20, 20, 30.0, 50.0, 2),
+    ('Zombie', 'Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels avec ses griffes et ses morsures infectieuses', 30, 10, 10.0, 35.0, 1),
     ('Uruk Noir', 'Créature imposante et très puissante mais débile', 100, 10, 80.0, 30.0, 3),
-    ('Mage Elfique', 'Puissant mage', 80, 20, 15.0, 40.0, 4),
-    ('Roi Mineur', 'Meilleurs des Nains', 50, 6, 35.0, 15.0, 5),
+    ('Mage Elfique', 'Puissant mage', 80, 20, 15.0, 150.0, 4),
+    ('Roi Mineur', 'Meilleurs des Nains', 50, 6, 35.0, 55.0, 5),
     ('Mage Orc', 'Issue de l''union entre elfes et orc, il est puissant mais petit', 30, 15, 15.0, 100.0, 6),
-    ('Minotaure', 'Issue du Labyrinthe', 20, 20, 30.0, 20.0, 7);
+    ('Minotaure', 'Issue du Labyrinthe', 20, 20, 30.0, 70.0, 7);
