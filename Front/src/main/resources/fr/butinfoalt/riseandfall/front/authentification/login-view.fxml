@@ -11,21 +11,25 @@
       fx:controller="fr.butinfoalt.riseandfall.front.authentification.LoginController"
       prefHeight="400.0" prefWidth="600.0">
     <ImageView fx:id="backgroundImageView" managed="false"/>
-    <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
-        Bienvenue sur Rise &amp; Fall futur empereur.
-    </TitleLabel>
-    <Label text="Connexion" style="-fx-font-size: 24px; -fx-text-fill: #333;"/>
+    <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="root">
+        <VBox alignment="CENTER" spacing="20.0">
+            <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
+                Bienvenue sur Rise &amp; Fall futur empereur.
+            </TitleLabel>
+            <Label text="Connexion" style="-fx-font-size: 24px; -fx-text-fill: #333;"/>
 
-    <TextField fx:id="username" promptText="Nom d'utilisateur" maxWidth="400.0" onKeyPressed="#handleEnter"/>
-    <PasswordField fx:id="password" promptText="Mot de passe" maxWidth="400.0" onKeyPressed="#handleEnter"/>
+            <TextField fx:id="username" promptText="Nom d'utilisateur" maxWidth="400.0" onKeyPressed="#handleEnter"/>
+            <PasswordField fx:id="password" promptText="Mot de passe" maxWidth="400.0" onKeyPressed="#handleEnter"/>
 
 
-    <Label fx:id="errorMessage" text="" style="-fx-text-fill: red;" visible="false"/>
+            <Label fx:id="errorMessage" style="-fx-text-fill: red;" visible="false"/>
 
-    <VBox.margin>
-        <Insets bottom="40"/>
-    </VBox.margin>
+            <VBox.margin>
+                <Insets bottom="40"/>
+            </VBox.margin>
 
-    <Button text="Se connecter" style="-fx-background-color: #0078D7; -fx-text-fill: white;" onAction="#login"/>
-    <Hyperlink text="Créer un compte" onAction="#register"/>
+            <Button text="Se connecter" style="-fx-background-color: #0078D7; -fx-text-fill: white;" onAction="#login"/>
+            <Hyperlink text="Créer un compte" onAction="#register"/>
+        </VBox>
+    </ScrollPane>
 </VBox>

@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.front.game.gamelist;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
@@ -18,6 +19,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -46,6 +48,12 @@ public class GameListController implements ViewController {
     private ImageView backgroundImageView;
 
     /**
+     * Champ pour le composant racine de la vue.
+     */
+    @FXML
+    public ScrollPane root;
+
+    /**
      * Animation de clignotement des instructions.
      */
     private Timeline instructionsBlinkTransition;
@@ -59,7 +67,7 @@ public class GameListController implements ViewController {
     @FXML
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
-        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
+        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView, this.root);
 
 
         Color startColor = Color.BLACK;
@@ -105,7 +113,9 @@ public class GameListController implements ViewController {
             RiseAndFall.getClient().sendPacket(new PacketCreateOrJoinGame(this.raceChoiceBox.getValue(), gameId));
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du paquet de création ou de jointure de partie : ", e);
+            return;
         }
+        RiseAndFallApplication.switchToView(View.LOADING);
     }
 
     @Override

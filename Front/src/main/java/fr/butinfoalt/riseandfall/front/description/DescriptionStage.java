@@ -1,6 +1,5 @@
 package fr.butinfoalt.riseandfall.front.description;
 
-import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import javafx.beans.InvalidationListener;
@@ -8,8 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-
-import java.util.Objects;
 
 /**
  * Classe représentant la scène de description du jeu.
@@ -38,7 +35,6 @@ public class DescriptionStage extends Stage {
      */
     private void setupScene(Scene scene) {
         DescriptionController controller = View.DESCRIPTION.getController();
-        scene.getStylesheets().add(Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/description.css")).toExternalForm());
 
         UIUtils.setBackgroundImage("images/map.jpg", scene, controller.backgroundImageView);
         Text mainTitle = new Text("Rise & Fall\n");

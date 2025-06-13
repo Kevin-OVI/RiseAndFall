@@ -3,49 +3,47 @@
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
 <?import fr.butinfoalt.riseandfall.front.game.orders.table.BuildingsPurchaseTable?>
 <?import fr.butinfoalt.riseandfall.front.game.orders.table.UnitsPurchaseTable?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
-      fx:controller="fr.butinfoalt.riseandfall.front.game.orders.OrderController">
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="fr.butinfoalt.riseandfall.front.game.orders.OrderController">
     <ImageView fx:id="backgroundImageView" managed="false"/>
+    <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="root">
+        <VBox alignment="CENTER" spacing="20.0">
+            <VBox alignment="CENTER" spacing="10">
+                <TitleLabel>Vos ressources</TitleLabel>
+                <Label fx:id="goldField"/>
+                <Label fx:id="intelligenceField"/>
+                <Label fx:id="unitsField"/>
+            </VBox>
 
-    <VBox.margin>
-        <Insets top="20"/>
-    </VBox.margin>
+            <VBox alignment="CENTER" spacing="10">
+                <TitleLabel>Entrainement d'unités</TitleLabel>
 
-    <VBox alignment="CENTER" spacing="10">
-        <TitleLabel>Vos ressources :</TitleLabel>
-        <Label fx:id="goldField"/>
-        <Label fx:id="intelligenceField"/>
-        <Label fx:id="unitsField"/>
-    </VBox>
+                <!--Ce tableau est rempli dynamiquement avec les types d'unités-->
+                <UnitsPurchaseTable fx:id="unitTable"/>
+            </VBox>
 
-    <VBox alignment="CENTER" spacing="10">
-        <TitleLabel>Entrainement d'unités :</TitleLabel>
+            <VBox alignment="CENTER" spacing="10">
+                <TitleLabel>Construction de bâtiments</TitleLabel>
 
-        <!--Ce tableau est rempli dynamiquement avec les types d'unités-->
-        <UnitsPurchaseTable fx:id="unitTable"/>
-    </VBox>
+                <!--Ce tableau est rempli dynamiquement avec les types de bâtiments-->
+                <BuildingsPurchaseTable fx:id="buildingTable"/>
+            </VBox>
 
-    <VBox alignment="CENTER" spacing="10">
-        <TitleLabel>Construction de bâtiments :</TitleLabel>
+            <VBox alignment="CENTER" spacing="10">
+                <TitleLabel>Résumé</TitleLabel>
+                <Label fx:id="totalPrice"/>
+            </VBox>
 
-        <!--Ce tableau est rempli dynamiquement avec les types de bâtiments-->
-        <BuildingsPurchaseTable fx:id="buildingTable"/>
-    </VBox>
+            <HBox alignment="CENTER" spacing="10">
+                <!-- Bouton Sauvegarder -->
+                <Button text="Sauvegarder" onAction="#handleSave"/>
 
-    <VBox alignment="CENTER" spacing="10">
-        <TitleLabel>Résumé :</TitleLabel>
-        <Label fx:id="totalPrice"/>
-    </VBox>
-
-    <HBox alignment="CENTER" spacing="10">
-        <!-- Bouton Sauvegarder -->
-        <Button text="Sauvegarder" onAction="#handleSave"/>
-
-        <!-- Bouton Annuler -->
-        <Button text="Annuler" onAction="#switchBack"/>
-    </HBox>
-</VBox>
+                <!-- Bouton Annuler -->
+                <Button text="Annuler" onAction="#switchBack"/>
+            </HBox>
+        </VBox>
+    </ScrollPane>
+</StackPane>

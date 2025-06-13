@@ -2,7 +2,6 @@ package fr.butinfoalt.riseandfall.front.game.orders.table;
 
 import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableItemAmountSelector;
 import fr.butinfoalt.riseandfall.gamelogic.data.PurchasableItem;
-import javafx.beans.property.SimpleFloatProperty;
 import javafx.scene.control.TableColumn;
 
 /**
@@ -14,12 +13,12 @@ public class PurchasableTable<T extends PurchasableItem> extends ItemTable<T, Pu
     /**
      * Colonne pour afficher le prix unitaire de l'élément.
      */
-    private final TableColumn<ItemTableRow<T, PurchasableItemAmountSelector<T>>, Number> pricePerUnitColumn;
+    private final TableColumn<ItemTableRow<T, PurchasableItemAmountSelector<T>>, String> pricePerUnitColumn;
 
     /**
      * Colonne pour afficher l'intelligence requise de l'élément.
      */
-    private final TableColumn<ItemTableRow<T, PurchasableItemAmountSelector<T>>, Number> requiredIntelligenceColumn;
+    private final TableColumn<ItemTableRow<T, PurchasableItemAmountSelector<T>>, String> requiredIntelligenceColumn;
 
     /**
      * Constructeur de la classe PurchasableTable.
@@ -29,11 +28,11 @@ public class PurchasableTable<T extends PurchasableItem> extends ItemTable<T, Pu
         super();
 
         this.pricePerUnitColumn = new TableColumn<>("Prix unitaire");
-        this.pricePerUnitColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getPrice()));
+        this.pricePerUnitColumn.setCellValueFactory(data -> new FloatOptimisedDisplayProperty(data.getValue().getItem().getPrice()));
         this.getColumns().add(this.pricePerUnitColumn);
 
         this.requiredIntelligenceColumn = new TableColumn<>("Intelligence requise");
-        this.requiredIntelligenceColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getRequiredIntelligence()));
+        this.requiredIntelligenceColumn.setCellValueFactory(data -> new FloatOptimisedDisplayProperty(data.getValue().getItem().getRequiredIntelligence()));
         this.getColumns().add(this.requiredIntelligenceColumn);
     }
 }
