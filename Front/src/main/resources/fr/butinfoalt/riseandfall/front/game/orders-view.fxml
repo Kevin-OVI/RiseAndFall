@@ -6,7 +6,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="fr.butinfoalt.riseandfall.front.game.orders.OrderController">
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="fr.butinfoalt.riseandfall.front.game.orders.OrderController">
     <ImageView fx:id="backgroundImageView" managed="false"/>
     <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="root">
         <VBox alignment="CENTER" spacing="20.0">

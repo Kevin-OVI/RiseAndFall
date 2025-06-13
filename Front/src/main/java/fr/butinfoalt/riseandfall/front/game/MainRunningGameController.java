@@ -16,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -82,6 +83,11 @@ public class MainRunningGameController implements ViewController {
      */
     @FXML
     public ImageView backgroundImageView;
+
+    /**
+     * Champ pour le composant racine de la vue.
+     */
+    public ScrollPane root;
 
     /**
      * Conteneur pour les boutons de la barre d'outils.
@@ -178,7 +184,7 @@ public class MainRunningGameController implements ViewController {
     @FXML
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
-        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
+        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView, this.root);
 
         if (!Environment.DEBUG_MODE) {
             this.buttonsContainer.getChildren().remove(this.nextTurnButton);

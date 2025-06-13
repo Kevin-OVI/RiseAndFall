@@ -18,12 +18,19 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 
 /**
  * Contrôleur pour la vue de création ou d'édition d'une attaque.
  */
 public class OrderAttackController implements ViewController {
+    /**
+     * Champ pour le composant racine de la vue.
+     */
+    @FXML
+    public ScrollPane root;
+
     /**
      * Les unités utilisées pour l'attaque.
      */
@@ -97,7 +104,7 @@ public class OrderAttackController implements ViewController {
     @FXML
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
-        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
+        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView, this.root);
 
         NamedItemStringConverter<OtherClientPlayer> converter = new NamedItemStringConverter<>();
         targetPlayerSelector.setConverter(converter);

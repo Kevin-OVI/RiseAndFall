@@ -41,6 +41,9 @@ public class OrderController implements ViewController {
      */
     private ObjectIntMap<BuildingType> pendingBuildings;
 
+    /**
+     * Champ pour le composant racine de la vue.
+     */
     @FXML
     public ScrollPane root;
 

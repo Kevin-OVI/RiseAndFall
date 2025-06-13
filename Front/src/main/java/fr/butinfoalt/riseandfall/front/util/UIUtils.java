@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class UIUtils {
-    private static final int BACKGROUND_IMAGE_PADDING_HORIZONTAL = 113, BACKGROUND_IMAGE_PADDING_VERTICAL = 171;
+    private static final int BACKGROUND_IMAGE_PADDING_HORIZONTAL = 242, BACKGROUND_IMAGE_PADDING_VERTICAL = 89;
 
     private static final HashMap<String, Image> imagesCache = new HashMap<>();
 

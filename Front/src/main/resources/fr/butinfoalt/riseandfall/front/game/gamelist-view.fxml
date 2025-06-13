@@ -2,6 +2,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -11,23 +12,29 @@
 
     <ImageView fx:id="backgroundImageView" managed="false"/>
 
-    <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
-        Bienvenue sur Rise &amp; Fall Futur Empereur.
-    </TitleLabel>
-    <Label fx:id="instructions">Sélectionnez votre race pour jouer</Label>
-    <ChoiceBox fx:id="raceChoiceBox"/>
 
-    <TitleLabel style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: black;">
-        Listes des parties disponibles:
-    </TitleLabel>
+    <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="root">
+        <VBox alignment="CENTER" spacing="20.0">
 
-    <VBox fx:id="listContainer" alignment="CENTER"
-          maxWidth="Infinity"
-          StackPane.alignment="TOP_CENTER">
-        <padding>
-            <Insets top="20" right="20" bottom="20" left="20"/>
-        </padding>
-    </VBox>
+            <TitleLabel style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: black;">
+                Bienvenue sur Rise &amp; Fall Futur Empereur.
+            </TitleLabel>
+            <Label fx:id="instructions">Sélectionnez votre race pour jouer</Label>
+            <ChoiceBox fx:id="raceChoiceBox"/>
 
-    <Label fx:id="errorMessage" style="-fx-text-fill: red;" visible="false"/>
+            <TitleLabel style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: black;">
+                Listes des parties disponibles:
+            </TitleLabel>
+
+            <VBox fx:id="listContainer" alignment="CENTER"
+                  maxWidth="Infinity"
+                  StackPane.alignment="TOP_CENTER">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+            </VBox>
+
+            <Label fx:id="errorMessage" style="-fx-text-fill: red;" visible="false"/>
+        </VBox>
+    </ScrollPane>
 </VBox>

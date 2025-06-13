@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -28,6 +29,12 @@ public class LoginController implements ViewController {
     public ImageView backgroundImageView;
 
     /**
+     * Champ pour le composant racine de la vue.
+     */
+    @FXML
+    public ScrollPane root;
+
+    /**
      * Champ pour le composant du nom d'utilisateur.
      */
     public TextField username;
@@ -42,14 +49,13 @@ public class LoginController implements ViewController {
      */
     public Label errorMessage;
 
-
     /**
      * Méthode d'initialisation de la vue appelée par JavaFX
      */
     @FXML
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
-        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
+        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView, this.root);
     }
 
     /**

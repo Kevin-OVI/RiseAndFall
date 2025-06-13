@@ -19,6 +19,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -47,6 +48,12 @@ public class GameListController implements ViewController {
     private ImageView backgroundImageView;
 
     /**
+     * Champ pour le composant racine de la vue.
+     */
+    @FXML
+    public ScrollPane root;
+
+    /**
      * Animation de clignotement des instructions.
      */
     private Timeline instructionsBlinkTransition;
@@ -60,7 +67,7 @@ public class GameListController implements ViewController {
     @FXML
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
-        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView);
+        UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView, this.root);
 
 
         Color startColor = Color.BLACK;
