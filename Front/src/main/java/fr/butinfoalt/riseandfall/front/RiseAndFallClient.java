@@ -17,12 +17,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.TimerTask;
 
 /**
  * Client socket pour le jeu Rise and Fall.
  * Il gère la connexion au serveur et l'envoi/réception de paquets.
  */
 public class RiseAndFallClient extends BaseSocketClient {
+    private TimerTask reconectTask;
+    private boolean shouldReconnect = true;
+
     /**
      * Constructeur du client.
      * Il initialise le client avec l'hôte et le port du serveur et enregistre les paquets à envoyer et à recevoir.
@@ -219,5 +223,45 @@ public class RiseAndFallClient extends BaseSocketClient {
      */
     private void onDiscoverPlayer(SocketWrapper sender, PacketDiscoverPlayer packet) {
         RiseAndFall.getGame().addOtherPlayer(packet.getPlayerId(), packet.getPlayerRace(), packet.getPlayerName());
+    }
+
+    private void startConnectionLoop(long delay) {
+        RiseAndFall.TIMER.scheduleAtFixedRate(this.reconectTask = new TimerTask() {
+            @Override
+            public void run() {
+                LogManager.logMessage("Attempting to reconnect...");
+                try {
+                    RiseAndFallClient.this.connect();
+                    RiseAndFallClient.this.reconectTask.cancel();
+                    RiseAndFallClient.this.reconectTask = null;
+                } catch (IOException e) {
+                    LogManager.logError("Could not reconnect to the server, retrying in 2 seconds...", e);
+                }
+            }
+        }, delay, 2000);
+    }
+
+    @Override
+    protected void onDisconnected(SocketWrapper socketWrapper) {
+        super.onDisconnected(socketWrapper);
+
+        if (this.shouldReconnect && this.reconectTask == null) {
+            LogManager.logMessage("Disconnected, reconnecting in 2 seconds...");
+            Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOADING));
+            this.startConnectionLoop(2000);
+        }
+    }
+
+    public void scheduledConnect() {
+        this.startConnectionLoop(0);
+    }
+
+    public void closeWithoutReconnect() throws IOException {
+        this.shouldReconnect = false;
+        if (this.reconectTask != null) {
+            this.reconectTask.cancel();
+            this.reconectTask = null;
+        }
+        this.close();
     }
 }

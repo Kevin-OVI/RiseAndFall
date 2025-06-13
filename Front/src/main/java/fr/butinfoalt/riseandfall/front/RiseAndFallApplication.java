@@ -130,10 +130,11 @@ public class RiseAndFallApplication extends Application {
     private void onCloseRequest(WindowEvent windowEvent) {
         if (!windowEvent.isConsumed()) {
             try {
-                RiseAndFall.getClient().close();
+                RiseAndFall.getClient().closeWithoutReconnect();
             } catch (IOException e) {
                 LogManager.logError("Erreur lors de la fermeture du client", e);
             }
+            RiseAndFall.TIMER.cancel();
         }
     }
 }
