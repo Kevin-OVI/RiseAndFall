@@ -4,8 +4,23 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.Image?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
       fx:controller="fr.butinfoalt.riseandfall.front.game.MainRunningGameController">
+
+    <!-- Bouton chat en haut à gauche -->
+    <HBox alignment="TOP_LEFT">
+        <Button fx:id="chatButton" onAction="#switchToChat" style="-fx-background-color: red; -fx-border-width: 0;">
+            <graphic>
+                <ImageView fitHeight="30.0" fitWidth="30.0" preserveRatio="true">
+                    <!-- Remplacez par le chemin vers votre image de bulle de texte -->
+                    <image><Image url="/fr/butinfoalt/riseandfall/front/images/bubble.png"/></image>
+                    <!-- <image><Image url="@/path/to/your/chat-bubble-icon.png"/></image> -->
+                </ImageView>
+            </graphic>
+        </Button>
+    </HBox>
+
     <ImageView fx:id="backgroundImageView" managed="false"/>
     <VBox alignment="CENTER" spacing="20">
         <HBox alignment="TOP_CENTER" spacing="30">
@@ -40,7 +55,6 @@
         <Button text="Description" onAction="#switchToDescriptionPage"/>
         <Button text="Modifier les ordres" onAction="#switchToOrders"/>
         <Button text="Créer une attaque" onAction="#createAttack"/>
-        <Button text="Chat" onAction="#switchToChat"/>
 
         <!-- Bouton pour passer au tour suivant -->
         <Button fx:id="nextTurnButton" text="Tour suivant" onAction="#handleEndTurn"/>

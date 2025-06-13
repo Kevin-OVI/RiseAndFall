@@ -13,8 +13,8 @@ import java.io.IOException;
  * Ce paquet pourra être utilisé pour envoyer des messages depuis le joueur
  */
 public class PacketMessage implements IPacket {
-    private int chatId;
-    private int playerId;
+    private int senderId;
+    private int receiverId;
     private String message;
     private long timestamp;
 
@@ -24,9 +24,9 @@ public class PacketMessage implements IPacket {
      *
      * @param message Le message à envoyer
      */
-    public PacketMessage(int chatId, int playerId, String message, long timestamp) {
-        this.chatId = chatId;
-        this.playerId = playerId;
+    public PacketMessage(int senderId, int receiverId, String message, long timestamp) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
         this.message = message;
         this.timestamp = timestamp;
     }
@@ -38,8 +38,8 @@ public class PacketMessage implements IPacket {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation
      */
     public PacketMessage(ReadHelper readHelper) throws IOException {
-        this.chatId = readHelper.readInt();
-        this.playerId = readHelper.readInt();
+        this.senderId = readHelper.readInt();
+        this.receiverId = readHelper.readInt();
         this.message = readHelper.readString();
         this.timestamp = readHelper.readLong();
     }
@@ -52,8 +52,8 @@ public class PacketMessage implements IPacket {
      */
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
-        writeHelper.writeInt(this.chatId);
-        writeHelper.writeInt(this.playerId);
+        writeHelper.writeInt(this.senderId);
+        writeHelper.writeInt(this.receiverId);
         writeHelper.writeString(this.message);
         writeHelper.writeLong(this.timestamp);
     }
@@ -67,12 +67,12 @@ public class PacketMessage implements IPacket {
         return this.message;
     }
 
-    public int getChatId() {
-        return chatId;
+    public int getSenderId() {
+        return senderId;
     }
 
-    public int getPlayerId() {
-        return playerId;
+    public int getReceiverId() {
+        return receiverId;
     }
 
     public long getTimestamp() {

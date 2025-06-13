@@ -443,13 +443,12 @@ public class GameManager {
     public void onChatMessage(SocketWrapper socketWrapper, PacketMessage packetMessage) {
         System.out.println("Message de " + this.server.getAuthManager().getUser(socketWrapper) + " : " + packetMessage.getMessage());
         // Ajouter le message en base de donnée et si l'utilisateur est connecté, lui envoyer le message
-        ServerPlayer sender = this.server.getUserManager().getPlayer(packetMessage.getPlayerId());
+        ServerPlayer sender = this.server.getUserManager().getPlayer(packetMessage.getSenderId());
         if (sender == null) {
-            LogManager.logError("Le joueur avec l'ID " + packetMessage.getPlayerId() + " n'existe pas.");
+            LogManager.logError("Le joueur avec l'ID " + packetMessage.getSenderId() + " n'existe pas.");
             return;
         }
-        Chat chat = getChatForPlayer(sender, sender.getGame())[packetMessage.getChatId() - 1];
-        int otherPlayerId = chat.getReceiver().getId();
+        int otherPlayerId = packetMessage.getReceiverId();
 
         ServerPlayer receiver = sender.getGame().getPlayers().stream()
                 .filter(player -> player.getId() == otherPlayerId)
@@ -474,7 +473,7 @@ public class GameManager {
             try {
                 java.util.Date currentDate = new Date();
                 long timestamp = currentDate.getTime();
-                connection.sendPacket(new PacketMessage(packetMessage.getChatId(), sender.getId(), packetMessage.getMessage(), timestamp));
+                connection.sendPacket(new PacketMessage(sender.getId(), receiver.getId(), packetMessage.getMessage(), timestamp));
             } catch (IOException e) {
                 LogManager.logError("Erreur lors de l'envoi du message au destinataire", e);
             }

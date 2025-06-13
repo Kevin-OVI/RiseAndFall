@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
@@ -71,6 +72,20 @@ public class ClientGame extends Game {
 
     public Chat getChat(int chatId) {
         return this.chats.get(chatId);
+    }
+
+    public Chat getChatByReceiver(Player receiver) {
+        return this.chats.values().stream()
+                .filter(chat -> chat.getReceiver() == receiver)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Chat getChatByReceiver(int receiverId) {
+        return this.chats.values().stream()
+                .filter(chat -> chat.getReceiver().getId() == receiverId)
+                .findFirst()
+                .orElse(null);
     }
 
     public Collection<Chat> getChats() {

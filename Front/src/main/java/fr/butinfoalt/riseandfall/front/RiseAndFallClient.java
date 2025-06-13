@@ -52,10 +52,9 @@ public class RiseAndFallClient extends BaseSocketClient {
     }
 
     private void onMessageReceived(SocketWrapper socketWrapper, PacketMessage packetMessage) {
-        LogManager.logError("Message reçu : " + packetMessage.getMessage() + " dans le chat " + packetMessage.getChatId() + " de la part du joueur " + packetMessage.getPlayerId());
-        Chat chat = RiseAndFall.getGame().getChat(packetMessage.getChatId());
+        Chat chat = RiseAndFall.getGame().getChatByReceiver(packetMessage.getReceiverId());
         if (chat != null) {
-            ChatMessage chatMessage = new ChatMessage(chat, RiseAndFall.getGame().getOtherPlayer(packetMessage.getPlayerId()), packetMessage.getMessage(), packetMessage.getTimestamp());
+            ChatMessage chatMessage = new ChatMessage(chat, RiseAndFall.getGame().getOtherPlayer(packetMessage.getSenderId()), packetMessage.getMessage(), packetMessage.getTimestamp());
 
             chat.addMessage(chatMessage);
 
@@ -63,13 +62,12 @@ public class RiseAndFallClient extends BaseSocketClient {
                 ChatController chatController = View.CHAT.getController();
                 if (chatController != null) {
                     chatController.receiveMessage(chatMessage);
-                    LogManager.logError("Rafraîchissement du chat pour le message reçu : " + packetMessage.getChatId());
                 } else {
-                    LogManager.logError("ChatController non trouvé pour rafraîchir le chat : " + packetMessage.getChatId());
+                    LogManager.logError("ChatController non initialisé pour le message reçu : " + packetMessage.getMessage());
                 }
             });
         } else {
-            LogManager.logError("Chat non trouvé pour le message reçu : " + packetMessage.getChatId());
+            LogManager.logError("Chat non trouvé pour le message reçu : " + packetMessage.getMessage());
         }
     }
 
