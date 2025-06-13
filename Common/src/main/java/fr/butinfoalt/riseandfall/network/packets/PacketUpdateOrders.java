@@ -16,10 +16,27 @@ import java.util.Collection;
  * Chaque champ est facultatif, et peut être null pour indiquer qu'il n'y a pas de données à mettre à jour.
  */
 public class PacketUpdateOrders implements IPacket {
+    /**
+     * Les unités à créer lors du prochain tour.
+     */
     private final ObjectIntMap<UnitType> pendingUnitsCreation;
+    /**
+     * Les bâtiments à créer lors du prochain tour.
+     */
     private final ObjectIntMap<BuildingType> pendingBuildingsCreation;
+    /**
+     * Les attaques à effectuer lors du prochain tour.
+     */
     private final Collection<AttackPlayerOrderData> pendingAttacks;
 
+    /**
+     * Constructeur du paquet de mise à jour des ordres.
+     * Chaque paramètre peut être null pour indiquer qu'il n'y a pas de données à mettre à jour.
+     *
+     * @param pendingUnitsCreation     Les unités à créer lors du prochain tour.
+     * @param pendingBuildingsCreation Les bâtiments à créer lors du prochain tour.
+     * @param pendingAttacks           Les attaques à effectuer lors du prochain tour.
+     */
     public PacketUpdateOrders(ObjectIntMap<UnitType> pendingUnitsCreation, ObjectIntMap<BuildingType> pendingBuildingsCreation, Collection<AttackPlayerOrderData> pendingAttacks) {
         this.pendingUnitsCreation = pendingUnitsCreation;
         this.pendingBuildingsCreation = pendingBuildingsCreation;
@@ -72,14 +89,29 @@ public class PacketUpdateOrders implements IPacket {
         if (this.pendingAttacks != null) writeHelper.writeSerializableList(this.pendingAttacks);
     }
 
+    /**
+     * Obtient les unités en attente de création.
+     *
+     * @return Les unités à créer lors du prochain tour, ou null si elles ne doivent pas être mises à jour.
+     */
     public ObjectIntMap<UnitType> getPendingUnitsCreation() {
         return this.pendingUnitsCreation;
     }
 
+    /**
+     * Obtient les bâtiments en attente de création.
+     *
+     * @return Les bâtiments à créer lors du prochain tour, ou null s'ils ne doivent pas être mis à jour.
+     */
     public ObjectIntMap<BuildingType> getPendingBuildingsCreation() {
         return this.pendingBuildingsCreation;
     }
 
+    /**
+     * Obtient les attaques en attente.
+     *
+     * @return Les attaques à effectuer lors du prochain tour, ou null si elles ne doivent pas être mises à jour.
+     */
     public Collection<AttackPlayerOrderData> getPendingAttacks() {
         return this.pendingAttacks;
     }

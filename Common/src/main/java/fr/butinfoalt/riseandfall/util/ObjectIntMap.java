@@ -211,6 +211,13 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
         return cloned;
     }
 
+    /**
+     * Sérialise l'association entre des objets identifiables et les entiers
+     *
+     * @param map         L'association entre les objets identifiables et les entiers à sérialiser
+     * @param writeHelper L'outil d'écriture utilisée pour écrire les données de l'association.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de l'écriture des données.
+     */
     public static <T extends Identifiable> void serialize(ObjectIntMap<T> map, WriteHelper writeHelper) throws IOException {
         for (Entry<T> entry : map) {
             writeHelper.writeInt(entry.getKey().getId());
@@ -218,6 +225,14 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
         }
     }
 
+    /**
+     * Désérialise l'association entre des objets identifiables et les entiers
+     *
+     * @param map        L'association entre les objets identifiables et les entiers à désérialiser
+     * @param readHelper L'outil de lecture utilisé pour lire les données de l'association.
+     * @param getter     Une fonction pour obtenir un objet identifiable à partir d'un entier.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture des données.
+     */
     public static <T extends Identifiable> void deserialize(ObjectIntMap<T> map, ReadHelper readHelper, IntFunction<T> getter) throws IOException {
         int size = map.size();
         for (int i = 0; i < size; i++) {

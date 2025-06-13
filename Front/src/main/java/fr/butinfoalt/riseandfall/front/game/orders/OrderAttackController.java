@@ -20,9 +20,21 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 
+/**
+ * Contrôleur pour la vue de création ou d'édition d'une attaque.
+ */
 public class OrderAttackController implements ViewController {
+    /**
+     * Les unités utilisées pour l'attaque.
+     */
     private ObjectIntMap<UnitType> usingUnits;
+    /**
+     * Le contrôleur de la liste des attaques, utilisé pour ajouter ou modifier des attaques.
+     */
     private OrderAttacksListController listController;
+    /**
+     * Les données de l'attaque en cours d'édition, ou null si on crée une nouvelle attaque.
+     */
     private AttackPlayerOrderData editingAttack;
 
     /**
@@ -43,9 +55,18 @@ public class OrderAttackController implements ViewController {
     @FXML
     public Label errorMessage;
 
+    /**
+     * Champ pour l'image de fond de la vue.
+     */
     @FXML
     private ImageView backgroundImageView;
 
+    /**
+     * Méthode appelée quand la vue est affichée.
+     * Elle initialise les composants et affiche un message d'erreur si nécessaire.
+     *
+     * @param errorMessage Le message d'erreur à afficher, ou null si aucun message d'erreur n'est à afficher.
+     */
     @Override
     public void onDisplayed(String errorMessage) {
         ViewController.super.onDisplayed(errorMessage);
@@ -57,6 +78,10 @@ public class OrderAttackController implements ViewController {
         this.unitsTable.getItems().clear();
     }
 
+    /**
+     * Méthode appelée quand la vue est cachée.
+     * Elle réinitialise les sélections et les données de l'attaque en cours d'édition.
+     */
     @Override
     public void onHidden() {
         ViewController.super.onHidden();
@@ -90,7 +115,9 @@ public class OrderAttackController implements ViewController {
 
     /**
      * Méthode appelée par JavaFX pour gérer l'action de sauvegarde.
-     * Elle enregistre les ordres en attente du joueur et revient à la vue précédente.
+     * Elle vérifie si un joueur cible est sélectionné et si au moins une unité est choisie pour l'attaque.
+     * Si tout est valide, elle ajoute ou remplace l'attaque dans la liste des attaques.
+     * Si des erreurs sont détectées, elle affiche un message d'erreur approprié.
      */
     @FXML
     private void handleSave() {
@@ -125,6 +152,15 @@ public class OrderAttackController implements ViewController {
         }
     }
 
+    /**
+     * Méthode pour initialiser le contrôleur avec les données de l'attaque et le contrôleur de la liste des attaques.
+     * Appelée par {@link OrderAttacksListController#createOrEditAttack(AttackPlayerOrderData)}.
+     * Cette méthode prépare le contrôleur pour créer ou éditer une attaque en remplissant
+     * la liste des joueurs cibles et en initialisant les unités à utiliser pour l'attaque.
+     *
+     * @param listController Le contrôleur de la liste des attaques.
+     * @param attack         Les données de l'attaque à éditer, ou null si on crée une nouvelle attaque.
+     */
     public void init(OrderAttacksListController listController, AttackPlayerOrderData attack) {
         this.listController = listController;
         this.editingAttack = attack;

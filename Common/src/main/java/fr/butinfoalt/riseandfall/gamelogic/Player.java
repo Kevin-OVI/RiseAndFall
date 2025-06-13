@@ -196,28 +196,68 @@ public abstract class Player implements Identifiable, ISerializable {
         return this.unitMap;
     }
 
+    /**
+     * Méthode pour obtenir les ordres de création d'unités en attente.
+     *
+     * @return L'association des types d'unités avec le nombre d'unités à créer.
+     */
     public ObjectIntMap<UnitType> getPendingUnitsCreation() {
         return pendingUnitsCreation;
     }
 
+    /**
+     * Méthode pour définir les ordres de création d'unités en attente.
+     *
+     * @param pendingUnitsCreation L'association des types d'unités avec le nombre d'unités à créer.
+     */
     public void setPendingUnitsCreation(ObjectIntMap<UnitType> pendingUnitsCreation) {
         this.pendingUnitsCreation = pendingUnitsCreation;
     }
 
+    /**
+     * Méthode pour obtenir les ordres de création de bâtiments en attente.
+     *
+     * @return L'association des types de bâtiments avec le nombre de bâtiments à créer.
+     */
     public ObjectIntMap<BuildingType> getPendingBuildingsCreation() {
         return pendingBuildingsCreation;
     }
 
+    /**
+     * Méthode pour définir les ordres de création de bâtiments en attente.
+     *
+     * @param pendingBuildingsCreation L'association des types de bâtiments avec le nombre de bâtiments à créer.
+     */
     public void setPendingBuildingsCreation(ObjectIntMap<BuildingType> pendingBuildingsCreation) {
         this.pendingBuildingsCreation = pendingBuildingsCreation;
     }
 
+    /**
+     * Méthode pour obtenir les ordres d'attaque en attente.
+     *
+     * @return La collection des ordres d'attaque en attente.
+     */
     public Collection<AttackPlayerOrderData> getPendingAttacks() {
         return pendingAttacks;
     }
 
+    /**
+     * Méthode pour définir les ordres d'attaque en attente.
+     *
+     * @param pendingAttacks La collection des ordres d'attaque à définir.
+     */
     public void setPendingAttacks(Collection<AttackPlayerOrderData> pendingAttacks) {
         this.pendingAttacks = pendingAttacks;
+    }
+
+    /**
+     * Méthode pour vérifier si le joueur est éliminé.
+     * Un joueur est considéré comme éliminé s'il n'a plus d'unités et pas de bâtiments.
+     *
+     * @return true si le joueur est éliminé, false sinon.
+     */
+    public boolean isEliminated() {
+        return this.unitMap.isEmpty() && this.buildingMap.isEmpty();
     }
 
     /**
@@ -271,9 +311,5 @@ public abstract class Player implements Identifiable, ISerializable {
     @Override
     public String toString() {
         return this.toStringFormatter().build();
-    }
-
-    public boolean isEliminated() {
-        return this.unitMap.isEmpty() && this.buildingMap.isEmpty();
     }
 }

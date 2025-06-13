@@ -188,8 +188,9 @@ public class ServerGame extends Game {
     }
 
     /**
-     * Méthode pour passer au tour suivant.
-     * Exécute les ordres de chaque joueur et incrémente le tour actuel.
+     * Méthode pour passer au tour suivant. La partie ne peut passer au tour suivant que si elle est en cours.
+     * On commence par exécuter les attaques des joueurs, puis on exécute le reste des ordres de chaque joueur.
+     * Enfin, on incrémente le tour actuel et on planifie le prochain tour.
      *
      * @throws IllegalStateException Si la partie n'est pas en cours.
      */
@@ -204,7 +205,7 @@ public class ServerGame extends Game {
         }
         context.executeAttacks();
         for (ServerPlayer player : remainingPlayers) {
-            if (player.isEliminated()) {;
+            if (player.isEliminated()) {
                 LogManager.logMessage("Le joueur %s a été éliminé de la partie %s.".formatted(player.getUser().getUsername(), this.name));
                 continue; // Ne pas exécuter les ordres d'un joueur éliminé
             }

@@ -1,15 +1,14 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.front.ClientDataDeserializer;
+import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
 import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
-import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.packets.data.OrderDeserializationContext;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Représente le joueur courant dans le jeu du côté client.
@@ -42,12 +41,6 @@ public class CurrentClientPlayer extends ClientPlayer {
         ObjectIntMap.deserialize(this.getUnitMap(), readHelper, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
         ObjectIntMap.deserialize(this.getPendingUnitsCreation(), readHelper, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
         ObjectIntMap.deserialize(this.getPendingBuildingsCreation(), readHelper, value -> Identifiable.getById(ServerData.getBuildingTypes(), value));
-        int attacksSize = readHelper.readInt();
-        ArrayList<AttackPlayerOrderData> pendingAttacks = new ArrayList<>(attacksSize);
-        OrderDeserializationContext orderDeserializationContext = new OrderDeserializationContext(this, ClientDataDeserializer.INSTANCE);
-        for (int i = 0; i < attacksSize; i++) {
-            pendingAttacks.add(new AttackPlayerOrderData(readHelper, orderDeserializationContext));
-        }
-        this.setPendingAttacks(pendingAttacks);
+        this.setPendingAttacks(readHelper.readSerializableList(AttackPlayerOrderData::new, new OrderDeserializationContext(this, ClientDataDeserializer.INSTANCE)));
     }
 }

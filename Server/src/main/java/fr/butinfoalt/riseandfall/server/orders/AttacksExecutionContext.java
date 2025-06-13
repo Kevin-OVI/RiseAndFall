@@ -10,13 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Implémentation du contexte d'exécution des ordres sur le serveur.
+ * Le contexte d'exécution des attaques entre les joueurs.
  */
 public class AttacksExecutionContext {
-    /**
-     * La partie sur laquelle les ordres sont exécutés.
-     */
-    private final ServerGame game;
 
     /**
      * Unités de défense restantes pour chaque joueur.
@@ -37,7 +33,6 @@ public class AttacksExecutionContext {
      * @param game La partie sur laquelle les ordres sont exécutés.
      */
     public AttacksExecutionContext(ServerGame game) {
-        this.game = game;
         for (ServerPlayer player : game.getPlayers()) {
             this.defenseUnits.put(player, player.getUnitMap().clone());
         }

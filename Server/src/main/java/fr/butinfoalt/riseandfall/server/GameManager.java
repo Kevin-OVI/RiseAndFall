@@ -322,7 +322,15 @@ public class GameManager {
         this.handleGameUpdate(game, null);
     }
 
-    private void deleteTableByPlayer(ServerPlayer player, String tableName) {
+    /**
+     * Supprime le contenu d'une table spécifique pour un joueur donné.
+     * On suppose que la table contient une colonne `player_id` pour identifier les données du joueur,
+     * et que le nom de la table passé en paramètre n'est pas dangereux (pas de vérification d'injections SQL).
+     *
+     * @param player    Le joueur dont on veut supprimer les données de la table.
+     * @param tableName Le nom de la table à nettoyer (pas de vérification d'injection SQL).
+     */
+    private void emptyTableByPlayer(ServerPlayer player, String tableName) {
         try (PreparedStatement preparedStatement = this.server.getDb().prepareStatement("DELETE FROM " + tableName + " WHERE player_id = ?")) {
             preparedStatement.setInt(1, player.getId());
             preparedStatement.executeUpdate();
@@ -338,32 +346,14 @@ public class GameManager {
      * @param player Le joueur dont on veut supprimer les ordres en attente.
      */
     private void clearPendingOrders(ServerPlayer player) {
-        for (String statement : new String[]{
-                "DELETE FROM building_creation_order WHERE player_id = ?",
-                "DELETE FROM unit_creation_order WHERE player_id = ?",
-                "DELETE FROM attack_player_order WHERE player_id = ?",
-        }) {
-            try (PreparedStatement preparedStatement = this.server.getDb().prepareStatement(statement)) {
-                preparedStatement.setInt(1, player.getId());
-                preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                LogManager.logError("Erreur lors de la suppression des ordres en attente du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
-            }
-        }
+        this.emptyTableByPlayer(player, "building_creation_order");
+        this.emptyTableByPlayer(player, "unit_creation_order");
+        this.emptyTableByPlayer(player, "attack_player_order");
     }
 
     private void clearBuildingsAndUnits(ServerPlayer player) {
-        for (String statement : new String[]{
-                "DELETE FROM player_building WHERE player_id = ?",
-                "DELETE FROM player_unit WHERE player_id = ?",
-        }) {
-            try (PreparedStatement preparedStatement = this.server.getDb().prepareStatement(statement)) {
-                preparedStatement.setInt(1, player.getId());
-                preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                LogManager.logError("Erreur lors de la suppression des bâtiments et unités du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
-            }
-        }
+        this.emptyTableByPlayer(player, "player_building");
+        this.emptyTableByPlayer(player, "player_unit");
     }
 
     /**
@@ -588,7 +578,7 @@ public class GameManager {
         }
         // Si on arrive ici, c'est que le joueur a les ressources nécessaires pour exécuter les ordres. On retire les anciens ordres en attente et on ajoute les nouveaux.
         if (pendingUnitsCreation != null) {
-            this.deleteTableByPlayer(player, "unit_creation_order");
+            this.emptyTableByPlayer(player, "unit_creation_order");
             try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO unit_creation_order (player_id, unit_type_id, amount) VALUES (?, ?, ?)")) {
                 for (ObjectIntMap.Entry<UnitType> order : pendingUnitsCreation) {
                     if (order.getValue() == 0) continue; // Pas besoin de sauvegarder un ordre avec une quantité nulle
@@ -605,7 +595,7 @@ public class GameManager {
         }
 
         if (pendingBuildingsCreation != null) {
-            this.deleteTableByPlayer(player, "building_creation_order");
+            this.emptyTableByPlayer(player, "building_creation_order");
             try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO building_creation_order (player_id, building_type_id, amount) VALUES (?, ?, ?)")) {
                 for (ObjectIntMap.Entry<BuildingType> order : pendingBuildingsCreation) {
                     statement.setInt(1, player.getId());
@@ -621,7 +611,7 @@ public class GameManager {
         }
 
         if (pendingAttacks != null) {
-            this.deleteTableByPlayer(player, "attack_player_order");
+            this.emptyTableByPlayer(player, "attack_player_order");
             if (!pendingAttacks.isEmpty()) {
                 try (PreparedStatement attackStatement = this.server.getDb().prepareStatement("INSERT INTO attack_player_order (player_id, target_player_id) VALUES (?, ?) RETURNING id")) {
                     for (AttackPlayerOrderData order : pendingAttacks) {

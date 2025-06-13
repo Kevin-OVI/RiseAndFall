@@ -38,6 +38,13 @@ public class ServerPlayer extends Player {
         this.game = game;
     }
 
+    /**
+     * Prépare les attaques en attente pour le joueur.
+     * Cette méthode est appelée avant l'exécution des attaques pour les ajouter au contexte d'exécution.
+     * Les attaques sont exécutées avant le reste des ordres, qui eux sont exécutés dans {@link #executeOrders()}.
+     *
+     * @param context Le contexte d'exécution des attaques.
+     */
     public void prepareAttack(AttacksExecutionContext context) {
         for (AttackPlayerOrderData attack : this.getPendingAttacks()) {
             context.addAttack(this, attack.getTargetPlayer(), attack.getUsingUnits());
@@ -46,7 +53,8 @@ public class ServerPlayer extends Player {
     }
 
     /**
-     * Exécute les ordres en attente pour le joueur.
+     * Exécute les ordres en attente pour le joueur, sauf les attaques qui sont exécutées
+     * dans {@link #prepareAttack(AttacksExecutionContext)}.
      */
     public void executeOrders() {
         for (ObjectIntMap.Entry<BuildingType> entry : this.getPendingBuildingsCreation()) {
