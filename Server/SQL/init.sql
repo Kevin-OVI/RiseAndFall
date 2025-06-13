@@ -146,7 +146,7 @@ VALUES
     ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume', 20, 15, 10, 0, 120, 0, 0, NULL),
     ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 100, 3, 1, NULL),
     ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 80, 0, 0, NULL),
-    ('Rampart','Sert de protection au royaume', 60, 10, 0, 0, 50, 0, 1, NULL)
+    ('Rampart','Sert de protection au royaume', 60, 10, 0, 0, 50, 0, 1, NULL),
     ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 15, 10, 0, 0, 80, 15, 0, 1),
     ('Tour obscur','Ancienne tour de mage rempli de rituel sinistre',40 ,4 ,0 ,20 ,150 ,0 ,0 ,1),
     ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 6, 0, 0, 80, 5, 0, 2),
@@ -159,7 +159,7 @@ VALUES
     ('Taverne de Nains','Bar dans lequel on recrute les futurs Nains', 40, 15, 0, 0, 100, 10, 0, 5 ),
     ('Tente', 'Endroit où les futurs combattants sont formés', 10, 4, 0, 0, 40, 15, 0, 6),
     ('Forge', 'Endroit où les Nerlk fabriquent leurs armes', 20, 20, 20, 0, 120, 0, 0, 6),
-    ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 80, 4, 0, 0, 260, 1, 0, 7);
+    ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 80, 4, 0, 0, 260, 1, 0, 7),
     ('Temple', 'Endroit où les Primotaures s''instruisent et se forme', 100, 12, 10, 30, 90, 20, 0, 7);
 
 INSERT INTO unit_type (name, description, price, required_intelligence, health, damage, accessible_race_id)
