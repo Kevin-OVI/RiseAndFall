@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.front.game.gamelist;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
@@ -105,7 +106,9 @@ public class GameListController implements ViewController {
             RiseAndFall.getClient().sendPacket(new PacketCreateOrJoinGame(this.raceChoiceBox.getValue(), gameId));
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du paquet de création ou de jointure de partie : ", e);
+            return;
         }
+        RiseAndFallApplication.switchToView(View.LOADING);
     }
 
     @Override
