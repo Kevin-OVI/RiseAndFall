@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.server;
 
+import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
@@ -12,10 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Classe responsable de la gestion de l'authentification des clients.
@@ -321,9 +319,5 @@ public class AuthenticationManager {
      */
     public synchronized void onClientDisconnected(SocketWrapper client) {
         this.userConnections.remove(client);
-    }
-
-    public void onChatMessage(SocketWrapper socketWrapper, PacketMessage packetMessage) {
-        System.out.println("Message de " + this.getUser(socketWrapper) + " : " + packetMessage.getMessage());
     }
 }

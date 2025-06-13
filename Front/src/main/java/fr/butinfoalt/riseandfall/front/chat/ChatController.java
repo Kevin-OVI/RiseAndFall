@@ -81,6 +81,7 @@ public class ChatController implements ViewController {
         if (currentChat == null || messageField.getText().trim().isEmpty()) {
             return;
         }
+
         String messageText = messageField.getText().trim();
         ChatMessage newMessage = new ChatMessage(currentChat, RiseAndFall.getPlayer(), messageText);
 
@@ -92,6 +93,7 @@ public class ChatController implements ViewController {
             Platform.runLater(() -> messageScrollPane.setVvalue(1.0));
         } catch (IOException e) {
             LogManager.logError("Impossible d'envoyer le packet de message", e);
+            showErrorMessage("Erreur lors de l'envoi du message.");
             return;
         }
     }
@@ -192,6 +194,7 @@ public class ChatController implements ViewController {
     }
 
     private void loadData() {
+        chatListView.getItems().clear();
         Collection<Chat> chats = RiseAndFall.getGame().getChats();
         chatListView.getItems().addAll(chats);
         for (Chat chat : chats) {
@@ -205,11 +208,22 @@ public class ChatController implements ViewController {
     }
 
     public void receiveMessage(ChatMessage message) {
+        // Cette méthode est maintenant appelée depuis Platform.runLater() dans RiseAndFallClient
         Chat chat = message.getChat();
         if (chat.equals(currentChat)) {
             addMessageToView(message);
             Platform.runLater(() -> messageScrollPane.setVvalue(1.0));
         }
         chatListView.refresh();
+    }
+
+    private void showErrorMessage(String errorText) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText(null);
+            alert.setContentText(errorText);
+            alert.showAndWait();
+        });
     }
 }
