@@ -8,20 +8,15 @@
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
       fx:controller="fr.butinfoalt.riseandfall.front.game.MainRunningGameController">
 
-    <!-- Bouton chat en haut à gauche -->
+    <ImageView fx:id="backgroundImageView" managed="false"/>
     <HBox alignment="TOP_LEFT">
         <Button fx:id="chatButton" onAction="#switchToChat" style="-fx-background-color: red; -fx-border-width: 0;">
             <graphic>
-                <ImageView fitHeight="30.0" fitWidth="30.0" preserveRatio="true">
-                    <!-- Remplacez par le chemin vers votre image de bulle de texte -->
-                    <image><Image url="/fr/butinfoalt/riseandfall/front/images/bubble.png"/></image>
-                    <!-- <image><Image url="@/path/to/your/chat-bubble-icon.png"/></image> -->
-                </ImageView>
+                <!-- Gros carré rouge pour tester le placement -->
+                <Pane style="-fx-background-color: red; -fx-min-width: 40; -fx-min-height: 40; -fx-max-width: 40; -fx-max-height: 40;"/>
             </graphic>
         </Button>
     </HBox>
-
-    <ImageView fx:id="backgroundImageView" managed="false"/>
     <VBox alignment="CENTER" spacing="20">
         <HBox alignment="TOP_CENTER" spacing="30">
             <VBox alignment="TOP_CENTER" spacing="10">
