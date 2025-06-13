@@ -143,7 +143,7 @@ VALUES
 INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, resistance, max_units, initial_amount, accessible_race_id)
 VALUES
     ('Carrière', 'Structure permettant d''extraire des ressources naturelles pour financer l''économie du royaume', 10, 0, 5, 0, 100, 0, 4, NULL),
-    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume mais nécessite de l''intelligence pour être débloquer, 20, 15, 10, 0, 120, 0, 0, NULL),
+    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume mais nécessite de l''intelligence pour être débloquer', 20, 15, 10, 0, 120, 0, 0, NULL),
     ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 100, 3, 1, NULL),
     ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 4, 80, 0, 1, NULL),
     ('Rampart','Sert de protection au royaume', 30, 10, 0, 0, 50, 0, 1, NULL),
@@ -174,8 +174,8 @@ VALUES
     ('Mage Elfique', 'Puissant mage', 80, 20, 15.0, 150.0, 4),
     ('Archer Elfique', 'Unité dangereuse des elfes',150,40, 100.0,200.0,4),
     ('Roi Mineur', 'Meilleurs des Nains', 50, 6, 35.0, 55.0, 5),
-    ('Nain Ultime''Les meilleurs parmis les meilleurs des Rois mineurs', 150, 20, 100.0, 150.0,5),
+    ('Nain Ultime''Les meilleurs parmis les meilleurs des Rois mineurs', 'DESCRIPTION À RÉDIGER', 150, 20, 100.0, 150.0,5),
     ('Mage Orc', 'Issue de l''union entre elfes et orc, il est puissant mais petit', 40, 15, 15.0, 100.0, 6),
     ('Berserker Nerlk', 'Unité de combat Nerlk, très puissante mais coûteuse', 150, 20, 110.0, 150.0, 6),
-    ('Minotaure', 'Issue du Labyrinthe ', 20, 20, 30.0, 70.0, 7);
+    ('Minotaure', 'Issue du Labyrinthe ', 20, 20, 30.0, 70.0, 7),
     ('Dieu Primotaures', 'Dieu des Primotaures, très puissant', 150, 50, 200.0, 300.0, 7);
