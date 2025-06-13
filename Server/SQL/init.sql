@@ -1,6 +1,5 @@
 -- Détruire les tables existantes
-DROP INDEX IF EXISTS idx_attack_player_order_player ON attack_player_order;
-DROP TABLE IF EXISTS attack_player_order_unit, attack_player_order, unit_creation_order, building_creation_order, unit_type, building_type, player, game, user_token, user, race;
+DROP TABLE IF EXISTS attack_player_order_unit, attack_player_order, unit_creation_order, building_creation_order, player_unit, player_building, unit_type, building_type, player, game, user_token, user, race;
 
 -- Créer les tables nécessaires
 CREATE TABLE race (
@@ -120,8 +119,6 @@ CREATE TABLE attack_player_order (
     FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (target_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
-
-CREATE INDEX idx_attack_player_order_player ON attack_player_order (player_id);
 
 CREATE TABLE attack_player_order_unit (
     order_id BIGINT UNSIGNED NOT NULL,
