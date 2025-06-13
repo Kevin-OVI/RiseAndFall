@@ -94,7 +94,6 @@ public class ChatController implements ViewController {
         } catch (IOException e) {
             LogManager.logError("Impossible d'envoyer le packet de message", e);
             showErrorMessage("Erreur lors de l'envoi du message.");
-            return;
         }
     }
 

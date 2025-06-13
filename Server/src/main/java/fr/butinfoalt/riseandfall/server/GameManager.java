@@ -441,7 +441,7 @@ public class GameManager {
             LogManager.logError("Le joueur avec l'ID " + packetMessage.getSenderId() + " n'existe pas.");
             return;
         }
-        int otherPlayerId = packetMessage.getReceiverId();
+        int otherPlayerId = packetMessage.getSenderId();
 
         ServerPlayer receiver = sender.getGame().getPlayers().stream()
                 .filter(player -> player.getId() == otherPlayerId)
