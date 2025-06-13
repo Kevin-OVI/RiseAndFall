@@ -86,7 +86,7 @@ public class ChatController implements ViewController {
         ChatMessage newMessage = new ChatMessage(currentChat, RiseAndFall.getPlayer(), messageText);
 
         try {
-            RiseAndFall.getClient().sendPacket(new PacketMessage(newMessage.getChat().getReceiver().getId(), RiseAndFall.getPlayer().getId(), messageText, newMessage.getTimestamp()));
+            RiseAndFall.getClient().sendPacket(new PacketMessage(RiseAndFall.getPlayer().getId(), newMessage.getChat().getReceiver().getId(), messageText, newMessage.getTimestamp()));
             currentChat.addMessage(newMessage);
             addMessageToView(newMessage);
             messageField.clear();

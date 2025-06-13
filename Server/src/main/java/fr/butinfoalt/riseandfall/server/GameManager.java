@@ -425,6 +425,7 @@ public class GameManager {
                                 message.getMessage(),
                                 message.getTimestamp()
                         );
+                        System.out.println("Envoie du message à : " + this.server.getAuthManager().getUser(connection).getUsername());
                         connection.sendPacket(packetMessage);
                     }
                 } catch (IOException e) {
@@ -464,6 +465,7 @@ public class GameManager {
                 java.util.Date currentDate = new Date();
                 long timestamp = currentDate.getTime();
                 connection.sendPacket(new PacketMessage(sender.getId(), receiver.getId(), packetMessage.getMessage(), timestamp));
+                System.out.println("Envoie du message à : " + this.server.getAuthManager().getUser(connection).getUsername());
             } catch (IOException e) {
                 LogManager.logError("Erreur lors de l'envoi du message au destinataire", e);
             }
