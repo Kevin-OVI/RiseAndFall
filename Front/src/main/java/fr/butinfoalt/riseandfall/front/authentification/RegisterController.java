@@ -13,6 +13,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 import java.io.IOException;
 
@@ -115,5 +117,12 @@ public class RegisterController implements ViewController {
             return;
         }
         RiseAndFallApplication.switchToView(View.LOADING);
+    }
+
+    public void handleEnter(KeyEvent keyEvent) {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
+            keyEvent.consume();
+            this.register();
+        }
     }
 }
