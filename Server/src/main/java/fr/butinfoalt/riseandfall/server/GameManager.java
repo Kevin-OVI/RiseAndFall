@@ -2,11 +2,6 @@ package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
-import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
-import fr.butinfoalt.riseandfall.gamelogic.order.OrderAttackPlayer;
-import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
-import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
@@ -298,7 +293,6 @@ public class GameManager {
         int[] playerIds = new int[size];
         int index = 0;
 
-        // Créer les chats et collecter les IDs des autres joueurs
         for (ServerPlayer otherPlayer : game.getPlayers()) {
             if (otherPlayer != player) {
                 chats[index] = new Chat(index + 1, otherPlayer);
@@ -307,7 +301,6 @@ public class GameManager {
             }
         }
 
-        // Construire la requête SQL avec les IDs des joueurs
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT sender_player_id, receiver_player_id, message, sent_at ");
         sqlBuilder.append("FROM chat_message ");
@@ -418,18 +411,13 @@ public class GameManager {
     }
 
     private void sendChat(SocketWrapper connection, ServerPlayer player, ServerGame game) {
-        // Récupérer tous les chats avec leurs messages
         Chat[] chats = getChatForPlayer(player, game);
 
-        // Envoyer tous les chats un par un
         for (Chat chat : chats) {
-            for (SocketWrapper conn : this.getConnectionsFor(player)) {
                 try {
-                    // Envoyer d'abord le paquet de chat
-                    conn.sendPacket(new PacketChats(chat.getId(), chat.getReceiver().getId()));
-                    System.out.println("Envoi du paquet de chat " + chat.getId() + " au joueur " + player.getUser().getUsername() + " à la connexion " + conn.getName());
+                    connection.sendPacket(new PacketChats(chat.getId(), chat.getReceiver().getId()));
+                    System.out.println("Envoi du paquet de chat " + chat.getId() + " au joueur " + player.getUser().getUsername() + " à la connexion " + connection.getName());
 
-                    // Ensuite envoyer tous les messages de ce chat un par un
                     for (ChatMessage message : chat.getMessages()) {
                         PacketMessage packetMessage = new PacketMessage(
                                 chat.getId(),
@@ -437,18 +425,16 @@ public class GameManager {
                                 message.getMessage(),
                                 message.getTimestamp()
                         );
-                        conn.sendPacket(packetMessage);
+                        connection.sendPacket(packetMessage);
                     }
                 } catch (IOException e) {
-                    LogManager.logError("Erreur lors de l'envoi du paquet de chat au joueur " + player.getUser().getUsername() + " à la connexion " + conn.getName(), e);
+                    LogManager.logError("Erreur lors de l'envoi du paquet de chat au joueur " + player.getUser().getUsername() + " à la connexion " + connection.getName(), e);
                 }
-            }
         }
     }
 
     public void onChatMessage(SocketWrapper socketWrapper, PacketMessage packetMessage) {
         System.out.println("Message de " + this.server.getAuthManager().getUser(socketWrapper) + " : " + packetMessage.getMessage());
-        // Ajouter le message en base de donnée et si l'utilisateur est connecté, lui envoyer le message
         ServerPlayer sender = this.server.getUserManager().getPlayer(packetMessage.getSenderId());
         if (sender == null) {
             LogManager.logError("Le joueur avec l'ID " + packetMessage.getSenderId() + " n'existe pas.");
@@ -464,7 +450,6 @@ public class GameManager {
             LogManager.logError("Le joueur destinataire avec l'ID " + otherPlayerId + " n'existe pas.");
             return;
         }
-        // Enregistrer le message dans la base de données
         try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO chat_message (sender_player_id, receiver_player_id, message) VALUES (?, ?, ?)")) {
             statement.setInt(1, sender.getId());
             statement.setInt(2, receiver.getId());
@@ -474,7 +459,6 @@ public class GameManager {
             LogManager.logError("Erreur lors de l'enregistrement du message en base de données", e);
         }
 
-        // Envoyer le message au destinataire
         getConnectionsFor(receiver).forEach(connection -> {
             try {
                 java.util.Date currentDate = new Date();
