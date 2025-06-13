@@ -142,11 +142,11 @@ VALUES
 
 INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, resistance, max_units, initial_amount, accessible_race_id)
 VALUES
-    ('Carrière', 'Structure permettant d''extraire des ressources minérales pour financer l''économie du royaume', 10, 0, 5, 0, 100, 0, 4, NULL),
-    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume', 20, 15, 10, 0, 120, 0, 0, NULL),
+    ('Carrière', 'Structure permettant d''extraire des ressources naturelles pour financer l''économie du royaume', 10, 0, 5, 0, 100, 0, 4, NULL),
+    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume mais nécessite de l''intelligence pour être débloquer, 20, 15, 10, 0, 120, 0, 0, NULL),
     ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 100, 3, 1, NULL),
-    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 80, 0, 0, NULL),
-    ('Rampart','Sert de protection au royaume', 60, 10, 0, 0, 50, 0, 1, NULL),
+    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 4, 80, 0, 1, NULL),
+    ('Rampart','Sert de protection au royaume', 30, 10, 0, 0, 50, 0, 1, NULL),
     ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 15, 10, 0, 0, 80, 15, 0, 1),
     ('Tour obscur','Ancienne tour de mage rempli de rituel sinistre',40 ,4 ,0 ,20 ,150 ,0 ,0 ,1),
     ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 6, 0, 0, 80, 5, 0, 2),
@@ -158,17 +158,20 @@ VALUES
     ('Mine de Nains', 'Mine d''or où les nains adultes passent 100% de leurs temps', 30, 6, 20, 0, 180, 0, 0, 5),
     ('Taverne de Nains','Bar dans lequel on recrute les futurs Nains', 40, 15, 0, 0, 100, 10, 0, 5 ),
     ('Tente', 'Endroit où les futurs combattants sont formés', 10, 4, 0, 0, 40, 15, 0, 6),
-    ('Forge', 'Endroit où les Nerlk fabriquent leurs armes', 20, 20, 20, 0, 120, 0, 0, 6),
+    ('Forge', 'Endroit où les Nerlk fabriquent leurs armes', 20, 20, 40, 0, 120, 0, 0, 6),
     ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 80, 4, 0, 0, 260, 1, 0, 7),
     ('Temple', 'Endroit où les Primotaures s''instruisent et se forme', 100, 12, 10, 30, 90, 20, 0, 7);
 
 INSERT INTO unit_type (name, description, price, required_intelligence, health, damage, accessible_race_id)
 VALUES
-    ('Guerrier', 'Une unité de combat robuste et polyvalente', 10, 0, 10.0, 20.0, NULL),
-    ('Génie', 'Un combattant expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 20, 20, 30.0, 50.0, 2),
+    ('Guerrier', 'Une unité de combat faible et polyvalente', 8.0, 0, 10.0, 20.0, NULL),
+    ('Ingénieur de combat', 'Un combattant expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 20, 20, 30.0, 50.0, 2),
+    ('Héros Légendaire','L''un des humains les plus puissant du monde', 110, 40.0, 110.0, 200.0, 2),
     ('Zombie', 'Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels avec ses griffes et ses morsures infectieuses', 30, 10, 10.0, 35.0, 1),
+    ('Nécromancien','Un ancien héro humain devenue mort et invoquant la mort derrière lui', 100, 40, 100.0, 210.0, 3),
     ('Uruk Noir', 'Créature imposante et très puissante mais débile', 100, 10, 80.0, 30.0, 3),
+    ('Chef des Orcs','Chefs des Orcs ils sont extrenement puissants', 150, 20, 120.0, 50.0, 3),
     ('Mage Elfique', 'Puissant mage', 80, 20, 15.0, 150.0, 4),
     ('Roi Mineur', 'Meilleurs des Nains', 50, 6, 35.0, 55.0, 5),
-    ('Mage Orc', 'Issue de l''union entre elfes et orc, il est puissant mais petit', 30, 15, 15.0, 100.0, 6),
-    ('Minotaure', 'Issue du Labyrinthe', 20, 20, 30.0, 70.0, 7);
+    ('Mage Orc', 'Issue de l''union entre elfes et orc, il est puissant mais petit', 40, 15, 15.0, 100.0, 6),
+    ('Minotaure', 'Issue du Labyrinthe ', 20, 20, 30.0, 70.0, 7);
