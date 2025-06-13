@@ -66,6 +66,15 @@ public class ClientGame extends Game {
         return Collections.unmodifiableCollection(this.otherPlayers.values());
     }
 
+    /**
+     * Obtient le nombre de joueurs découverts par le client.
+     *
+     * @return Le nombre de joueurs découverts.
+     */
+    public int getOtherPlayersCount() {
+        return this.otherPlayers.size();
+    }
+
     public void addChat(Chat chat) {
         this.chats.put(chat.getId(), chat);
     }

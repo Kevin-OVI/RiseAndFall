@@ -8,12 +8,15 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Timer;
 
 /**
  * Classe principale du jeu RiseAndFall coté client.
  * Stocke le joueur actuel et les opérations avec lui.
  */
 public class RiseAndFall {
+    public static final Timer TIMER = new Timer();
+
     /**
      * Instance du joueur contrôlé par ce client.
      */
@@ -66,12 +69,7 @@ public class RiseAndFall {
      */
     public static void initSocketClient() {
         client = new RiseAndFallClient();
-
-        try {
-            client.connect();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        client.scheduledConnect();
     }
 
     /**

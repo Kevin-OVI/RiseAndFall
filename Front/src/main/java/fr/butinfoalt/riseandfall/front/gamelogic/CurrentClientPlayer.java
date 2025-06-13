@@ -1,12 +1,12 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.front.ClientDataDeserializer;
-import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
+import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
 import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
-import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.packets.data.OrderDeserializationContext;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 
 import java.io.IOException;
 
@@ -37,16 +37,10 @@ public class CurrentClientPlayer extends ClientPlayer {
     public void updateModifiableData(ReadHelper readHelper) throws IOException {
         this.setGoldAmount(readHelper.readFloat());
         this.setIntelligence(readHelper.readFloat());
-        int size = this.buildingMap.size();
-        for (int i = 0; i < size; i++) {
-            BuildingType buildingType = Identifiable.getById(ServerData.getBuildingTypes(), readHelper.readInt());
-            this.buildingMap.set(buildingType, readHelper.readInt());
-        }
-        size = this.unitMap.size();
-        for (int i = 0; i < size; i++) {
-            UnitType unitType = Identifiable.getById(ServerData.getUnitTypes(), readHelper.readInt());
-            this.unitMap.set(unitType, readHelper.readInt());
-        }
-        this.updatePendingOrders(deserializeOrders(readHelper, new OrderDeserializationContext(this, ClientDataDeserializer.INSTANCE)));
+        ObjectIntMap.deserialize(this.getBuildingMap(), readHelper, value -> Identifiable.getById(ServerData.getBuildingTypes(), value));
+        ObjectIntMap.deserialize(this.getUnitMap(), readHelper, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
+        ObjectIntMap.deserialize(this.getPendingUnitsCreation(), readHelper, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
+        ObjectIntMap.deserialize(this.getPendingBuildingsCreation(), readHelper, value -> Identifiable.getById(ServerData.getBuildingTypes(), value));
+        this.setPendingAttacks(readHelper.readSerializableList(AttackPlayerOrderData::new, new OrderDeserializationContext(this, ClientDataDeserializer.INSTANCE)));
     }
 }

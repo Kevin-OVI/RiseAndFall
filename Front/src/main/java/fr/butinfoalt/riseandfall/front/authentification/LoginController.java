@@ -13,6 +13,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 import java.io.IOException;
 
@@ -94,6 +96,13 @@ public class LoginController implements ViewController {
         } else {
             this.errorMessage.setText(error);
             this.errorMessage.setVisible(true);
+        }
+    }
+
+    public void handleEnter(KeyEvent keyEvent) {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
+            keyEvent.consume();
+            this.login();
         }
     }
 }

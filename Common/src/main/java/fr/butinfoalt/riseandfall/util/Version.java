@@ -71,7 +71,7 @@ public class Version implements Comparable<Version>, ISerializable {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture des données.
      */
     public Version(ReadHelper readHelper) throws IOException {
-        this.version = readHelper.readIntArray();
+        this.version = readHelper.readSizedIntArray();
     }
 
     /**
@@ -142,7 +142,7 @@ public class Version implements Comparable<Version>, ISerializable {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de l'écriture des données.
      */
     public void toBytes(WriteHelper writeHelper) throws IOException {
-        writeHelper.writeIntArray(this.version);
+        writeHelper.writeSizedIntArray(this.version);
     }
 
     /**

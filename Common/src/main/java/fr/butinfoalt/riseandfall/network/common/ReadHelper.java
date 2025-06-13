@@ -35,7 +35,7 @@ public class ReadHelper {
      * @return Un tableau d'octets contenant les données lues.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public byte[] readNBytes(int len) throws IOException {
+    public byte[] readBytesArray(int len) throws IOException {
         byte[] buffer = this.inputStream.readNBytes(len);
         if (buffer.length != len) {
             throw new SocketException("Socket closed");
@@ -60,7 +60,7 @@ public class ReadHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
     public byte readByte() throws IOException {
-        return this.readNBytes(1)[0];
+        return this.readBytesArray(1)[0];
     }
 
     /**
@@ -70,7 +70,7 @@ public class ReadHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
     public short readShort() throws IOException {
-        return ByteBuffer.wrap(this.readNBytes(2)).getShort();
+        return ByteBuffer.wrap(this.readBytesArray(2)).getShort();
     }
 
     /**
@@ -80,7 +80,7 @@ public class ReadHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
     public int readInt() throws IOException {
-        return ByteBuffer.wrap(this.readNBytes(4)).getInt();
+        return ByteBuffer.wrap(this.readBytesArray(4)).getInt();
     }
 
     /**
@@ -90,7 +90,7 @@ public class ReadHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
     public long readLong() throws IOException {
-        return ByteBuffer.wrap(this.readNBytes(8)).getLong();
+        return ByteBuffer.wrap(this.readBytesArray(8)).getLong();
     }
 
     /**
@@ -100,7 +100,7 @@ public class ReadHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
     public float readFloat() throws IOException {
-        return ByteBuffer.wrap(this.readNBytes(4)).getFloat();
+        return ByteBuffer.wrap(this.readBytesArray(4)).getFloat();
     }
 
     /**
@@ -110,7 +110,7 @@ public class ReadHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
     public double readDouble() throws IOException {
-        return ByteBuffer.wrap(this.readNBytes(8)).getDouble();
+        return ByteBuffer.wrap(this.readBytesArray(8)).getDouble();
     }
 
     /**
@@ -120,21 +120,20 @@ public class ReadHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
     public char readChar() throws IOException {
-        return ByteBuffer.wrap(this.readNBytes(2)).getChar();
+        return ByteBuffer.wrap(this.readBytesArray(2)).getChar();
     }
 
     /**
      * Lit un tableau de booléens à partir du flux d'entrée.
      * Les booléens sont stockés sous forme de bits dans un tableau d'octets pour économiser de l'espace.
      *
+     * @param size La taille du tableau de booléens à lire.
      * @return Le tableau de booléens lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public boolean[] readBooleanArray() throws IOException {
-        int size = this.readInt();
-        if (size < 0) return null;
+    public boolean[] readBooleanArray(int size) throws IOException {
         boolean[] booleans = new boolean[size];
-        byte[] bytes = this.readNBytes((size + 7) / 8);
+        byte[] bytes = this.readBytesArray((size + 7) / 8);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < 8 && i < size; j++) {
                 booleans[i] = (bytes[i / 8] & 1 << j) != 0;
@@ -145,28 +144,41 @@ public class ReadHelper {
     }
 
     /**
+     * Lit un tableau de booléens à partir du flux d'entrée.
+     * Le tableau est précédé de sa taille sous forme d'entier. Si la taille est négative, le tableau est considéré comme nul.
+     *
+     * @return Le tableau de booléens lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
+    public boolean[] readSizedBooleanArray() throws IOException {
+        int size = this.readInt();
+        if (size < 0) return null;
+        return this.readBooleanArray(size);
+    }
+
+    /**
      * Lit un tableau d'octets à partir du flux d'entrée.
+     * Le tableau est précédé de sa taille sous forme d'entier. Si la taille est négative, le tableau est considéré comme nul.
      *
      * @return Le tableau d'octets lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public byte[] readByteArray() throws IOException {
+    public byte[] readSizedByteArray() throws IOException {
         int size = this.readInt();
         if (size < 0) return null;
-        return this.readNBytes(size);
+        return this.readBytesArray(size);
     }
 
     /**
      * Lit un tableau d'entiers courts à partir du flux d'entrée.
      *
+     * @param size La taille du tableau d'entiers courts à lire.
      * @return Le tableau d'entiers courts lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public short[] readShortArray() throws IOException {
-        int size = this.readInt();
-        if (size < 0) return null;
+    public short[] readShortArray(int size) throws IOException {
         short[] shorts = new short[size];
-        ByteBuffer buffer = ByteBuffer.wrap(this.readNBytes(size * 2));
+        ByteBuffer buffer = ByteBuffer.wrap(this.readBytesArray(size * 2));
         for (int i = 0; i < size; i++) {
             shorts[i] = buffer.getShort();
         }
@@ -174,16 +186,28 @@ public class ReadHelper {
     }
 
     /**
+     * Lit un tableau d'entiers courts à partir du flux d'entrée.
+     * Le tableau est précédé de sa taille sous forme d'entier. Si la taille est négative, le tableau est considéré comme nul.
+     *
+     * @return Le tableau d'entiers courts lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
+    public short[] readSizedShortArray() throws IOException {
+        int size = this.readInt();
+        if (size < 0) return null;
+        return this.readShortArray(size);
+    }
+
+    /**
      * Lit un tableau d'entiers à partir du flux d'entrée.
      *
+     * @param size La taille du tableau d'entiers à lire.
      * @return Le tableau d'entiers lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public int[] readIntArray() throws IOException {
-        int size = this.readInt();
-        if (size < 0) return null;
+    public int[] readIntArray(int size) throws IOException {
         int[] ints = new int[size];
-        ByteBuffer buffer = ByteBuffer.wrap(this.readNBytes(size * 4));
+        ByteBuffer buffer = ByteBuffer.wrap(this.readBytesArray(size * 4));
         for (int i = 0; i < size; i++) {
             ints[i] = buffer.getInt();
         }
@@ -191,16 +215,28 @@ public class ReadHelper {
     }
 
     /**
+     * Lit un tableau d'entiers à partir du flux d'entrée.
+     * Le tableau est précédé de sa taille sous forme d'entier. Si la taille est négative, le tableau est considéré comme nul.
+     *
+     * @return Le tableau d'entiers lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
+    public int[] readSizedIntArray() throws IOException {
+        int size = this.readInt();
+        if (size < 0) return null;
+        return this.readIntArray(size);
+    }
+
+    /**
      * Lit un tableau d'entiers longs à partir du flux d'entrée.
      *
+     * @param size La taille du tableau d'entiers longs à lire.
      * @return Le tableau d'entiers longs lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public long[] readLongArray() throws IOException {
-        int size = this.readInt();
-        if (size < 0) return null;
+    public long[] readLongArray(int size) throws IOException {
         long[] longs = new long[size];
-        ByteBuffer buffer = ByteBuffer.wrap(this.readNBytes(size * 8));
+        ByteBuffer buffer = ByteBuffer.wrap(this.readBytesArray(size * 8));
         for (int i = 0; i < size; i++) {
             longs[i] = buffer.getLong();
         }
@@ -208,16 +244,28 @@ public class ReadHelper {
     }
 
     /**
+     * Lit un tableau d'entiers longs à partir du flux d'entrée.
+     * Le tableau est précédé de sa taille sous forme d'entier. Si la taille est négative, le tableau est considéré comme nul.
+     *
+     * @return Le tableau d'entiers longs lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
+    public long[] readSizedLongArray() throws IOException {
+        int size = this.readInt();
+        if (size < 0) return null;
+        return this.readLongArray(size);
+    }
+
+    /**
      * Lit un tableau de flottants à partir du flux d'entrée.
      *
+     * @param size La taille du tableau de flottants à lire.
      * @return Le tableau de flottants lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public float[] readFloatArray() throws IOException {
-        int size = this.readInt();
-        if (size < 0) return null;
+    public float[] readFloatArray(int size) throws IOException {
         float[] floats = new float[size];
-        ByteBuffer buffer = ByteBuffer.wrap(this.readNBytes(size * 4));
+        ByteBuffer buffer = ByteBuffer.wrap(this.readBytesArray(size * 4));
         for (int i = 0; i < size; i++) {
             floats[i] = buffer.getFloat();
         }
@@ -225,16 +273,28 @@ public class ReadHelper {
     }
 
     /**
+     * Lit un tableau de flottants à partir du flux d'entrée.
+     * Le tableau est précédé de sa taille sous forme d'entier. Si la taille est négative, le tableau est considéré comme nul.
+     *
+     * @return Le tableau de flottants lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
+    public float[] readSizedFloatArray() throws IOException {
+        int size = this.readInt();
+        if (size < 0) return null;
+        return this.readFloatArray(size);
+    }
+
+    /**
      * Lit un tableau de doubles à partir du flux d'entrée.
      *
+     * @param size La taille du tableau de doubles à lire.
      * @return Le tableau de doubles lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public double[] readDoubleArray() throws IOException {
-        int size = this.readInt();
-        if (size < 0) return null;
+    public double[] readDoubleArray(int size) throws IOException {
         double[] doubles = new double[size];
-        ByteBuffer buffer = ByteBuffer.wrap(this.readNBytes(size * 8));
+        ByteBuffer buffer = ByteBuffer.wrap(this.readBytesArray(size * 8));
         for (int i = 0; i < size; i++) {
             doubles[i] = buffer.getDouble();
         }
@@ -242,20 +302,45 @@ public class ReadHelper {
     }
 
     /**
+     * Lit un tableau de doubles à partir du flux d'entrée.
+     * Le tableau est précédé de sa taille sous forme d'entier. Si la taille est négative, le tableau est considéré comme nul.
+     *
+     * @return Le tableau de doubles lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
+    public double[] readSizedDoubleArray() throws IOException {
+        int size = this.readInt();
+        if (size < 0) return null;
+        return this.readDoubleArray(size);
+    }
+
+    /**
      * Lit un tableau de caractères à partir du flux d'entrée.
      *
+     * @param size La taille du tableau de caractères à lire.
      * @return Le tableau de caractères lu.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
-    public char[] readCharArray() throws IOException {
-        int size = this.readInt();
-        if (size < 0) return null;
+    public char[] readCharArray(int size) throws IOException {
         char[] chars = new char[size];
-        ByteBuffer buffer = ByteBuffer.wrap(this.readNBytes(size * 2));
+        ByteBuffer buffer = ByteBuffer.wrap(this.readBytesArray(size * 2));
         for (int i = 0; i < size; i++) {
             chars[i] = buffer.getChar();
         }
         return chars;
+    }
+
+    /**
+     * Lit un tableau de caractères à partir du flux d'entrée.
+     * Le tableau est précédé de sa taille sous forme d'entier. Si la taille est négative, le tableau est considéré comme nul.
+     *
+     * @return Le tableau de caractères lu.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
+     */
+    public char[] readSizedCharArray() throws IOException {
+        int size = this.readInt();
+        if (size < 0) return null;
+        return this.readCharArray(size);
     }
 
     /**
@@ -266,7 +351,7 @@ public class ReadHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture.
      */
     public String readString() throws IOException {
-        byte[] b = this.readByteArray();
+        byte[] b = this.readSizedByteArray();
         if (b == null) return null;
         return new String(b, StandardCharsets.UTF_8);
     }
