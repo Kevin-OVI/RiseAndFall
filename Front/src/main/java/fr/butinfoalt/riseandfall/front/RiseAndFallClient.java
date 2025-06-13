@@ -246,6 +246,7 @@ public class RiseAndFallClient extends BaseSocketClient {
 
         if (this.shouldReconnect && this.reconectTask == null) {
             LogManager.logMessage("Disconnected, reconnecting in 2 seconds...");
+            Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOADING));
             this.startConnectionLoop(2000);
         }
     }

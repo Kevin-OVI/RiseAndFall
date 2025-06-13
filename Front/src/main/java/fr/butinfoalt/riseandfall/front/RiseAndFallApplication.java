@@ -134,6 +134,7 @@ public class RiseAndFallApplication extends Application {
             } catch (IOException e) {
                 LogManager.logError("Erreur lors de la fermeture du client", e);
             }
+            RiseAndFall.TIMER.cancel();
         }
     }
 }
