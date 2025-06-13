@@ -4,6 +4,7 @@ import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
+import fr.butinfoalt.riseandfall.server.ServerPlayer;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 
 import java.util.HashMap;
@@ -28,17 +29,17 @@ public class AttackManager {
     /**
      * Attaques dirigées vers la cible, association entre les joueurs attaquants et les types d'unités utilisées par chacun d'eux.
      */
-    private final Map<Player, ObjectIntMap<UnitType>> attacksTowardsTarget;
+    private final Map<ServerPlayer, ObjectIntMap<UnitType>> attacksTowardsTarget;
 
     /**
      * Dégâts infligés par chaque attaquant
      */
-    private final Map<Player, Float> attackersDamage;
+    private final Map<ServerPlayer, Float> attackersDamage;
 
     /**
      * Santé de chaque attaquant
      */
-    private final Map<Player, Float> attackersHealth;
+    private final Map<ServerPlayer, Float> attackersHealth;
 
     /**
      * Dégâts totaux infligés par tous les attaquants
@@ -88,7 +89,7 @@ public class AttackManager {
      * @param targetDefenseUnits   Unités de défense de la cible, associées à leur nombre.
      * @param attacksTowardsTarget Attaques dirigées vers la cible, association entre les joueurs attaquants et les types d'unités utilisées par chacun d'eux.
      */
-    public AttackManager(Player targetPlayer, ObjectIntMap<UnitType> targetDefenseUnits, Map<Player, ObjectIntMap<UnitType>> attacksTowardsTarget) {
+    public AttackManager(Player targetPlayer, ObjectIntMap<UnitType> targetDefenseUnits, Map<ServerPlayer, ObjectIntMap<UnitType>> attacksTowardsTarget) {
         this.targetPlayer = targetPlayer;
         this.targetDefenseUnits = targetDefenseUnits;
         this.attacksTowardsTarget = attacksTowardsTarget;
@@ -125,10 +126,10 @@ public class AttackManager {
      *
      * @return Une map associant chaque attaquant à ses dégâts totaux.
      */
-    private Map<Player, Float> calculateAttackersDamage() {
-        Map<Player, Float> attackersDamage = new HashMap<>();
-        for (Map.Entry<Player, ObjectIntMap<UnitType>> entry : this.attacksTowardsTarget.entrySet()) {
-            Player attacker = entry.getKey();
+    private Map<ServerPlayer, Float> calculateAttackersDamage() {
+        Map<ServerPlayer, Float> attackersDamage = new HashMap<>();
+        for (Map.Entry<ServerPlayer, ObjectIntMap<UnitType>> entry : this.attacksTowardsTarget.entrySet()) {
+            ServerPlayer attacker = entry.getKey();
             attackersDamage.put(attacker, calculateUnitsAttackDamage(entry.getValue(), attacker.getRace()));
         }
         return attackersDamage;
@@ -139,10 +140,10 @@ public class AttackManager {
      *
      * @return Une map associant chaque attaquant à sa santé totale.
      */
-    private Map<Player, Float> calculateAttackersHealth() {
-        Map<Player, Float> attackersHealth = new HashMap<>();
-        for (Map.Entry<Player, ObjectIntMap<UnitType>> entry : this.attacksTowardsTarget.entrySet()) {
-            Player attacker = entry.getKey();
+    private Map<ServerPlayer, Float> calculateAttackersHealth() {
+        Map<ServerPlayer, Float> attackersHealth = new HashMap<>();
+        for (Map.Entry<ServerPlayer, ObjectIntMap<UnitType>> entry : this.attacksTowardsTarget.entrySet()) {
+            ServerPlayer attacker = entry.getKey();
             attackersHealth.put(attacker, calculateUnitsHealth(entry.getValue(), attacker.getRace()));
         }
         return attackersHealth;
@@ -191,8 +192,8 @@ public class AttackManager {
     void applyAttackersLosses() {
         // Si aucun dégât n'est infligé par les unités de la cible, il n'y a pas de pertes à appliquer.
         if (this.totalTargetDamage <= 0) return;
-        for (Map.Entry<Player, Float> entry : this.attackersHealth.entrySet()) {
-            Player attacker = entry.getKey();
+        for (Map.Entry<ServerPlayer, Float> entry : this.attackersHealth.entrySet()) {
+            ServerPlayer attacker = entry.getKey();
             float attackerUnitsHealth = entry.getValue();
             float damageTowardsAttacker = crossProduct(attackerUnitsHealth, this.totalAttackersUnitsHealth, this.totalTargetDamage);
             if (damageTowardsAttacker > entry.getValue()) {

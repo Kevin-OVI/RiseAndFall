@@ -111,11 +111,6 @@ public class WriteHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
     public void writeBooleanArray(boolean[] booleans) throws IOException {
-        if (booleans == null) {
-            this.writeInt(-1);
-            return;
-        }
-        this.writeInt(booleans.length);
         byte[] converted = new byte[(booleans.length + 7) / 8];
         for (int i = 0; i < booleans.length; i++) {
             for (int j = 0; j < 8 && i < booleans.length; j++) {
@@ -129,18 +124,45 @@ public class WriteHelper {
     }
 
     /**
+     * Écrit un tableau de booléens dans le flux de sortie, précédé de la taille du tableau.
+     * Si le tableau est nul, -1 est écrit pour indiquer l'absence de données.
+     *
+     * @param booleans Le tableau de booléens à écrire.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
+    public void writeSizedBooleanArray(boolean[] booleans) throws IOException {
+        if (booleans == null) {
+            this.writeInt(-1);
+            return;
+        }
+        this.writeInt(booleans.length);
+        this.writeBooleanArray(booleans);
+    }
+
+    /**
      * Écrit un tableau d'octets dans le flux de sortie.
      *
      * @param bytes Le tableau d'octets à écrire.
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
     public void writeByteArray(byte[] bytes) throws IOException {
+        this.outputStream.write(bytes);
+    }
+
+    /**
+     * Écrit un tableau d'octets dans le flux de sortie, précédé de la taille du tableau.
+     * Si le tableau est nul, -1 est écrit pour indiquer l'absence de données.
+     *
+     * @param bytes Le tableau d'octets à écrire.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
+    public void writeSizedByteArray(byte[] bytes) throws IOException {
         if (bytes == null) {
             this.writeInt(-1);
             return;
         }
         this.writeInt(bytes.length);
-        this.outputStream.write(bytes);
+        this.writeByteArray(bytes);
     }
 
     /**
@@ -150,16 +172,27 @@ public class WriteHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
     public void writeShortArray(short[] shorts) throws IOException {
-        if (shorts == null) {
-            this.writeInt(-1);
-            return;
-        }
-        this.writeInt(shorts.length);
         ByteBuffer buffer = ByteBuffer.allocate(shorts.length * 2);
         for (short s : shorts) {
             buffer.putShort(s);
         }
         this.outputStream.write(buffer.array());
+    }
+
+    /**
+     * Écrit un tableau d'entiers courts dans le flux de sortie, précédé de la taille du tableau.
+     * Si le tableau est nul, -1 est écrit pour indiquer l'absence de données.
+     *
+     * @param shorts Le tableau d'entiers courts à écrire.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
+    public void writeSizedShortArray(short[] shorts) throws IOException {
+        if (shorts == null) {
+            this.writeInt(-1);
+            return;
+        }
+        this.writeInt(shorts.length);
+        this.writeShortArray(shorts);
     }
 
     /**
@@ -169,16 +202,27 @@ public class WriteHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
     public void writeIntArray(int[] ints) throws IOException {
-        if (ints == null) {
-            this.writeInt(-1);
-            return;
-        }
-        this.writeInt(ints.length);
         ByteBuffer buffer = ByteBuffer.allocate(ints.length * 4);
         for (int i : ints) {
             buffer.putInt(i);
         }
         this.outputStream.write(buffer.array());
+    }
+
+    /**
+     * Écrit un tableau d'entiers dans le flux de sortie, précédé de la taille du tableau.
+     * Si le tableau est nul, -1 est écrit pour indiquer l'absence de données.
+     *
+     * @param ints Le tableau d'entiers à écrire.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
+    public void writeSizedIntArray(int[] ints) throws IOException {
+        if (ints == null) {
+            this.writeInt(-1);
+            return;
+        }
+        this.writeInt(ints.length);
+        this.writeIntArray(ints);
     }
 
     /**
@@ -188,16 +232,27 @@ public class WriteHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
     public void writeLongArray(long[] longs) throws IOException {
-        if (longs == null) {
-            this.writeInt(-1);
-            return;
-        }
-        this.writeInt(longs.length);
         ByteBuffer buffer = ByteBuffer.allocate(longs.length * 8);
         for (long l : longs) {
             buffer.putLong(l);
         }
         this.outputStream.write(buffer.array());
+    }
+
+    /**
+     * Écrit un tableau d'entiers longs dans le flux de sortie, précédé de la taille du tableau.
+     * Si le tableau est nul, -1 est écrit pour indiquer l'absence de données.
+     *
+     * @param longs Le tableau d'entiers longs à écrire.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
+    public void writeSizedLongArray(long[] longs) throws IOException {
+        if (longs == null) {
+            this.writeInt(-1);
+            return;
+        }
+        this.writeInt(longs.length);
+        this.writeLongArray(longs);
     }
 
     /**
@@ -207,16 +262,27 @@ public class WriteHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
     public void writeFloatArray(float[] floats) throws IOException {
-        if (floats == null) {
-            this.writeInt(-1);
-            return;
-        }
-        this.writeInt(floats.length);
         ByteBuffer buffer = ByteBuffer.allocate(floats.length * 4);
         for (float f : floats) {
             buffer.putFloat(f);
         }
         this.outputStream.write(buffer.array());
+    }
+
+    /**
+     * Écrit un tableau de flottants dans le flux de sortie, précédé de la taille du tableau.
+     * Si le tableau est nul, -1 est écrit pour indiquer l'absence de données.
+     *
+     * @param floats Le tableau de flottants à écrire.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
+    public void writeSizedFloatArray(float[] floats) throws IOException {
+        if (floats == null) {
+            this.writeInt(-1);
+            return;
+        }
+        this.writeInt(floats.length);
+        this.writeFloatArray(floats);
     }
 
     /**
@@ -226,16 +292,27 @@ public class WriteHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
     public void writeDoubleArray(double[] doubles) throws IOException {
-        if (doubles == null) {
-            this.writeInt(-1);
-            return;
-        }
-        this.writeInt(doubles.length);
         ByteBuffer buffer = ByteBuffer.allocate(doubles.length * 8);
         for (double d : doubles) {
             buffer.putDouble(d);
         }
         this.outputStream.write(buffer.array());
+    }
+
+    /**
+     * Écrit un tableau de doubles dans le flux de sortie, précédé de la taille du tableau.
+     * Si le tableau est nul, -1 est écrit pour indiquer l'absence de données.
+     *
+     * @param doubles Le tableau de doubles à écrire.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
+    public void writeSizedDoubleArray(double[] doubles) throws IOException {
+        if (doubles == null) {
+            this.writeInt(-1);
+            return;
+        }
+        this.writeInt(doubles.length);
+        this.writeDoubleArray(doubles);
     }
 
     /**
@@ -245,16 +322,27 @@ public class WriteHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
     public void writeCharArray(char[] chars) throws IOException {
-        if (chars == null) {
-            this.writeInt(-1);
-            return;
-        }
-        this.writeInt(chars.length);
         ByteBuffer buffer = ByteBuffer.allocate(chars.length * 2);
         for (char c : chars) {
             buffer.putChar(c);
         }
         this.outputStream.write(buffer.array());
+    }
+
+    /**
+     * Écrit un tableau de caractères dans le flux de sortie, précédé de la taille du tableau.
+     * Si le tableau est nul, -1 est écrit pour indiquer l'absence de données.
+     *
+     * @param chars Le tableau de caractères à écrire.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
+    public void writeSizedCharArray(char[] chars) throws IOException {
+        if (chars == null) {
+            this.writeInt(-1);
+            return;
+        }
+        this.writeInt(chars.length);
+        this.writeCharArray(chars);
     }
 
     /**
@@ -264,7 +352,7 @@ public class WriteHelper {
      * @throws IOException Si une erreur d'entrée/sortie se produit.
      */
     public void writeString(String s) throws IOException {
-        this.writeByteArray(s == null ? null : s.getBytes(StandardCharsets.UTF_8));
+        this.writeSizedByteArray(s == null ? null : s.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

@@ -1,6 +1,12 @@
 package fr.butinfoalt.riseandfall.util;
 
+import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
+import fr.butinfoalt.riseandfall.network.common.ReadHelper;
+import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+
+import java.io.IOException;
 import java.util.*;
+import java.util.function.IntFunction;
 
 /**
  * Une classe pour associer des objets à des entiers.
@@ -66,6 +72,17 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
     }
 
     /**
+     * Permet d'incrémenter la valeur associée à plusieurs clés à partir d'une autre ObjectIntMap.
+     *
+     * @param other L'autre ObjectIntMap contenant les clés et les valeurs à ajouter.
+     */
+    public void increment(ObjectIntMap<T> other) {
+        for (Entry<T> entry : other) {
+            this.increment(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
      * Permet de décrémenter la valeur associée à une clé.
      *
      * @param key   La clé pour laquelle la valeur doit être décrémentée.
@@ -76,6 +93,17 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
         int value = this.get(key) - count;
         this.set(key, value);
         return value;
+    }
+
+    /**
+     * Permet de décrémenter la valeur associée à plusieurs clés à partir d'une autre ObjectIntMap.
+     *
+     * @param other L'autre ObjectIntMap contenant les clés et les valeurs à soustraire.
+     */
+    public void decrement(ObjectIntMap<T> other) {
+        for (Entry<T> entry : other) {
+            this.decrement(entry.getKey(), entry.getValue());
+        }
     }
 
     /**
@@ -90,7 +118,7 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
      *
      * @return true si toutes les valeurs sont égales à 0, false sinon.
      */
-    public boolean isReset() {
+    public boolean isEmpty() {
         for (int value : this.map.values()) {
             if (value != 0) {
                 return false;
@@ -181,6 +209,21 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
             cloned.set(entry.getKey(), entry.getValue());
         }
         return cloned;
+    }
+
+    public static <T extends Identifiable> void serialize(ObjectIntMap<T> map, WriteHelper writeHelper) throws IOException {
+        for (Entry<T> entry : map) {
+            writeHelper.writeInt(entry.getKey().getId());
+            writeHelper.writeInt(entry.getValue());
+        }
+    }
+
+    public static <T extends Identifiable> void deserialize(ObjectIntMap<T> map, ReadHelper readHelper, IntFunction<T> getter) throws IOException {
+        int size = map.size();
+        for (int i = 0; i < size; i++) {
+            T key = getter.apply(readHelper.readInt());
+            map.set(key, readHelper.readInt());
+        }
     }
 
     /**

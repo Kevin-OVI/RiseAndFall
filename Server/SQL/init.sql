@@ -1,4 +1,5 @@
 -- Détruire les tables existantes
+DROP INDEX IF EXISTS idx_attack_player_order_player ON attack_player_order;
 DROP TABLE IF EXISTS attack_player_order_unit, attack_player_order, unit_creation_order, building_creation_order, unit_type, building_type, player, game, user_token, user, race;
 
 -- Créer les tables nécessaires
@@ -77,37 +78,37 @@ CREATE TABLE unit_type (
 );
 
 CREATE TABLE player_building (
-    id SERIAL PRIMARY KEY,
     player_id BIGINT UNSIGNED NOT NULL,
     building_id BIGINT UNSIGNED NOT NULL,
     quantity INT NOT NULL,
+    PRIMARY KEY (player_id, building_id),
     FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (building_id) REFERENCES building_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE player_unit (
-    id SERIAL PRIMARY KEY,
     player_id BIGINT UNSIGNED NOT NULL,
     unit_id BIGINT UNSIGNED NOT NULL,
     quantity INT NOT NULL,
+    PRIMARY KEY (player_id, unit_id),
     FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (unit_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE building_creation_order (
-    id SERIAL PRIMARY KEY,
     player_id BIGINT UNSIGNED NOT NULL,
     building_type_id BIGINT UNSIGNED NOT NULL,
     amount INT NOT NULL,
+    PRIMARY KEY (player_id, building_type_id),
     FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (building_type_id) REFERENCES building_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE unit_creation_order (
-    id SERIAL PRIMARY KEY,
     player_id BIGINT UNSIGNED NOT NULL,
     unit_type_id BIGINT UNSIGNED NOT NULL,
     amount INT NOT NULL,
+    PRIMARY KEY (player_id, unit_type_id),
     FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (unit_type_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -116,14 +117,17 @@ CREATE TABLE attack_player_order (
     id SERIAL PRIMARY KEY,
     player_id BIGINT UNSIGNED NOT NULL,
     target_player_id BIGINT UNSIGNED NOT NULL,
-    FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (target_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+CREATE INDEX idx_attack_player_order_player ON attack_player_order (player_id);
+
 CREATE TABLE attack_player_order_unit (
-    id SERIAL PRIMARY KEY,
     order_id BIGINT UNSIGNED NOT NULL,
     unit_type_id BIGINT UNSIGNED NOT NULL,
     amount INT NOT NULL,
+    PRIMARY KEY (order_id, unit_type_id),
     FOREIGN KEY (order_id) REFERENCES attack_player_order(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (unit_type_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
 );

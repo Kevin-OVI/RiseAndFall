@@ -2,7 +2,6 @@ package fr.butinfoalt.riseandfall.server.orders;
 
 import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
-import fr.butinfoalt.riseandfall.gamelogic.order.IOrderExecutionContext;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
@@ -13,7 +12,7 @@ import java.util.Map;
 /**
  * Implémentation du contexte d'exécution des ordres sur le serveur.
  */
-public class OrderExecutionContext implements IOrderExecutionContext {
+public class AttacksExecutionContext {
     /**
      * La partie sur laquelle les ordres sont exécutés.
      */
@@ -29,7 +28,7 @@ public class OrderExecutionContext implements IOrderExecutionContext {
      * Attaques effectuées par les joueurs vers d'autres joueurs.
      * La clé est le joueur cible, et la valeur est une association des attaquants avec les unités utilisées pour l'attaque.
      */
-    private final Map<Player, Map<Player, ObjectIntMap<UnitType>>> attacksTowards = new HashMap<>();
+    private final Map<Player, Map<ServerPlayer, ObjectIntMap<UnitType>>> attacksTowards = new HashMap<>();
 
     /**
      * Constructeur de l'exécution des ordres.
@@ -37,7 +36,7 @@ public class OrderExecutionContext implements IOrderExecutionContext {
      *
      * @param game La partie sur laquelle les ordres sont exécutés.
      */
-    public OrderExecutionContext(ServerGame game) {
+    public AttacksExecutionContext(ServerGame game) {
         this.game = game;
         for (ServerPlayer player : game.getPlayers()) {
             this.defenseUnits.put(player, player.getUnitMap().clone());
@@ -52,15 +51,11 @@ public class OrderExecutionContext implements IOrderExecutionContext {
      * @param target     Le joueur cible de l'attaque
      * @param usingUnits Les unités utilisées pour l'attaque, association de leur type d'unité à leur quantité.
      */
-    @Override
-    public void addAttack(Player attacker, Player target, ObjectIntMap<UnitType> usingUnits) {
+    public void addAttack(ServerPlayer attacker, Player target, ObjectIntMap<UnitType> usingUnits) {
         ObjectIntMap<UnitType> remaining = this.defenseUnits.get(attacker);
         ObjectIntMap<UnitType> attackUnits = this.attacksTowards.computeIfAbsent(target, p -> new HashMap<>()).computeIfAbsent(attacker, p -> p.getUnitMap().createEmptyClone());
-
-        for (ObjectIntMap.Entry<UnitType> entry : usingUnits) {
-            remaining.decrement(entry.getKey(), entry.getValue());
-            attackUnits.increment(entry.getKey(), entry.getValue());
-        }
+        remaining.decrement(usingUnits);
+        attackUnits.increment(usingUnits);
     }
 
     /**
@@ -69,9 +64,9 @@ public class OrderExecutionContext implements IOrderExecutionContext {
      * et applique les dégâts sur les unités et bâtiments de la cible.
      */
     public void executeAttacks() {
-        for (Map.Entry<Player, Map<Player, ObjectIntMap<UnitType>>> entry : this.attacksTowards.entrySet()) {
+        for (Map.Entry<Player, Map<ServerPlayer, ObjectIntMap<UnitType>>> entry : this.attacksTowards.entrySet()) {
             Player target = entry.getKey();
-            Map<Player, ObjectIntMap<UnitType>> attacksTowardsTarget = entry.getValue();
+            Map<ServerPlayer, ObjectIntMap<UnitType>> attacksTowardsTarget = entry.getValue();
             ObjectIntMap<UnitType> defenseUnits = this.defenseUnits.get(target);
             AttackManager attackManager = new AttackManager(target, defenseUnits, attacksTowardsTarget);
             attackManager.applyAttackersLosses();

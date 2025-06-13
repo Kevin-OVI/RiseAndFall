@@ -13,9 +13,6 @@ import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
-import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
-import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
-import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
 import fr.butinfoalt.riseandfall.network.packets.PacketUpdateOrders;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.counter.Counter;
@@ -27,7 +24,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 
 /**
@@ -98,16 +94,8 @@ public class OrderController implements ViewController {
 
         ClientPlayer player = RiseAndFall.getPlayer();
         float playerIntelligence = player.getIntelligence();
-        this.pendingUnits = player.getUnitMap().createEmptyClone();
-        this.pendingBuildings = player.getBuildingMap().createEmptyClone();
-
-        for (BaseOrder order : player.getPendingOrders()) {
-            if (order instanceof OrderCreateUnit orderCreateUnit) {
-                pendingUnits.increment(orderCreateUnit.getUnitType(), orderCreateUnit.getCount());
-            } else if (order instanceof OrderCreateBuilding orderCreateBuilding) {
-                pendingBuildings.increment(orderCreateBuilding.getBuildingType(), orderCreateBuilding.getCount());
-            }
-        }
+        this.pendingUnits = player.getPendingUnitsCreation().clone();
+        this.pendingBuildings = player.getPendingBuildingsCreation().clone();
 
         this.intelligenceField.setText("Intelligence : " + playerIntelligence);
 
@@ -126,7 +114,7 @@ public class OrderController implements ViewController {
             PurchasableItemAmountSelector<UnitType> selector = new PurchasableItemAmountSelector<>(entry, goldCounter, playerIntelligence,
                     (amount) -> unitsModifier.computeWithAlternativeDelta(-amount) >= 0);
             selector.addListener(amount -> unitsModifier.setDelta(-amount));
-            unitTable.getItems().add(new ItemTableRow<>(entry.getKey(), selector));
+            this.unitTable.getItems().add(new ItemTableRow<>(entry.getKey(), selector));
         }
 
         this.buildingTable.getItems().clear();
@@ -160,32 +148,15 @@ public class OrderController implements ViewController {
      */
     @FXML
     private void handleSave() {
-        ArrayList<BaseOrder> newOrders = new ArrayList<>();
         CurrentClientPlayer player = RiseAndFall.getPlayer();
-        player.getPendingOrders().stream()
-                .filter(baseOrder -> !(baseOrder instanceof OrderCreateUnit || baseOrder instanceof OrderCreateBuilding))
-                .forEach(newOrders::add);
-
-        for (ObjectIntMap.Entry<UnitType> entry : this.pendingUnits) {
-            int nbTroops = entry.getValue();
-            if (nbTroops > 0) {
-                newOrders.add(new OrderCreateUnit(entry.getKey(), nbTroops));
-            }
-        }
-        for (ObjectIntMap.Entry<BuildingType> entry : this.pendingBuildings) {
-            int nbHuts = entry.getValue();
-            if (nbHuts > 0) {
-                newOrders.add(new OrderCreateBuilding(entry.getKey(), nbHuts));
-            }
-        }
+        player.setPendingBuildingsCreation(this.pendingBuildings);
+        player.setPendingUnitsCreation(this.pendingUnits);
         try {
-            RiseAndFall.getClient().sendPacket(new PacketUpdateOrders(newOrders));
+            RiseAndFall.getClient().sendPacket(new PacketUpdateOrders(this.pendingUnits, this.pendingBuildings, null));
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du paquet de mise à jour des ordres", e);
             return;
         }
-        RiseAndFall.getPlayer().updatePendingOrders(newOrders);
-
         this.switchBack();
     }
 

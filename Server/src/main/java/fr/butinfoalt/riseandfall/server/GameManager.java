@@ -5,10 +5,7 @@ import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
-import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
-import fr.butinfoalt.riseandfall.gamelogic.order.OrderAttackPlayer;
-import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateBuilding;
-import fr.butinfoalt.riseandfall.gamelogic.order.OrderCreateUnit;
+import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
@@ -22,7 +19,7 @@ import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -123,7 +120,7 @@ public class GameManager {
                 GameState state = GameState.valueOf(resultSet.getString("state"));
                 Timestamp nextActionAt = resultSet.getTimestamp("next_action_at");
 
-                ServerGame game = new ServerGame(this.server, gameId, name, maxPlayers, minPlayers, turnInterval, isPrivate, state, nextActionAt, currentTurn);
+                ServerGame game = new ServerGame(this.server, gameId, name, turnInterval, minPlayers, maxPlayers, isPrivate, state, nextActionAt, currentTurn);
                 this.games.add(game);
                 LogManager.logMessage("Partie créée avec succès : " + name + " (ID: " + gameId + ")");
                 return game;
@@ -325,6 +322,15 @@ public class GameManager {
         this.handleGameUpdate(game, null);
     }
 
+    private void deleteTableByPlayer(ServerPlayer player, String tableName) {
+        try (PreparedStatement preparedStatement = this.server.getDb().prepareStatement("DELETE FROM " + tableName + " WHERE player_id = ?")) {
+            preparedStatement.setInt(1, player.getId());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de la suppression des données du joueur " + player.getUser().getUsername() + " dans la table " + tableName + ".", e);
+        }
+    }
+
     /**
      * Supprime les ordres en attente du joueur dans la base de données.
      * Cette méthode est appelée pour nettoyer les ordres en attente lorsque le joueur met à jour ses ordres.
@@ -510,12 +516,14 @@ public class GameManager {
             LogManager.logError("La connexion " + sender.getName() + " n'est pas dans une partie. Impossible de mettre à jour les ordres.");
             return;
         }
-        PacketUpdateOrders packet = new PacketUpdateOrders(readHelper, new OrderDeserializationContext(player, this.server.getDataDeserializer()));
-
         if (player.getGame().getState() != GameState.RUNNING) {
             LogManager.logError("Le joueur " + player.getUser().getUsername() + " essaie de mettre à jour les ordres alors que la partie n'est pas en cours.");
             return;
         }
+        PacketUpdateOrders packet = new PacketUpdateOrders(readHelper, new OrderDeserializationContext(player, this.server.getDataDeserializer()));
+        ObjectIntMap<UnitType> pendingUnitsCreation = packet.getPendingUnitsCreation();
+        ObjectIntMap<BuildingType> pendingBuildingsCreation = packet.getPendingBuildingsCreation();
+        Collection<AttackPlayerOrderData> pendingAttacks = packet.getPendingAttacks();
 
         // On vérifie coté serveur que le joueur a bien les ressources nécessaires pour exécuter les ordres
         float goldCapacity = player.getGoldAmount();
@@ -524,117 +532,131 @@ public class GameManager {
         int buildingsCapacity = 5; // Maximum 5 bâtiments par tour
         ObjectIntMap<UnitType> remainingUnits = player.getUnitMap().clone();
 
-        List<BaseOrder> newOrders = packet.getOrders();
-
-        List<OrderCreateBuilding> createBuildingOrders = new ArrayList<>();
-        List<OrderCreateUnit> createUnitOrders = new ArrayList<>();
-        List<OrderAttackPlayer> attackPlayerOrders = new ArrayList<>();
-
-        for (BaseOrder order : newOrders) {
-            goldCapacity -= order.getPrice();
-            switch (order) {
-                case OrderCreateBuilding orderCreateBuilding -> {
-                    buildingsCapacity -= orderCreateBuilding.getCount();
-                    if (playerIntelligence < orderCreateBuilding.getBuildingType().getRequiredIntelligence()) {
-                        LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez d'intelligence pour construire le bâtiment " + orderCreateBuilding.getBuildingType() + ".");
-                        return;
-                    }
-                    createBuildingOrders.add(orderCreateBuilding);
+        if (pendingUnitsCreation != null) {
+            for (ObjectIntMap.Entry<UnitType> entry : pendingUnitsCreation) {
+                UnitType unitType = entry.getKey();
+                int count = entry.getValue();
+                if (count <= 0) { // On ne peut pas créer un nombre négatif d'unités
+                    entry.setValue(0);
+                    continue;
                 }
-                case OrderCreateUnit orderCreateUnit -> {
-                    unitsCapacity -= orderCreateUnit.getCount();
-                    if (playerIntelligence < orderCreateUnit.getUnitType().getRequiredIntelligence()) {
-                        LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez d'intelligence pour créer l'unité " + orderCreateUnit.getUnitType() + ".");
-                        return;
-                    }
-                    createUnitOrders.add(orderCreateUnit);
+                goldCapacity -= unitType.getPrice() * count;
+                unitsCapacity -= count;
+                if (playerIntelligence < unitType.getRequiredIntelligence()) {
+                    LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez d'intelligence pour créer l'unité " + unitType + ".");
+                    return;
                 }
-                case OrderAttackPlayer orderAttackPlayer -> {
-                    for (ObjectIntMap.Entry<UnitType> entry : orderAttackPlayer.getUsingUnits()) {
-                        if (((ServerPlayer) orderAttackPlayer.getTargetPlayer()).getGame() != player.getGame()) {
-                            LogManager.logError("Le joueur " + player.getUser().getUsername() + " essaie d'attaquer un joueur qui n'est pas dans la même partie.");
-                            return;
-                        }
-
-                        if (remainingUnits.decrement(entry.getKey(), entry.getValue()) < 0) {
-                            LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez d'unités de type " + entry.getKey() + " pour exécuter l'ordre d'attaque avec " + entry.getValue() + " unités.");
-                            return;
-                        }
-                    }
-                    attackPlayerOrders.add(orderAttackPlayer);
-                }
-                default -> throw new IllegalStateException("Unexpected value: " + order);
             }
         }
+
+        if (pendingBuildingsCreation != null) {
+            for (ObjectIntMap.Entry<BuildingType> entry : packet.getPendingBuildingsCreation()) {
+                BuildingType buildingType = entry.getKey();
+                int count = entry.getValue();
+                if (count <= 0) { // On ne peut pas créer un nombre négatif de bâtiments
+                    entry.setValue(0);
+                    continue;
+                }
+                goldCapacity -= buildingType.getPrice() * count;
+                buildingsCapacity -= count;
+                if (playerIntelligence < buildingType.getRequiredIntelligence()) {
+                    LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez d'intelligence pour construire le bâtiment " + buildingType + ".");
+                    return;
+                }
+            }
+        }
+
+        if (pendingAttacks != null) {
+            for (AttackPlayerOrderData attack : pendingAttacks) {
+                for (ObjectIntMap.Entry<UnitType> entry : attack.getUsingUnits()) {
+                    if (((ServerPlayer) attack.getTargetPlayer()).getGame() != player.getGame()) {
+                        LogManager.logError("Le joueur " + player.getUser().getUsername() + " essaie d'attaquer un joueur qui n'est pas dans la même partie.");
+                        return;
+                    }
+
+                    if (remainingUnits.decrement(entry.getKey(), entry.getValue()) < 0) {
+                        LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez d'unités de type " + entry.getKey() + " pour exécuter l'ordre d'attaque avec " + entry.getValue() + " unités.");
+                        return;
+                    }
+                }
+            }
+        }
+
         if (goldCapacity < 0 || unitsCapacity < 0 || buildingsCapacity < 0) {
             LogManager.logError("Le joueur " + player.getUser().getUsername() + " n'a pas assez de ressources pour exécuter les ordres demandés.");
             return;
         }
         // Si on arrive ici, c'est que le joueur a les ressources nécessaires pour exécuter les ordres. On retire les anciens ordres en attente et on ajoute les nouveaux.
-        this.clearPendingOrders(player);
-
-        if (!createBuildingOrders.isEmpty()) {
-            try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO building_creation_order (player_id, building_type_id, amount) VALUES (?, ?, ?)")) {
-                for (OrderCreateBuilding order : createBuildingOrders) {
-                    statement.setInt(1, player.getId());
-                    statement.setInt(2, order.getBuildingType().getId());
-                    statement.setInt(3, order.getCount());
-                    statement.addBatch();
-                }
-                statement.executeBatch();
-            } catch (SQLException e) {
-                LogManager.logError("Erreur lors de l'ajout des ordres de création de bâtiment pour le joueur " + player.getUser().getUsername() + ".", e);
-            }
-        }
-
-        if (!createUnitOrders.isEmpty()) {
+        if (pendingUnitsCreation != null) {
+            this.deleteTableByPlayer(player, "unit_creation_order");
             try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO unit_creation_order (player_id, unit_type_id, amount) VALUES (?, ?, ?)")) {
-                for (OrderCreateUnit order : createUnitOrders) {
+                for (ObjectIntMap.Entry<UnitType> order : pendingUnitsCreation) {
+                    if (order.getValue() == 0) continue; // Pas besoin de sauvegarder un ordre avec une quantité nulle
                     statement.setInt(1, player.getId());
-                    statement.setInt(2, order.getUnitType().getId());
-                    statement.setInt(3, order.getCount());
+                    statement.setInt(2, order.getKey().getId());
+                    statement.setInt(3, order.getValue());
                     statement.addBatch();
                 }
                 statement.executeBatch();
             } catch (SQLException e) {
                 LogManager.logError("Erreur lors de l'ajout des ordres de création d'unité pour le joueur " + player.getUser().getUsername() + ".", e);
             }
+            player.setPendingUnitsCreation(pendingUnitsCreation);
         }
 
-        if (!attackPlayerOrders.isEmpty()) {
-            try (PreparedStatement attackStatement = this.server.getDb().prepareStatement("INSERT INTO attack_player_order (player_id, target_player_id) VALUES (?, ?) RETURNING id")) {
-                for (OrderAttackPlayer order : attackPlayerOrders) {
-                    attackStatement.setInt(1, player.getId());
-                    attackStatement.setInt(2, order.getTargetPlayer().getId());
-                    attackStatement.addBatch();
+        if (pendingBuildingsCreation != null) {
+            this.deleteTableByPlayer(player, "building_creation_order");
+            try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO building_creation_order (player_id, building_type_id, amount) VALUES (?, ?, ?)")) {
+                for (ObjectIntMap.Entry<BuildingType> order : pendingBuildingsCreation) {
+                    statement.setInt(1, player.getId());
+                    statement.setInt(2, order.getKey().getId());
+                    statement.setInt(3, order.getValue());
+                    statement.addBatch();
                 }
-                attackStatement.executeBatch();
-                ResultSet resultSet = attackStatement.getResultSet();
-                Iterator<OrderAttackPlayer> iterator = attackPlayerOrders.iterator();
-
-                try (PreparedStatement unitsStatement = this.server.getDb().prepareStatement("INSERT INTO attack_player_order_unit (order_id, unit_type_id, amount) VALUES (?, ?, ?)")) {
-                    while (resultSet.next()) {
-                        assert iterator.hasNext() : "Le nombre d'ordres d'attaque ne correspond pas au nombre de résultats retournés par la base de données.";
-                        OrderAttackPlayer orderAttackPlayer = iterator.next();
-                        int orderId = resultSet.getInt("id");
-
-                        // On ajoute les unités utilisées pour chaque ordre d'attaque
-                        for (ObjectIntMap.Entry<UnitType> entry : orderAttackPlayer.getUsingUnits()) {
-                            unitsStatement.setInt(1, orderId);
-                            unitsStatement.setInt(2, entry.getKey().getId());
-                            unitsStatement.setInt(3, entry.getValue());
-                            unitsStatement.addBatch();
-                        }
-                    }
-                    assert !iterator.hasNext() : "Il reste des ordres d'attaque à traiter, mais aucun résultat n'a été retourné par la base de données.";
-                    unitsStatement.executeBatch();
-                }
+                statement.executeBatch();
             } catch (SQLException e) {
-                LogManager.logError("Erreur lors de l'ajout des ordres d'attaque pour le joueur " + player.getUser().getUsername() + ".", e);
+                LogManager.logError("Erreur lors de l'ajout des ordres de création de bâtiment pour le joueur " + player.getUser().getUsername() + ".", e);
             }
+            player.setPendingBuildingsCreation(pendingBuildingsCreation);
         }
 
-        player.updatePendingOrders(newOrders);
+        if (pendingAttacks != null) {
+            this.deleteTableByPlayer(player, "attack_player_order");
+            if (!pendingAttacks.isEmpty()) {
+                try (PreparedStatement attackStatement = this.server.getDb().prepareStatement("INSERT INTO attack_player_order (player_id, target_player_id) VALUES (?, ?) RETURNING id")) {
+                    for (AttackPlayerOrderData order : pendingAttacks) {
+                        attackStatement.setInt(1, player.getId());
+                        attackStatement.setInt(2, order.getTargetPlayer().getId());
+                        attackStatement.addBatch();
+                    }
+                    attackStatement.executeBatch();
+                    ResultSet resultSet = attackStatement.getResultSet();
+                    Iterator<AttackPlayerOrderData> iterator = pendingAttacks.iterator();
+
+                    try (PreparedStatement unitsStatement = this.server.getDb().prepareStatement("INSERT INTO attack_player_order_unit (order_id, unit_type_id, amount) VALUES (?, ?, ?)")) {
+                        while (resultSet.next()) {
+                            assert iterator.hasNext() : "Le nombre d'ordres d'attaque ne correspond pas au nombre de résultats retournés par la base de données.";
+                            AttackPlayerOrderData order = iterator.next();
+                            int orderId = resultSet.getInt("id");
+
+                            // On ajoute les unités utilisées pour chaque ordre d'attaque
+                            for (ObjectIntMap.Entry<UnitType> entry : order.getUsingUnits()) {
+                                unitsStatement.setInt(1, orderId);
+                                unitsStatement.setInt(2, entry.getKey().getId());
+                                unitsStatement.setInt(3, entry.getValue());
+                                unitsStatement.addBatch();
+                            }
+                        }
+                        assert !iterator.hasNext() : "Il reste des ordres d'attaque à traiter, mais aucun résultat n'a été retourné par la base de données.";
+                        unitsStatement.executeBatch();
+                    }
+                } catch (SQLException e) {
+                    LogManager.logError("Erreur lors de l'ajout des ordres d'attaque pour le joueur " + player.getUser().getUsername() + ".", e);
+                }
+            }
+            player.setPendingAttacks(pendingAttacks);
+        }
+
         this.sendPlayerDataUpdates(player);
     }
 

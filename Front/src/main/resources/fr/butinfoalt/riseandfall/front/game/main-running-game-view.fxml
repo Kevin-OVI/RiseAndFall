@@ -39,7 +39,7 @@
     <HBox fx:id="buttonsContainer" alignment="CENTER" spacing="10">
         <Button text="Description" onAction="#switchToDescriptionPage"/>
         <Button text="Modifier les ordres" onAction="#switchToOrders"/>
-        <Button text="Créer une attaque" onAction="#createAttack"/>
+        <Button text="Modifier les attaques" onAction="#manageAttacks"/>
 
         <!-- Bouton pour passer au tour suivant -->
         <Button fx:id="nextTurnButton" text="Tour suivant" onAction="#handleEndTurn"/>

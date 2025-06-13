@@ -6,28 +6,24 @@ import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.game.orders.amountselector.ItemAmountSelector;
 import fr.butinfoalt.riseandfall.front.game.orders.table.ItemTableRow;
 import fr.butinfoalt.riseandfall.front.game.orders.table.UnitsSelectTable;
-import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.OtherClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.NamedItemStringConverter;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
+import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
-import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
-import fr.butinfoalt.riseandfall.gamelogic.order.OrderAttackPlayer;
-import fr.butinfoalt.riseandfall.network.packets.PacketUpdateOrders;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
-import fr.butinfoalt.riseandfall.util.logging.LogManager;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
 public class OrderAttackController implements ViewController {
     private ObjectIntMap<UnitType> usingUnits;
+    private OrderAttacksListController listController;
+    private AttackPlayerOrderData editingAttack;
 
     /**
      * Champs de sélection du joueur cible de l'attaque.
@@ -50,18 +46,6 @@ public class OrderAttackController implements ViewController {
     @FXML
     private ImageView backgroundImageView;
 
-    private void loadExistingOrder(CurrentClientPlayer player) {
-        for (BaseOrder order : player.getPendingOrders()) {
-            if (order instanceof OrderAttackPlayer orderAttackPlayer) {
-                this.targetPlayerSelector.setValue((OtherClientPlayer) orderAttackPlayer.getTargetPlayer());
-                this.usingUnits = orderAttackPlayer.getUsingUnits();
-                return;
-            }
-        }
-        this.targetPlayerSelector.setValue(null);
-        this.usingUnits = player.getUnitMap().createEmptyClone();
-    }
-
     @Override
     public void onDisplayed(String errorMessage) {
         ViewController.super.onDisplayed(errorMessage);
@@ -70,19 +54,16 @@ public class OrderAttackController implements ViewController {
             this.showError(errorMessage);
         }
 
-        this.targetPlayerSelector.getItems().clear();
-        this.targetPlayerSelector.getItems().addAll(RiseAndFall.getGame().getOtherPlayers());
-
-        CurrentClientPlayer player = RiseAndFall.getPlayer();
-        ObjectIntMap<UnitType> playerUnits = player.getUnitMap();
-        this.loadExistingOrder(player);
-
         this.unitsTable.getItems().clear();
-        for (ObjectIntMap.Entry<UnitType> entry : this.usingUnits) {
-            ItemAmountSelector<UnitType> selector = new ItemAmountSelector<>(entry, value -> value <= playerUnits.get(entry.getKey()));
-            this.unitsTable.getItems().add(new ItemTableRow<>(entry.getKey(), selector));
-            selector.updateButtonsState();
-        }
+    }
+
+    @Override
+    public void onHidden() {
+        ViewController.super.onHidden();
+        this.targetPlayerSelector.setValue(null);
+        this.usingUnits = null;
+        this.listController = null;
+        this.editingAttack = null;
     }
 
     /**
@@ -104,7 +85,7 @@ public class OrderAttackController implements ViewController {
      */
     @FXML
     private void switchBack() {
-        RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
+        RiseAndFallApplication.switchToView(View.ORDERS_ATTACK_LIST);
     }
 
     /**
@@ -119,29 +100,14 @@ public class OrderAttackController implements ViewController {
             return;
         }
 
-        if (this.usingUnits.isReset()) {
+        if (this.usingUnits.isEmpty()) {
             this.showError("Veuillez sélectionner au moins une unité à utiliser pour l'attaque.");
             return;
         }
 
         this.showError(null);
 
-        CurrentClientPlayer player = RiseAndFall.getPlayer();
-
-        ArrayList<BaseOrder> newOrders = new ArrayList<>();
-        player.getPendingOrders().stream()
-                .filter(baseOrder -> !(baseOrder instanceof OrderAttackPlayer))
-                .forEach(newOrders::add);
-
-        newOrders.add(new OrderAttackPlayer(targetPlayer, this.usingUnits));
-        try {
-            RiseAndFall.getClient().sendPacket(new PacketUpdateOrders(newOrders));
-        } catch (IOException e) {
-            LogManager.logError("Erreur lors de l'envoi du paquet de mise à jour des ordres", e);
-            return;
-        }
-        player.updatePendingOrders(newOrders);
-
+        this.listController.addOrReplaceAttack(new AttackPlayerOrderData(targetPlayer, this.usingUnits), this.editingAttack);
         this.switchBack();
     }
 
@@ -156,6 +122,33 @@ public class OrderAttackController implements ViewController {
         } else {
             this.errorMessage.setText(error);
             this.errorMessage.setVisible(true);
+        }
+    }
+
+    public void init(OrderAttacksListController listController, AttackPlayerOrderData attack) {
+        this.listController = listController;
+        this.editingAttack = attack;
+
+        ObservableList<OtherClientPlayer> selectablePlayers = this.targetPlayerSelector.getItems();
+        selectablePlayers.clear();
+        selectablePlayers.addAll(listController.getNotAttackedPlayers());
+        ObjectIntMap<UnitType> remainingUnits = listController.getRemainingUnits();
+
+        if (attack != null) {
+            OtherClientPlayer currentAttackedPlayer = (OtherClientPlayer) attack.getTargetPlayer();
+            selectablePlayers.add(currentAttackedPlayer);
+            remainingUnits.increment(attack.getUsingUnits());
+            this.targetPlayerSelector.setValue(currentAttackedPlayer);
+            this.usingUnits = attack.getUsingUnits().clone();
+        } else {
+            this.targetPlayerSelector.setValue(null);
+            this.usingUnits = RiseAndFall.getPlayer().getUnitMap().createEmptyClone();
+        }
+
+        for (ObjectIntMap.Entry<UnitType> entry : this.usingUnits) {
+            ItemAmountSelector<UnitType> selector = new ItemAmountSelector<>(entry, value -> value <= remainingUnits.get(entry.getKey()));
+            this.unitsTable.getItems().add(new ItemTableRow<>(entry.getKey(), selector));
+            selector.updateButtonsState();
         }
     }
 }

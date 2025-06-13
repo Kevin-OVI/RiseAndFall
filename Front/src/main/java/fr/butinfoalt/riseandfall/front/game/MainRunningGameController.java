@@ -113,8 +113,8 @@ public class MainRunningGameController implements ViewController {
     }
 
     @FXML
-    public void createAttack() {
-        RiseAndFallApplication.switchToView(View.ORDERS_ATTACK);
+    public void manageAttacks() {
+        RiseAndFallApplication.switchToView(View.ORDERS_ATTACK_LIST);
     }
 
     /**
