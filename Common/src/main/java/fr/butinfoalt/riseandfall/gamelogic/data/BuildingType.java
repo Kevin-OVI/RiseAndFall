@@ -48,6 +48,11 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
     private final float intelligenceProduction;
 
     /**
+     * Résistance du bâtiment.
+     */
+    private final float resistance;
+
+    /**
      * Nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      */
     private final int maxUnits;
@@ -73,11 +78,12 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      * @param requiredIntelligence   La quantité d'intelligence requise pour construire le bâtiment.
      * @param goldProduction         La production d'or du bâtiment par tour.
      * @param intelligenceProduction La production d'intelligence du bâtiment par tour.
+     * @param resistance             La résistance du bâtiment.
      * @param maxUnits               Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      * @param initialAmount          Le nombre initial de bâtiments de ce type.
      * @param accessibleByRace       La race qui peut construire ce bâtiment.
      */
-    public BuildingType(int id, String name, String description, float price, float requiredIntelligence, float goldProduction, float intelligenceProduction, int maxUnits, int initialAmount, Race accessibleByRace) {
+    public BuildingType(int id, String name, String description, float price, float requiredIntelligence, float goldProduction, float intelligenceProduction, float resistance, int maxUnits, int initialAmount, Race accessibleByRace) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -85,6 +91,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         this.requiredIntelligence = requiredIntelligence;
         this.goldProduction = goldProduction;
         this.intelligenceProduction = intelligenceProduction;
+        this.resistance = resistance;
         this.maxUnits = maxUnits;
         this.initialAmount = initialAmount;
         this.accessibleByRace = accessibleByRace;
@@ -106,6 +113,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         this.requiredIntelligence = readHelper.readFloat();
         this.goldProduction = readHelper.readFloat();
         this.intelligenceProduction = readHelper.readFloat();
+        this.resistance = readHelper.readFloat();
         this.maxUnits = readHelper.readInt();
         this.initialAmount = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
@@ -180,6 +188,15 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
     }
 
     /**
+     * Méthode pour obtenir la résistance du bâtiment.
+     *
+     * @return La résistance du bâtiment.
+     */
+    public float getResistance() {
+        return this.resistance;
+    }
+
+    /**
      * Méthode pour obtenir le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      *
      * @return Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
@@ -215,6 +232,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         writeHelper.writeFloat(this.requiredIntelligence);
         writeHelper.writeFloat(this.goldProduction);
         writeHelper.writeFloat(this.intelligenceProduction);
+        writeHelper.writeFloat(this.resistance);
         writeHelper.writeInt(this.maxUnits);
         writeHelper.writeInt(this.initialAmount);
         writeHelper.writeInt(this.accessibleByRace == null ? -1 : this.accessibleByRace.getId());
@@ -227,9 +245,10 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
                 .add("name", this.name)
                 .add("description", this.description)
                 .add("price", this.price)
-                .add("requiredIntelligence)", this.requiredIntelligence)
+                .add("requiredIntelligence", this.requiredIntelligence)
                 .add("goldProduction", this.goldProduction)
                 .add("intelligenceProduction", this.intelligenceProduction)
+                .add("resistance", this.resistance)
                 .add("maxUnits", this.maxUnits)
                 .add("initialAmount", this.initialAmount)
                 .add("accessibleByRace", this.accessibleByRace)

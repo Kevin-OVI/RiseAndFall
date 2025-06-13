@@ -1,23 +1,29 @@
 package fr.butinfoalt.riseandfall.util;
 
+import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
+import fr.butinfoalt.riseandfall.network.common.ReadHelper;
+import fr.butinfoalt.riseandfall.network.common.WriteHelper;
+
+import java.io.IOException;
 import java.util.*;
+import java.util.function.IntFunction;
 
 /**
- * Une classe pour associer plusieurs types d'énumération à des entiers.
+ * Une classe pour associer des objets à des entiers.
  *
- * @param <T> Le type d'énumération à associer.
+ * @param <T> Le type d'objet à associer aux entiers.
  */
-public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
+public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneable {
     /**
-     * Un tableau d'entiers pour stocker les valeurs associées à chaque valeur de l'énumération.
+     * Un LinkedHashMap pour stocker l'association entre les objets et les entiers de manière ordonnée.
      */
     private final LinkedHashMap<T, Integer> map;
 
     /**
-     * Constructeur privé de la classe EnumIntMap.
-     * On crée un tableau d'entiers de la taille spécifiée.
+     * Constructeur de la classe ObjectIntMap.
+     * Ce constructeur initialise l'association entre les objets et les entiers avec une valeur par défaut de 0 pour chaque objet.
      *
-     * @param keyUniverse Un tableau contenant les valeurs de l'énumération filtrées.
+     * @param keyUniverse Un tableau contenant les valeurs possibles pour les clés de l'association.
      */
     public ObjectIntMap(Collection<T> keyUniverse) {
         this.map = new LinkedHashMap<>();
@@ -27,85 +33,125 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
     }
 
     /**
-     * Permet de définir la valeur associée à un type d'énumération.
+     * Permet de définir la valeur associée à un objet.
      *
-     * @param type  Le type d'énumération pour lequel la valeur doit être définie.
-     * @param count La valeur à associer au type d'énumération.
+     * @param key   La clée pour laquelle la valeur doit être définie.
+     * @param value La valeur à associer à la clé.
      */
-    public void set(T type, int count) {
-        this.map.put(type, count);
+    public void set(T key, int value) {
+        if (!this.map.containsKey(key)) {
+            throw new IllegalArgumentException("Type not found in the map: " + key);
+        }
+        this.map.put(key, value);
     }
 
     /**
-     * Permet d'obtenir la valeur associée à un type d'énumération.
+     * Permet d'obtenir la valeur associée à un objet.
      *
-     * @param type Le type d'énumération pour lequel la valeur doit être obtenue.
-     * @return La valeur associée au type d'énumération.
+     * @param key La clé pour laquelle la valeur doit être récupérée.
+     * @return La valeur associée à la clé.
      */
-    public int get(T type) {
-        return this.map.get(type);
+    public int get(T key) {
+        if (!this.map.containsKey(key)) {
+            throw new IllegalArgumentException("Type not found in the map: " + key);
+        }
+        return this.map.get(key);
     }
 
     /**
-     * Permet d'incrémenter la valeur associée à un type d'énumération.
+     * Permet d'incrémenter la valeur associée à une clé.
      *
-     * @param type  Le type d'énumération pour lequel la valeur doit être incrémentée.
-     * @param count La valeur à ajouter au type d'énumération.
-     * @return La nouvelle valeur associée au type d'énumération après l'incrémentation.
+     * @param key   La clé pour laquelle la valeur doit être incrémentée.
+     * @param count La valeur à ajouter à la valeur déjà associée à la clé.
+     * @return La nouvelle valeur associée à la clé après l'incrémentation.
      */
-    public int increment(T type, int count) {
-        int value = this.get(type) + count;
-        this.set(type, value);
+    public int increment(T key, int count) {
+        int value = this.get(key) + count;
+        this.set(key, value);
         return value;
     }
 
     /**
-     * Permet de décrémenter la valeur associée à un type d'énumération.
+     * Permet d'incrémenter la valeur associée à plusieurs clés à partir d'une autre ObjectIntMap.
      *
-     * @param type  Le type d'énumération pour lequel la valeur doit être décrémentée.
-     * @param count La valeur à soustraire au type d'énumération.
-     * @return La nouvelle valeur associée au type d'énumération après la décrémentation.
+     * @param other L'autre ObjectIntMap contenant les clés et les valeurs à ajouter.
      */
-    public int decrement(T type, int count) {
-        int value = this.get(type) - count;
-        this.set(type, value);
+    public void increment(ObjectIntMap<T> other) {
+        for (Entry<T> entry : other) {
+            this.increment(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     * Permet de décrémenter la valeur associée à une clé.
+     *
+     * @param key   La clé pour laquelle la valeur doit être décrémentée.
+     * @param count La valeur à soustraire de la valeur déjà associée à la clé.
+     * @return La nouvelle valeur associée à la clé après la décrémentation.
+     */
+    public int decrement(T key, int count) {
+        int value = this.get(key) - count;
+        this.set(key, value);
         return value;
     }
 
     /**
-     * Permet d'obtenir les types de l'énumération.
+     * Permet de décrémenter la valeur associée à plusieurs clés à partir d'une autre ObjectIntMap.
      *
-     * @return Un tableau contenant les types de l'énumération.
+     * @param other L'autre ObjectIntMap contenant les clés et les valeurs à soustraire.
      */
-    public Set<T> getEnumConstants() {
-        return this.map.keySet();
+    public void decrement(ObjectIntMap<T> other) {
+        for (Entry<T> entry : other) {
+            this.decrement(entry.getKey(), entry.getValue());
+        }
     }
 
     /**
-     * Permet d'obtenir le nombre de types dans l'énumération.
+     * Permet de réinitialiser toutes les valeurs de l'association à 0.
+     */
+    public void reset() {
+        this.map.replaceAll((k, v) -> 0);
+    }
+
+    /**
+     * Permet de vérifier si toutes les valeurs de l'association sont égales à 0.
      *
-     * @return Le nombre de types dans l'énumération.
+     * @return true si toutes les valeurs sont égales à 0, false sinon.
+     */
+    public boolean isEmpty() {
+        for (int value : this.map.values()) {
+            if (value != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Permet d'obtenir un ensemble contenant toutes les clés de l'association.
+     *
+     * @return Un ensemble contenant toutes les clés de l'association.
+     */
+    public SequencedSet<T> getKeys() {
+        return this.map.sequencedKeySet();
+    }
+
+    /**
+     * Permet d'obtenir le nombre d'entrées dans l'association.
+     *
+     * @return Le nombre d'entrées dans l'association.
      */
     public int size() {
         return this.map.size();
     }
 
     /**
-     * Permet d'obtenir le nombre total de valeurs associées dans l'association.
-     *
-     * @return Le nombre total de valeurs associées dans l'association.
-     */
-    public int getTotal() {
-        return this.map.values().stream().mapToInt(Integer::intValue).sum();
-    }
-
-    /**
      * Permet de créer une copie vide de l'association.
      *
-     * @return Une nouvelle instance d'EnumIntMap vide.
+     * @return Une nouvelle instance d'ObjectIntMap vide avec les mêmes clés que l'instance actuelle.
      */
     public ObjectIntMap<T> createEmptyClone() {
-        return new ObjectIntMap<>(this.getEnumConstants());
+        return new ObjectIntMap<>(this.getKeys());
     }
 
     /**
@@ -115,8 +161,8 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
      * @return Un itérateur sur les entrées de l'association.
      */
     @Override
-    public Iterator<Entry<T>> iterator() {
-        return new EnumIntMapIterator<>(this);
+    public ObjectIntMapIterator<T> iterator() {
+        return new ObjectIntMapIterator<>(this);
     }
 
     /**
@@ -152,15 +198,62 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
     }
 
     /**
+     * Permet de cloner l'association.
+     *
+     * @return Une nouvelle instance d'ObjectIntMap contenant les mêmes clés et valeurs que l'instance actuelle.
+     */
+    @Override
+    public ObjectIntMap<T> clone() {
+        ObjectIntMap<T> cloned = this.createEmptyClone();
+        for (Map.Entry<T, Integer> entry : this.map.entrySet()) {
+            cloned.set(entry.getKey(), entry.getValue());
+        }
+        return cloned;
+    }
+
+    /**
+     * Sérialise l'association entre des objets identifiables et les entiers
+     *
+     * @param map         L'association entre les objets identifiables et les entiers à sérialiser
+     * @param writeHelper L'outil d'écriture utilisée pour écrire les données de l'association.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de l'écriture des données.
+     */
+    public static <T extends Identifiable> void serialize(ObjectIntMap<T> map, WriteHelper writeHelper) throws IOException {
+        for (Entry<T> entry : map) {
+            writeHelper.writeInt(entry.getKey().getId());
+            writeHelper.writeInt(entry.getValue());
+        }
+    }
+
+    /**
+     * Désérialise l'association entre des objets identifiables et les entiers
+     *
+     * @param map        L'association entre les objets identifiables et les entiers à désérialiser
+     * @param readHelper L'outil de lecture utilisé pour lire les données de l'association.
+     * @param getter     Une fonction pour obtenir un objet identifiable à partir d'un entier.
+     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la lecture des données.
+     */
+    public static <T extends Identifiable> void deserialize(ObjectIntMap<T> map, ReadHelper readHelper, IntFunction<T> getter) throws IOException {
+        int size = map.size();
+        for (int i = 0; i < size; i++) {
+            T key = getter.apply(readHelper.readInt());
+            map.set(key, readHelper.readInt());
+        }
+    }
+
+    /**
      * Un itérateur sur les entrées de l'association entre les types d'énumération et les entiers.
      *
      * @param <T> Le type d'énumération à associer.
      */
-    public static class EnumIntMapIterator<T> implements Iterator<Entry<T>> {
+    public static class ObjectIntMapIterator<T> implements Iterator<Entry<T>> {
         /**
          * L'instance de l'association sur laquelle itérer
          */
         private final ObjectIntMap<T> objectIntMap;
+        /**
+         * L'itérateur interne sur les clés de l'association.
+         */
         private final Iterator<T> internalIterator;
 
         /**
@@ -168,7 +261,7 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
          *
          * @param objectIntMap L'instance de l'association sur laquelle itérer.
          */
-        public EnumIntMapIterator(ObjectIntMap<T> objectIntMap) {
+        public ObjectIntMapIterator(ObjectIntMap<T> objectIntMap) {
             this.objectIntMap = objectIntMap;
             this.internalIterator = objectIntMap.map.keySet().iterator();
         }
@@ -198,9 +291,9 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
     }
 
     /**
-     * Une entrée de l'association entre un type d'énumération et un entier.
+     * Une entrée de l'association entre une clé et une valeur.
      *
-     * @param <T> Le type d'énumération à associer.
+     * @param <T> Le type d'objet à associé aux entiers.
      */
     public static final class Entry<T> {
         /**
@@ -209,7 +302,7 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
         private final ObjectIntMap<T> objectIntMap;
 
         /**
-         * Le type d'énumération associé à l'entrée.
+         * L'objet clé associé à l'entrée.
          */
         private final T key;
 
@@ -217,7 +310,7 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>> {
          * Constructeur de l'entrée.
          *
          * @param objectIntMap L'instance de l'association sur laquelle l'entrée est associée.
-         * @param key          Le type d'énumération associé à l'entrée.
+         * @param key          La clé de l'entrée.
          */
         private Entry(ObjectIntMap<T> objectIntMap, T key) {
             this.objectIntMap = objectIntMap;

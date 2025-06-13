@@ -16,9 +16,9 @@
     </TitleLabel>
     <Label text="Connexion" style="-fx-font-size: 24px; -fx-text-fill: #333;"/>
 
-    <TextField fx:id="username" promptText="Nom d'utilisateur" maxWidth="400.0"/>
-    <PasswordField fx:id="password" promptText="Mot de passe" maxWidth="400.0"/>
-    <PasswordField fx:id="confirmPassword" promptText="Confirmer le mot de passe" maxWidth="400.0"/>
+    <TextField fx:id="username" promptText="Nom d'utilisateur" maxWidth="400.0" onKeyPressed="#handleEnter"/>
+    <PasswordField fx:id="password" promptText="Mot de passe" maxWidth="400.0" onKeyPressed="#handleEnter"/>
+    <PasswordField fx:id="confirmPassword" promptText="Confirmer le mot de passe" maxWidth="400.0" onKeyPressed="#handleEnter"/>
 
 
     <Label fx:id="errorMessage" text="" style="-fx-text-fill: red;" visible="false"/>

@@ -2,8 +2,11 @@ package fr.butinfoalt.riseandfall.server.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.server.Environment;
+import fr.butinfoalt.riseandfall.server.GameManager;
 import fr.butinfoalt.riseandfall.server.RiseAndFallServer;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
+import fr.butinfoalt.riseandfall.server.orders.AttacksExecutionContext;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
@@ -116,10 +119,14 @@ public class ServerGame extends Game {
         LogManager.logMessage("Démarrage de la partie %s avec %d joueurs.".formatted(this.name, this.players.size()));
         this.state = GameState.RUNNING;
 
+        System.out.println(this.turnInterval);
         this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
         this.scheduleNextTurn();
 
-        this.server.getGameManager().handleGameUpdate(this);
+        GameManager gameManager = this.server.getGameManager();
+        gameManager.handleGameUpdate(this);
+        gameManager.handleGameStart(this);
+        gameManager.newRandomGame();
     }
 
     /**
@@ -181,8 +188,9 @@ public class ServerGame extends Game {
     }
 
     /**
-     * Méthode pour passer au tour suivant.
-     * Exécute les ordres de chaque joueur et incrémente le tour actuel.
+     * Méthode pour passer au tour suivant. La partie ne peut passer au tour suivant que si elle est en cours.
+     * On commence par exécuter les attaques des joueurs, puis on exécute le reste des ordres de chaque joueur.
+     * Enfin, on incrémente le tour actuel et on planifie le prochain tour.
      *
      * @throws IllegalStateException Si la partie n'est pas en cours.
      */
@@ -190,7 +198,17 @@ public class ServerGame extends Game {
         if (this.state != GameState.RUNNING) {
             throw new IllegalStateException("Cannot proceed to the next turn when the game is not running.");
         }
-        for (ServerPlayer player : this.players.values()) {
+        AttacksExecutionContext context = new AttacksExecutionContext(this);
+        List<ServerPlayer> remainingPlayers = this.players.values().stream().filter(player -> !player.isEliminated()).toList();
+        for (ServerPlayer player : remainingPlayers) {
+            player.prepareAttack(context);
+        }
+        context.executeAttacks();
+        for (ServerPlayer player : remainingPlayers) {
+            if (player.isEliminated()) {
+                LogManager.logMessage("Le joueur %s a été éliminé de la partie %s.".formatted(player.getUser().getUsername(), this.name));
+                continue; // Ne pas exécuter les ordres d'un joueur éliminé
+            }
             player.executeOrders();
         }
         // TODO : Condition de Victoire pour arrêter la partie si nécessaire, pour le moment la partie ne s'arrête jamais.
@@ -240,7 +258,7 @@ public class ServerGame extends Game {
 
         if (this.state == GameState.WAITING && this.hasSufficientPlayers() && this.delayedTask == null) {
             LogManager.logMessage("Suffisamment de joueurs pour démarrer la partie %s, planification du démarrage.".formatted(this.name));
-            this.nextActionAt = new Timestamp(System.currentTimeMillis() + 60_000L); // Démarrage prévu dans 1 minute
+            this.nextActionAt = new Timestamp(System.currentTimeMillis() + (Environment.DEBUG_MODE ? 10_000L : 60_000L)); // Démarrage prévu dans 1 minute (10 secondes si en mode débogage)
             this.scheduleGameStart();
             this.server.getGameManager().handleGameUpdate(this, player);
         }

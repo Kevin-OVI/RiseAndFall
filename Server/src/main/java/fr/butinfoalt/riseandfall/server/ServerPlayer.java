@@ -3,9 +3,11 @@ package fr.butinfoalt.riseandfall.server;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
-import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
+import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
+import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.server.orders.AttacksExecutionContext;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
@@ -37,25 +39,44 @@ public class ServerPlayer extends Player {
     }
 
     /**
-     * Exécute les ordres en attente pour le joueur.
+     * Prépare les attaques en attente pour le joueur.
+     * Cette méthode est appelée avant l'exécution des attaques pour les ajouter au contexte d'exécution.
+     * Les attaques sont exécutées avant le reste des ordres, qui eux sont exécutés dans {@link #executeOrders()}.
+     *
+     * @param context Le contexte d'exécution des attaques.
+     */
+    public void prepareAttack(AttacksExecutionContext context) {
+        for (AttackPlayerOrderData attack : this.getPendingAttacks()) {
+            context.addAttack(this, attack.getTargetPlayer(), attack.getUsingUnits());
+        }
+        this.getPendingAttacks().clear();
+    }
+
+    /**
+     * Exécute les ordres en attente pour le joueur, sauf les attaques qui sont exécutées
+     * dans {@link #prepareAttack(AttacksExecutionContext)}.
      */
     public void executeOrders() {
+        for (ObjectIntMap.Entry<BuildingType> entry : this.getPendingBuildingsCreation()) {
+            this.getBuildingMap().increment(entry.getKey(), entry.getValue());
+            this.removeGoldAmount(entry.getKey().getPrice() * entry.getValue());
+        }
+        this.getPendingBuildingsCreation().reset();
+
+        for (ObjectIntMap.Entry<UnitType> entry : this.getPendingUnitsCreation()) {
+            this.getUnitMap().increment(entry.getKey(), entry.getValue());
+            this.removeGoldAmount(entry.getKey().getPrice() * entry.getValue());
+        }
+        this.getPendingUnitsCreation().reset();
+
         float addGold = 0, addIntelligence = 0;
-        for (ObjectIntMap.Entry<BuildingType> entry : this.buildingMap) {
+        for (ObjectIntMap.Entry<BuildingType> entry : this.getBuildingMap()) {
             addGold += entry.getValue() * entry.getKey().getGoldProduction();
             addIntelligence += entry.getValue() * entry.getKey().getIntelligenceProduction();
         }
 
         this.addGoldAmount(addGold * this.getRace().getGoldMultiplier());
         this.addIntelligence(addIntelligence * this.getRace().getIntelligenceMultiplier());
-
-        for (BaseOrder order : this.pendingOrders) {
-            if (this.goldAmount >= order.getPrice()) {
-                order.execute(this);
-                this.removeGoldAmount(order.getPrice());
-            }
-        }
-        this.pendingOrders.clear();
     }
 
     /**

@@ -1,13 +1,8 @@
 package fr.butinfoalt.riseandfall.front;
 
-import fr.butinfoalt.riseandfall.front.authentification.LoginController;
-import fr.butinfoalt.riseandfall.front.authentification.RegisterController;
-import fr.butinfoalt.riseandfall.front.game.MainRunningGameController;
-import fr.butinfoalt.riseandfall.front.game.WaitingGameController;
 import fr.butinfoalt.riseandfall.front.game.gamelist.GameListController;
-import fr.butinfoalt.riseandfall.front.game.orders.OrderController;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
-import fr.butinfoalt.riseandfall.front.gamelogic.ClientPlayer;
+import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
@@ -22,12 +17,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.TimerTask;
 
 /**
  * Client socket pour le jeu Rise and Fall.
  * Il gère la connexion au serveur et l'envoi/réception de paquets.
  */
 public class RiseAndFallClient extends BaseSocketClient {
+    private TimerTask reconectTask;
+    private boolean shouldReconnect = true;
+
     /**
      * Constructeur du client.
      * Il initialise le client avec l'hôte et le port du serveur et enregistre les paquets à envoyer et à recevoir.
@@ -39,26 +38,14 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this::onToken, PacketToken::new);
         this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, PacketServerData::new);
         this.registerSendPacket((byte) 3, PacketCreateOrJoinGame.class);
-        this.registerReceivePacket((byte) 4, PacketJoinedGame.class, this::onJoinedGame, this::decodePacketJoinedGame);
+        this.registerReceivePacket((byte) 4, PacketJoinedGame.class, this::onJoinedGame);
         this.registerSendPacket((byte) 5, PacketUpdateOrders.class);
         this.registerReceivePacket((byte) 6, PacketUpdateGameData.class, this::onUpdateGameData);
         this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerReceivePacket((byte) 8, PacketError.class, this::onError, PacketError::new);
         this.registerSendPacket((byte) 9, PacketRegister.class);
         this.registerReceivePacket((byte) 10, PacketWaitingGames.class, this::onWaitingGames, readHelper -> new PacketWaitingGames<>(readHelper, ClientGame::new));
-    }
-
-    /**
-     * Décode les données du paquet PacketInitialGameData.
-     *
-     * @param readHelper L'outil de lecture pour désérialiser le paquet.
-     * @return Un objet PacketInitialGameData contenant les données du jeu et du joueur.
-     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
-     */
-    private PacketJoinedGame<ClientGame, ClientPlayer> decodePacketJoinedGame(ReadHelper readHelper) throws IOException {
-        ClientGame clientGame = new ClientGame(readHelper);
-        ClientPlayer player = new ClientPlayer(readHelper);
-        return new PacketJoinedGame<>(clientGame, player);
+        this.registerReceivePacket((byte) 11, PacketDiscoverPlayer.class, this::onDiscoverPlayer, PacketDiscoverPlayer::new);
     }
 
     /**
@@ -108,25 +95,17 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param errorMessage Message d'erreur à afficher, ou null si aucune erreur n'est à afficher.
      */
     private void switchToGameView(GameState gameState, String errorMessage) {
-        WaitingGameController waitingGameController = View.WAITING_GAME.getController();
-        waitingGameController.stopUpdateTimer();
         switch (gameState) {
             case WAITING -> {
-                RiseAndFallApplication.switchToView(View.WAITING_GAME);
-                waitingGameController.updateFields();
-                if (errorMessage != null) {
-                    waitingGameController.showError(errorMessage);
-                }
+                RiseAndFallApplication.switchToView(View.WAITING_GAME, errorMessage);
             }
             case RUNNING -> {
-                RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
-                MainRunningGameController controller = View.MAIN_RUNNING_GAME.getController();
-                controller.updateFields();
-                if (errorMessage != null) {
-                    controller.showError(errorMessage);
+                View displayView = RiseAndFallApplication.getCurrentView();
+                if (displayView != View.MAIN_RUNNING_GAME && displayView != View.ORDERS) {
+                    displayView = View.MAIN_RUNNING_GAME;
                 }
-                OrderController orderController = View.ORDERS.getController();
-                orderController.loadPendingOrders();
+
+                RiseAndFallApplication.switchToView(displayView, errorMessage);
             }
             case ENDED -> {
                 // TODO : Afficher un message de fin de partie (victoire, défaite)
@@ -145,15 +124,17 @@ public class RiseAndFallClient extends BaseSocketClient {
     }
 
     /**
-     * Méthode appelée lorsque le paquet {@link PacketJoinedGame} est reçu.
-     * Elle initialise les données du jeu et du joueur, puis change la vue de l'application pour afficher l'écran principal.
+     * Décode les données du paquet PacketInitialGameData, initialise le jeu et le joueur,
+     * puis change la vue de l'application pour afficher l'écran principal.
      *
-     * @param client Le socket connecté au serveur.
-     * @param packet Le paquet reçu.
+     * @param client     Le socket connecté au serveur.
+     * @param readHelper L'outil de lecture pour désérialiser le paquet.
      */
-    private void onJoinedGame(SocketWrapper client, PacketJoinedGame<ClientGame, ClientPlayer> packet) {
-        RiseAndFall.initGame(packet);
-        Platform.runLater(() -> this.switchToGameView(packet.getGame().getState()));
+    private void onJoinedGame(SocketWrapper client, ReadHelper readHelper) throws IOException {
+        ClientGame game = new ClientGame(readHelper);
+        RiseAndFall.setGame(game);
+        RiseAndFall.setPlayer(new CurrentClientPlayer(readHelper));
+        Platform.runLater(() -> this.switchToGameView(game.getState()));
     }
 
     /**
@@ -199,14 +180,12 @@ public class RiseAndFallClient extends BaseSocketClient {
         Platform.runLater(() -> {
             switch (errorType) {
                 case LOGIN_GENERIC_ERROR, LOGIN_INVALID_CREDENTIALS, LOGIN_INVALID_SESSION -> {
-                    RiseAndFallApplication.switchToView(View.LOGIN);
-                    ((LoginController) View.LOGIN.getController()).showError(errorType.getMessage());
+                    RiseAndFallApplication.switchToView(View.LOGIN, errorType.getMessage());
                 }
                 case REGISTER_GENERIC_ERROR, REGISTER_USERNAME_TAKEN -> {
-                    RiseAndFallApplication.switchToView(View.REGISTER);
-                    ((RegisterController) View.REGISTER.getController()).showError(errorType.getMessage());
+                    RiseAndFallApplication.switchToView(View.REGISTER, errorType.getMessage());
                 }
-                case JOINING_GAME_FAILED, JOINING_GAME_NOT_FOUND -> {
+                case JOINING_GAME_FAILED, JOINING_GAME_NOT_FOUND, JOINING_NON_WAITING, JOINING_GAME_FULL -> {
                     GameListController controller = View.GAME_LIST.getController();
                     controller.showError(errorType.getMessage());
                     // Le basculement vers la vue de la liste des parties aura lieu après la réception du paquet PacketWaitingGames
@@ -233,5 +212,56 @@ public class RiseAndFallClient extends BaseSocketClient {
             controller.refreshGameList(packet.getWaitingGames());
             RiseAndFallApplication.switchToView(View.GAME_LIST);
         });
+    }
+
+    /**
+     * Méthode appelée lorsque le paquet {@link PacketDiscoverPlayer} est reçu.
+     * Elle ajoute un nouveau joueur découvert à la liste des joueurs du jeu.
+     *
+     * @param sender Le socket connecté au serveur.
+     * @param packet Le paquet contenant les informations du joueur découvert.
+     */
+    private void onDiscoverPlayer(SocketWrapper sender, PacketDiscoverPlayer packet) {
+        RiseAndFall.getGame().addOtherPlayer(packet.getPlayerId(), packet.getPlayerRace(), packet.getPlayerName());
+    }
+
+    private void startConnectionLoop(long delay) {
+        RiseAndFall.TIMER.scheduleAtFixedRate(this.reconectTask = new TimerTask() {
+            @Override
+            public void run() {
+                LogManager.logMessage("Attempting to reconnect...");
+                try {
+                    RiseAndFallClient.this.connect();
+                    RiseAndFallClient.this.reconectTask.cancel();
+                    RiseAndFallClient.this.reconectTask = null;
+                } catch (IOException e) {
+                    LogManager.logError("Could not reconnect to the server, retrying in 2 seconds...", e);
+                }
+            }
+        }, delay, 2000);
+    }
+
+    @Override
+    protected void onDisconnected(SocketWrapper socketWrapper) {
+        super.onDisconnected(socketWrapper);
+
+        if (this.shouldReconnect && this.reconectTask == null) {
+            LogManager.logMessage("Disconnected, reconnecting in 2 seconds...");
+            Platform.runLater(() -> RiseAndFallApplication.switchToView(View.LOADING));
+            this.startConnectionLoop(2000);
+        }
+    }
+
+    public void scheduledConnect() {
+        this.startConnectionLoop(0);
+    }
+
+    public void closeWithoutReconnect() throws IOException {
+        this.shouldReconnect = false;
+        if (this.reconectTask != null) {
+            this.reconectTask.cancel();
+            this.reconectTask = null;
+        }
+        this.close();
     }
 }

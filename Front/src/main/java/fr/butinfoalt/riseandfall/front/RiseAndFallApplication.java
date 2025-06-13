@@ -27,6 +27,11 @@ public class RiseAndFallApplication extends Application {
     private static Stage mainWindow;
 
     /**
+     * Vue actuellement affichée dans la fenêtre principale.
+     */
+    private static View currentView;
+
+    /**
      * Méthode principale de l'application. Elle lance l'application JavaFX.
      *
      * @param args Arguments de la ligne de commande (non utilisés).
@@ -57,14 +62,43 @@ public class RiseAndFallApplication extends Application {
     }
 
     /**
+     * Méthode pour obtenir la vue actuellement affichée dans la fenêtre principale.
+     *
+     * @return La vue actuellement affichée.
+     */
+    public static View getCurrentView() {
+        return currentView;
+    }
+
+    /**
      * Méthode pour changer la vue de la fenêtre principale.
+     * Cette méthode est une surcharge de {@link #switchToView(View, String)} qui n'affiche pas de message d'erreur.
      *
      * @param view La nouvelle vue à afficher.
      */
     public static void switchToView(View view) {
-        Parent newRoot = view.getSceneRoot();
-        mainWindow.getScene().setRoot(newRoot);
-        mainWindow.setTitle(view.getWindowTitle());
+        switchToView(view, null);
+    }
+
+    /**
+     * Méthode pour changer la vue de la fenêtre principale.
+     *
+     * @param view         La nouvelle vue à afficher.
+     * @param errorMessage Le message d'erreur à afficher dans la vue
+     */
+    public static void switchToView(View view, String errorMessage) {
+        if (currentView != view) {
+            if (currentView.getController() instanceof ViewController viewController) {
+                viewController.onHidden();
+            }
+            Parent newRoot = view.getSceneRoot();
+            mainWindow.getScene().setRoot(newRoot);
+            mainWindow.setTitle(view.getWindowTitle());
+            currentView = view;
+        }
+        if (view.getController() instanceof ViewController viewController) {
+            viewController.onDisplayed(errorMessage);
+        }
     }
 
     /**
@@ -75,9 +109,10 @@ public class RiseAndFallApplication extends Application {
     @Override
     public void start(Stage stage) {
         mainWindow = stage;
+        currentView = View.LOADING;
 
-        Scene scene = new Scene(View.LOADING.getSceneRoot(), WIDTH, HEIGHT);
-        stage.setTitle(View.LOADING.getWindowTitle());
+        Scene scene = new Scene(currentView.getSceneRoot(), WIDTH, HEIGHT);
+        stage.setTitle(currentView.getWindowTitle());
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.setOnCloseRequest(this::onCloseRequest);
@@ -85,17 +120,21 @@ public class RiseAndFallApplication extends Application {
 
         RiseAndFall.initSocketClient();
 
-        LoadingController controller = View.LOADING.getController();
+        LoadingController controller = currentView.getController();
         controller.initializeScene(scene);
+        if (currentView.getController() instanceof ViewController viewController) {
+            viewController.onDisplayed(null);
+        }
     }
 
     private void onCloseRequest(WindowEvent windowEvent) {
         if (!windowEvent.isConsumed()) {
             try {
-                RiseAndFall.getClient().close();
+                RiseAndFall.getClient().closeWithoutReconnect();
             } catch (IOException e) {
                 LogManager.logError("Erreur lors de la fermeture du client", e);
             }
+            RiseAndFall.TIMER.cancel();
         }
     }
 }

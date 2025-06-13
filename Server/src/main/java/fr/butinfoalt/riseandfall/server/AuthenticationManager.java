@@ -213,13 +213,7 @@ public class AuthenticationManager {
             }
             return;
         }
-        this.userConnections.put(sender, user);
-        try {
-            sender.sendPacket(new PacketToken(generateTokenToUser(user)));
-        } catch (IOException e) {
-            LogManager.logError("Erreur lors de l'envoi du token", e);
-        }
-        this.server.getGameManager().sendJoinGamePacket(sender, user);
+        this.onUserConnected(sender, user, new PacketToken(generateTokenToUser(user)));
     }
 
     /**
@@ -239,13 +233,7 @@ public class AuthenticationManager {
             }
             return;
         }
-        this.userConnections.put(sender, user);
-        try {
-            sender.sendPacket(packet);
-        } catch (IOException e) {
-            LogManager.logError("Erreur lors de l'envoi du token", e);
-        }
-        this.server.getGameManager().sendJoinGamePacket(sender, user);
+        this.onUserConnected(sender, user, packet);
     }
 
     /**
@@ -277,13 +265,27 @@ public class AuthenticationManager {
             return;
         }
         server.getUserManager().addUser(user);
+        this.onUserConnected(sender, user, new PacketToken(generateTokenToUser(user)));
+    }
+
+    /**
+     * Méthode appelée lorsque l'utilisateur est connecté.
+     * Elle enregistre l'utilisateur dans la map des connexions et envoie les paquets nécessaires au client.
+     *
+     * @param sender      Le socket du client qui s'est connecté.
+     * @param user        L'utilisateur qui s'est connecté.
+     * @param tokenToSend Le token d'authentification à envoyer au client.
+     */
+    private void onUserConnected(SocketWrapper sender, User user, PacketToken tokenToSend) {
         this.userConnections.put(sender, user);
         try {
-            sender.sendPacket(new PacketToken(generateTokenToUser(user)));
+            sender.sendPacket(tokenToSend);
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du token", e);
         }
-        this.server.getGameManager().sendJoinGamePacket(sender, user);
+        GameManager gameManager = this.server.getGameManager();
+        gameManager.sendJoinGamePacket(sender, user);
+        gameManager.sendDiscoverPlayerPacket(sender, user);
     }
 
     /**

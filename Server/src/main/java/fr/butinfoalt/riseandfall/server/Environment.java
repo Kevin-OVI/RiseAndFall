@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.server;
 
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import io.github.cdimascio.dotenv.Dotenv;
 
 /**
@@ -9,6 +10,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class Environment {
     public static final int SERVER_PORT, DB_PORT;
     public static final String SERVER_HOST, DB_HOST, DB_NAME, DB_USER, DB_PASSWORD;
+    public static final boolean DEBUG_MODE;
 
     static {
         Dotenv dotenv = Dotenv.load();
@@ -20,5 +22,10 @@ public class Environment {
         DB_NAME = dotenv.get("DB_NAME");
         DB_USER = dotenv.get("DB_USER");
         DB_PASSWORD = dotenv.get("DB_PASSWORD");
+        String debugMode = dotenv.get("DEBUG_MODE");
+        DEBUG_MODE = debugMode != null && debugMode.equalsIgnoreCase("true");
+        if (DEBUG_MODE) {
+            LogManager.logMessage("Mode debug activé !");
+        }
     }
 }

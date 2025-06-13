@@ -1,18 +1,16 @@
 package fr.butinfoalt.riseandfall.gamelogic;
 
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
-import fr.butinfoalt.riseandfall.gamelogic.order.BaseOrder;
+import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
 import fr.butinfoalt.riseandfall.network.common.ISerializable;
-import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
-import fr.butinfoalt.riseandfall.network.packets.data.OrderType;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap.Entry;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 
@@ -30,19 +28,27 @@ public abstract class Player implements Identifiable, ISerializable {
     /**
      * Association entre les types de bâtiments et le nombre de bâtiments de chaque type.
      */
-    protected final ObjectIntMap<BuildingType> buildingMap;
+    private final ObjectIntMap<BuildingType> buildingMap;
     /**
      * Association entre les types d'unités et le nombre d'unités de chaque type.
      */
-    protected final ObjectIntMap<UnitType> unitMap;
+    private final ObjectIntMap<UnitType> unitMap;
     /**
-     * Liste des ordres à exécuter au prochain tour pour le joueur.
+     * Ordres de création de bâtiments en attente.
      */
-    protected final ArrayList<BaseOrder> pendingOrders = new ArrayList<>();
+    private ObjectIntMap<BuildingType> pendingBuildingsCreation;
     /**
-     * Race du joueur
+     * Ordres de créations d'unités en attente.
      */
-    private final Race race;
+    private ObjectIntMap<UnitType> pendingUnitsCreation;
+    /**
+     * Ordres d'attaque en attente.
+     */
+    private Collection<AttackPlayerOrderData> pendingAttacks;
+    /**
+     * Race du joueur (non final car elle peut être modifiée coté client)
+     */
+    protected Race race;
     /**
      * Quantité d'or que possède le joueur.
      * Initialisé à 50 pièces d'or au début de la partie.
@@ -71,6 +77,9 @@ public abstract class Player implements Identifiable, ISerializable {
                         .filter(unitType -> unitType.getAccessibleByRace() == null || unitType.getAccessibleByRace() == this.race)
                         .collect(Collectors.toList())
         );
+        this.pendingBuildingsCreation = this.buildingMap.createEmptyClone();
+        this.pendingUnitsCreation = this.unitMap.createEmptyClone();
+        this.pendingAttacks = new ArrayList<>();
 
         for (Entry<BuildingType> entry : this.buildingMap) {
             entry.setValue(entry.getKey().getInitialAmount());
@@ -188,57 +197,67 @@ public abstract class Player implements Identifiable, ISerializable {
     }
 
     /**
-     * Méthode pour obtenir la liste des ordres en attente.
+     * Méthode pour obtenir les ordres de création d'unités en attente.
      *
-     * @return La liste des ordres en attente.
+     * @return L'association des types d'unités avec le nombre d'unités à créer.
      */
-    public ArrayList<BaseOrder> getPendingOrders() {
-        return this.pendingOrders;
+    public ObjectIntMap<UnitType> getPendingUnitsCreation() {
+        return pendingUnitsCreation;
     }
 
     /**
-     * Méthode pour ajouter un ordre à la liste des ordres en attente.
-     * Supprime tous les ordres en attente avant d'ajouter les nouveaux ordres.
+     * Méthode pour définir les ordres de création d'unités en attente.
      *
-     * @param orders Liste des ordres à ajouter.
+     * @param pendingUnitsCreation L'association des types d'unités avec le nombre d'unités à créer.
      */
-    public void updatePendingOrders(List<BaseOrder> orders) {
-        this.pendingOrders.clear();
-        this.pendingOrders.addAll(orders);
+    public void setPendingUnitsCreation(ObjectIntMap<UnitType> pendingUnitsCreation) {
+        this.pendingUnitsCreation = pendingUnitsCreation;
     }
 
     /**
-     * Méthode pour désérialiser une liste d'ordres à partir d'un flux de données.
-     * On lit d'abord le nombre d'ordres, puis on lit chaque ordre en fonction de son type.
+     * Méthode pour obtenir les ordres de création de bâtiments en attente.
      *
-     * @param readHelper L'outil de lecture pour désérialiser les ordres.
-     * @return La liste des ordres désérialisés.
-     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
+     * @return L'association des types de bâtiments avec le nombre de bâtiments à créer.
      */
-    public static ArrayList<BaseOrder> deserializeOrders(ReadHelper readHelper) throws IOException {
-        int orderCount = readHelper.readInt();
-        ArrayList<BaseOrder> orders = new ArrayList<>(orderCount);
-        for (int i = 0; i < orderCount; i++) {
-            OrderType orderType = OrderType.values()[readHelper.readInt()];
-            orders.add(orderType.getDeserializer().deserialize(readHelper));
-        }
-        return orders;
+    public ObjectIntMap<BuildingType> getPendingBuildingsCreation() {
+        return pendingBuildingsCreation;
     }
 
     /**
-     * Méthode pour sérialiser une liste d'ordres dans un flux de données.
-     * On écrit d'abord le nombre d'ordres, puis on écrit chaque ordre en fonction de son type.
+     * Méthode pour définir les ordres de création de bâtiments en attente.
      *
-     * @param orders      La liste des ordres à sérialiser.
-     * @param writeHelper L'outil d'écriture pour sérialiser les ordres.
-     * @throws IOException Si une erreur d'entrée/sortie se produit lors de la sérialisation.
+     * @param pendingBuildingsCreation L'association des types de bâtiments avec le nombre de bâtiments à créer.
      */
-    public static void serializeOrders(ArrayList<BaseOrder> orders, WriteHelper writeHelper) throws IOException {
-        writeHelper.writeInt(orders.size());
-        for (BaseOrder order : orders) {
-            writeHelper.writeInt(OrderType.getByClass(order.getClass()).ordinal());
-            order.toBytes(writeHelper);
-        }
+    public void setPendingBuildingsCreation(ObjectIntMap<BuildingType> pendingBuildingsCreation) {
+        this.pendingBuildingsCreation = pendingBuildingsCreation;
+    }
+
+    /**
+     * Méthode pour obtenir les ordres d'attaque en attente.
+     *
+     * @return La collection des ordres d'attaque en attente.
+     */
+    public Collection<AttackPlayerOrderData> getPendingAttacks() {
+        return pendingAttacks;
+    }
+
+    /**
+     * Méthode pour définir les ordres d'attaque en attente.
+     *
+     * @param pendingAttacks La collection des ordres d'attaque à définir.
+     */
+    public void setPendingAttacks(Collection<AttackPlayerOrderData> pendingAttacks) {
+        this.pendingAttacks = pendingAttacks;
+    }
+
+    /**
+     * Méthode pour vérifier si le joueur est éliminé.
+     * Un joueur est considéré comme éliminé s'il n'a plus d'unités et pas de bâtiments.
+     *
+     * @return true si le joueur est éliminé, false sinon.
+     */
+    public boolean isEliminated() {
+        return this.unitMap.isEmpty() && this.buildingMap.isEmpty();
     }
 
     /**
@@ -253,15 +272,14 @@ public abstract class Player implements Identifiable, ISerializable {
     public void serializeModifiableData(WriteHelper writeHelper) throws IOException {
         writeHelper.writeFloat(this.goldAmount);
         writeHelper.writeFloat(this.intelligence);
-        for (Entry<BuildingType> entry : this.buildingMap) {
-            writeHelper.writeInt(entry.getKey().getId());
-            writeHelper.writeInt(entry.getValue());
+        ObjectIntMap.serialize(this.buildingMap, writeHelper);
+        ObjectIntMap.serialize(this.unitMap, writeHelper);
+        ObjectIntMap.serialize(this.pendingUnitsCreation, writeHelper);
+        ObjectIntMap.serialize(this.pendingBuildingsCreation, writeHelper);
+        writeHelper.writeInt(this.pendingAttacks.size());
+        for (AttackPlayerOrderData attack : this.pendingAttacks) {
+            attack.toBytes(writeHelper);
         }
-        for (Entry<UnitType> entry : this.unitMap) {
-            writeHelper.writeInt(entry.getKey().getId());
-            writeHelper.writeInt(entry.getValue());
-        }
-        serializeOrders(this.pendingOrders, writeHelper);
     }
 
     /**
@@ -285,7 +303,9 @@ public abstract class Player implements Identifiable, ISerializable {
                 .add("intelligence", this.intelligence)
                 .add("buildingMap", this.buildingMap)
                 .add("unitMap", this.unitMap)
-                .add("pendingOrders", this.pendingOrders);
+                .add("pendingUnitsCreation", this.pendingUnitsCreation)
+                .add("pendingBuildingsCreation", this.pendingBuildingsCreation)
+                .add("pendingAttacks", this.pendingAttacks);
     }
 
     @Override

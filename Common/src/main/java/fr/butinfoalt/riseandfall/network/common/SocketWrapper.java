@@ -1,5 +1,7 @@
 package fr.butinfoalt.riseandfall.network.common;
 
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -84,7 +86,22 @@ public abstract class SocketWrapper {
                 this.handlePacket(packetId);
             }
         } catch (IOException e) {
-            if (!(e instanceof SocketException && "Socket closed".equals(e.getMessage()))) {
+            if (e instanceof SocketException) {
+                switch (e.getMessage()) {
+                    case "Socket closed" -> {
+                        // Fermeture propre de la socket, on ignore cette exception
+                    }
+                    case "Connection reset" -> {
+                        // La connexion a été réinitialisée, on affiche un message de log
+                        LogManager.logMessage("Connection reset by peer: %s".formatted(this.getName()));
+                    }
+                    case "Connection timed out" -> {
+                        // La connexion a expiré, on affiche un message de log
+                        LogManager.logMessage("Connection timed out: %s".formatted(this.getName()));
+                    }
+                    default -> throw new RuntimeException(e); // Autres exceptions de socket, on les relance
+                }
+            } else {
                 throw new RuntimeException(e);
             }
         } finally {
@@ -105,6 +122,10 @@ public abstract class SocketWrapper {
      */
     private <T extends IPacket> void handlePacket(byte packetId) throws IOException {
         IRawHandler handler = this.packetRegistry.getRawHandler(packetId);
+        if (handler == null) {
+            LogManager.logError("Unknown packet ID: %d from %s".formatted(packetId, this.getName()));
+            return;
+        }
         handler.deserialize(this, this.readHelper);
     }
 

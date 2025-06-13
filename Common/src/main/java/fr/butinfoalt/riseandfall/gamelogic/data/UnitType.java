@@ -192,7 +192,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
                 .add("name", this.name)
                 .add("description", this.description)
                 .add("price", this.price)
-                .add("requiredIntelligence)", this.requiredIntelligence)
+                .add("requiredIntelligence", this.requiredIntelligence)
                 .add("health", this.health)
                 .add("damage", this.damage)
                 .add("accessibleByRace", this.accessibleByRace)

@@ -2,11 +2,13 @@ package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
+import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
@@ -50,6 +52,12 @@ public class RiseAndFallServer extends BaseSocketServer {
     private final Timer timer = new Timer();
 
     /**
+     * Désérialiseur de données spécifique au serveur.
+     * Il est utilisé pour désérialiser les données côté serveur.
+     */
+    private final ServerDataDeserializer dataDeserializer = new ServerDataDeserializer(this);
+
+    /**
      * Constructeur de la classe BaseSocketServer.
      * Initialise le serveur socket sur le port spécifié.
      *
@@ -68,12 +76,13 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerSendPacket((byte) 2, PacketServerData.class);
         this.registerReceivePacket((byte) 3, PacketCreateOrJoinGame.class, this.gameManager::onCreateOrJoinGame, PacketCreateOrJoinGame::new);
         this.registerSendPacket((byte) 4, PacketJoinedGame.class);
-        this.registerReceivePacket((byte) 5, PacketUpdateOrders.class, this.gameManager::onUpdateOrders, PacketUpdateOrders::new);
+        this.registerReceivePacket((byte) 5, PacketUpdateOrders.class, this.gameManager::onUpdateOrders);
         this.registerSendPacket((byte) 6, PacketUpdateGameData.class);
         this.registerSendAndReceivePacket((byte) 7, PacketGameAction.class, this::onGameAction, PacketGameAction::new);
         this.registerSendPacket((byte) 8, PacketError.class);
         this.registerReceivePacket((byte) 9, PacketRegister.class, this.authManager::onRegister, PacketRegister::new);
         this.registerSendPacket((byte) 10, PacketWaitingGames.class);
+        this.registerSendPacket((byte) 11, PacketDiscoverPlayer.class);
     }
 
     /**
@@ -90,7 +99,7 @@ public class RiseAndFallServer extends BaseSocketServer {
             List<BuildingType> buildingTypes = new ArrayList<>();
             List<UnitType> unitTypes = new ArrayList<>();
 
-            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, gold_multiplier, intelligence_multiplier, damage_multiplier, health_multiplier FROM race ORDER BY id")) {
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM race ORDER BY id")) {
 
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
@@ -105,35 +114,36 @@ public class RiseAndFallServer extends BaseSocketServer {
                 }
             }
 
-            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, price, required_intelligence, gold_production, intelligence_production, max_units, initial_amount, accessible_race_id FROM building_type ORDER BY id")) {
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM building_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
 
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    float price = set.getInt("price");
-                    float requiredIntelligence = set.getInt("required_intelligence");
-                    float goldProduction = set.getInt("gold_production");
-                    float intelligenceProduction = set.getInt("intelligence_production");
+                    float price = set.getFloat("price");
+                    float requiredIntelligence = set.getFloat("required_intelligence");
+                    float goldProduction = set.getFloat("gold_production");
+                    float intelligenceProduction = set.getFloat("intelligence_production");
+                    float resistance = set.getFloat("resistance");
                     int maxUnits = set.getInt("max_units");
                     int initialAmount = set.getInt("initial_amount");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
-                    buildingTypes.add(new BuildingType(id, name, description, price, requiredIntelligence, goldProduction, intelligenceProduction, maxUnits, initialAmount, accessibleRace));
+                    buildingTypes.add(new BuildingType(id, name, description, price, requiredIntelligence, goldProduction, intelligenceProduction, resistance, maxUnits, initialAmount, accessibleRace));
                 }
             }
 
-            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT id, name, description, price, required_intelligence, health, damage, accessible_race_id FROM unit_type ORDER BY id")) {
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM unit_type ORDER BY id")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int id = set.getInt("id");
                     String name = set.getString("name");
                     String description = set.getString("description");
-                    float price = set.getInt("price");
-                    float requiredIntelligence = set.getInt("required_intelligence");
-                    float health = set.getInt("health");
-                    float damage = set.getInt("damage");
+                    float price = set.getFloat("price");
+                    float requiredIntelligence = set.getFloat("required_intelligence");
+                    float health = set.getFloat("health");
+                    float damage = set.getFloat("damage");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
                     unitTypes.add(new UnitType(id, name, description, price, requiredIntelligence, health, damage, accessibleRace));
@@ -183,6 +193,69 @@ public class RiseAndFallServer extends BaseSocketServer {
                     game.forceAddPlayer(player);
                 }
             }
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM player_building")){
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    BuildingType buildingType = Identifiable.getById(buildingTypes, set.getInt("building_id"));
+                    int amount = set.getInt("quantity");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    player.getBuildingMap().set(buildingType, amount);
+                }
+            }
+
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM player_unit")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    UnitType unitType = Identifiable.getById(unitTypes, set.getInt("unit_id"));
+                    int amount = set.getInt("quantity");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    player.getUnitMap().set(unitType, amount);
+                }
+            }
+
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM building_creation_order")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    BuildingType buildingType = Identifiable.getById(buildingTypes, set.getInt("building_type_id"));
+                    int amount = set.getInt("amount");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    player.getPendingBuildingsCreation().set(buildingType, amount);
+                }
+            }
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM unit_creation_order")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    UnitType unitType = Identifiable.getById(unitTypes, set.getInt("unit_type_id"));
+                    int amount = set.getInt("amount");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    player.getPendingUnitsCreation().set(unitType, amount);
+                }
+            }
+            try (PreparedStatement attackStatement = this.getDb().prepareStatement("SELECT * FROM attack_player_order")) {
+                ResultSet set = attackStatement.executeQuery();
+                while (set.next()) {
+                    int playerId = set.getInt("player_id");
+                    int targetPlayerId = set.getInt("target_player_id");
+                    int orderId = set.getInt("id");
+                    ServerPlayer player = Identifiable.getById(players, playerId);
+                    ServerPlayer targetPlayer = Identifiable.getById(players, targetPlayerId);
+                    ObjectIntMap<UnitType> usingUnits = player.getUnitMap().createEmptyClone();
+                    try (PreparedStatement unitStatement = this.getDb().prepareStatement("SELECT * FROM attack_player_order_unit WHERE order_id = ?")) {
+                        unitStatement.setInt(1, orderId);
+                        ResultSet unitSet = unitStatement.executeQuery();
+                        while (unitSet.next()) {
+                            UnitType unitType = Identifiable.getById(unitTypes, unitSet.getInt("unit_type_id"));
+                            usingUnits.set(unitType, unitSet.getInt("amount"));
+                        }
+                    }
+                    player.getPendingAttacks().add(new AttackPlayerOrderData(targetPlayer, usingUnits));
+                }
+            }
+
             // Redémarrage des actions en attente
             for (ServerGame game : games) {
                 switch (game.getState()) {
@@ -302,6 +375,15 @@ public class RiseAndFallServer extends BaseSocketServer {
      */
     public Timer getTimer() {
         return this.timer;
+    }
+
+    /**
+     * Méthode pour obtenir le désérialiseur de données spécifique au serveur.
+     *
+     * @return Le désérialiseur de données spécifique au serveur.
+     */
+    public ServerDataDeserializer getDataDeserializer() {
+        return this.dataDeserializer;
     }
 
     /**
