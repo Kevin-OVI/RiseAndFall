@@ -1,5 +1,7 @@
 package fr.butinfoalt.riseandfall.network.common;
 
+import fr.butinfoalt.riseandfall.util.logging.LogManager;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -105,6 +107,10 @@ public abstract class SocketWrapper {
      */
     private <T extends IPacket> void handlePacket(byte packetId) throws IOException {
         IRawHandler handler = this.packetRegistry.getRawHandler(packetId);
+        if (handler == null) {
+            LogManager.logError("Unknown packet ID: %d from %s".formatted(packetId, this.getName()));
+            return;
+        }
         handler.deserialize(this, this.readHelper);
     }
 
