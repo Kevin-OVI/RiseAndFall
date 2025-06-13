@@ -16,7 +16,7 @@
         <VBox alignment="CENTER" spacing="20.0">
 
             <TitleLabel fx:id="noAttacksScheduledTitle" visible="false">Aucune attaque prévue</TitleLabel>
-            <TitleLabel fx:id="scheduledAttacksTitle">Liste des attaques prévues :</TitleLabel>
+            <TitleLabel fx:id="scheduledAttacksTitle">Liste des attaques prévues</TitleLabel>
             <VBox fx:id="listContainer" alignment="CENTER"
                   maxWidth="Infinity"
                   StackPane.alignment="TOP_CENTER">

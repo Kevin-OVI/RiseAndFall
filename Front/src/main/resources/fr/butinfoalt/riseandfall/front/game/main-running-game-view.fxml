@@ -20,7 +20,7 @@
                     </VBox>
 
                     <VBox alignment="TOP_CENTER" spacing="10">
-                        <TitleLabel>Votre royaume :</TitleLabel>
+                        <TitleLabel>Votre royaume</TitleLabel>
 
                         <Label fx:id="goldField"/>
                         <Label fx:id="intelligenceField"/>
@@ -29,13 +29,13 @@
                 </HBox>
 
                 <VBox alignment="CENTER" spacing="10">
-                    <TitleLabel>Vos unités :</TitleLabel>
+                    <TitleLabel>Vos unités</TitleLabel>
                     <!--Ce composant est rempli dynamiquement avec les types d'unités-->
                     <VBox fx:id="unitVBox" alignment="CENTER" spacing="10"/>
                 </VBox>
 
                 <VBox alignment="CENTER" spacing="10">
-                    <TitleLabel>Vos bâtiments :</TitleLabel>
+                    <TitleLabel>Vos bâtiments</TitleLabel>
                     <!--Ce composant est rempli dynamiquement avec les types de bâtiments-->
                     <VBox fx:id="buildingsVBox" alignment="CENTER" spacing="10"/>
                 </VBox>

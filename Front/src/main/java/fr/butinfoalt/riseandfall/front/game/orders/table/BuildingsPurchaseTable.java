@@ -4,7 +4,6 @@ import fr.butinfoalt.riseandfall.front.game.orders.amountselector.PurchasableIte
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
-import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.TableColumn;
 
@@ -17,15 +16,15 @@ public class BuildingsPurchaseTable extends PurchasableTable<BuildingType> {
     /**
      * Colonne pour afficher la production d'or du bâtiment.
      */
-    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, Number> goldProductionColumn;
+    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, String> goldProductionColumn;
     /**
      * Colonne pour afficher la production d'intelligence du bâtiment.
      */
-    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, Number> intelligenceProductionColumn;
+    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, String> intelligenceProductionColumn;
     /**
      * Colonne pour afficher la résistance du bâtiment.
      */
-    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, Number> resistanceColumn;
+    private final TableColumn<ItemTableRow<BuildingType, PurchasableItemAmountSelector<BuildingType>>, String> resistanceColumn;
     /**
      * Colonne pour afficher la capacité d'hébergement du bâtiment.
      */
@@ -41,15 +40,15 @@ public class BuildingsPurchaseTable extends PurchasableTable<BuildingType> {
         Race race = RiseAndFall.getPlayer().getRace();
 
         this.goldProductionColumn = new TableColumn<>("Production d'or");
-        this.goldProductionColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getGoldProduction() * race.getGoldMultiplier()));
+        this.goldProductionColumn.setCellValueFactory(data -> new FloatOptimisedDisplayProperty(data.getValue().getItem().getGoldProduction() * race.getGoldMultiplier()));
         this.getColumns().add(this.goldProductionColumn);
 
         this.intelligenceProductionColumn = new TableColumn<>("Production d'intelligence");
-        this.intelligenceProductionColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getIntelligenceProduction() * race.getIntelligenceMultiplier()));
+        this.intelligenceProductionColumn.setCellValueFactory(data -> new FloatOptimisedDisplayProperty(data.getValue().getItem().getIntelligenceProduction() * race.getIntelligenceMultiplier()));
         this.getColumns().add(this.intelligenceProductionColumn);
 
         this.resistanceColumn = new TableColumn<>("Résistance");
-        this.resistanceColumn.setCellValueFactory(data -> new SimpleFloatProperty(data.getValue().getItem().getResistance()));
+        this.resistanceColumn.setCellValueFactory(data -> new FloatOptimisedDisplayProperty(data.getValue().getItem().getResistance()));
         this.getColumns().add(this.resistanceColumn);
 
         this.hostingCapacityColumn = new TableColumn<>("Capacité d'hébergement");

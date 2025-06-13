@@ -4,7 +4,8 @@
 }
 
 .title-label {
-    -fx-font-size: 120%;
+    -fx-font-family: "Arial Black", sans-serif;
+    -fx-font-size: 110%;
 }
 
 .purchasable-table-column {

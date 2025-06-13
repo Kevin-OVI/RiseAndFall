@@ -15,7 +15,7 @@
                 <Insets top="20"/>
             </VBox.margin>
             <VBox alignment="CENTER" spacing="10">
-                <TitleLabel>Qui attaquez-vous ?:</TitleLabel>
+                <TitleLabel>Qui attaquez-vous ?</TitleLabel>
 
                 <ChoiceBox fx:id="targetPlayerSelector"/>
             </VBox>

@@ -174,7 +174,5 @@ public class OrderController implements ViewController {
     public void initialize() {
         Scene scene = RiseAndFallApplication.getMainWindow().getScene();
         UIUtils.setBackgroundImage("images/background.png", scene, this.backgroundImageView, this.root);
-        this.unitTable.setMaxWidth(1000);
-        this.buildingTable.setMaxWidth(1000);
     }
 }

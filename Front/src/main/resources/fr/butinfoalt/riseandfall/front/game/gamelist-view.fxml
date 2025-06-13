@@ -23,7 +23,7 @@
             <ChoiceBox fx:id="raceChoiceBox"/>
 
             <TitleLabel style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: black;">
-                Listes des parties disponibles:
+                Listes des parties disponibles
             </TitleLabel>
 
             <VBox fx:id="listContainer" alignment="CENTER"

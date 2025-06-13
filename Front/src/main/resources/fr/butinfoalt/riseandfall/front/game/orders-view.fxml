@@ -12,28 +12,28 @@
     <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="root">
         <VBox alignment="CENTER" spacing="20.0">
             <VBox alignment="CENTER" spacing="10">
-                <TitleLabel>Vos ressources :</TitleLabel>
+                <TitleLabel>Vos ressources</TitleLabel>
                 <Label fx:id="goldField"/>
                 <Label fx:id="intelligenceField"/>
                 <Label fx:id="unitsField"/>
             </VBox>
 
             <VBox alignment="CENTER" spacing="10">
-                <TitleLabel>Entrainement d'unités :</TitleLabel>
+                <TitleLabel>Entrainement d'unités</TitleLabel>
 
                 <!--Ce tableau est rempli dynamiquement avec les types d'unités-->
                 <UnitsPurchaseTable fx:id="unitTable"/>
             </VBox>
 
             <VBox alignment="CENTER" spacing="10">
-                <TitleLabel>Construction de bâtiments :</TitleLabel>
+                <TitleLabel>Construction de bâtiments</TitleLabel>
 
                 <!--Ce tableau est rempli dynamiquement avec les types de bâtiments-->
                 <BuildingsPurchaseTable fx:id="buildingTable"/>
             </VBox>
 
             <VBox alignment="CENTER" spacing="10">
-                <TitleLabel>Résumé :</TitleLabel>
+                <TitleLabel>Résumé</TitleLabel>
                 <Label fx:id="totalPrice"/>
             </VBox>
 
