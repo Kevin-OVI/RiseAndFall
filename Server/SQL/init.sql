@@ -155,7 +155,7 @@ VALUES
     ('Château', 'Résidence royale des Humains, servant de centre de commandement, lieu de commerce et offrant une grande protection', 100, 20, 30, 20, 250, 2, 0, 2),
 
     ('Donjon', 'Endroit qui respire la violence permettant de former des futur combattants', 20, 10, 0, 0, 70, 6, 0, 3),
-    ('marché aux esclaves', 'Endroit où les orcs achètent et vendent des esclaves', 150, 35, 50, 20, 100, 15, 0, 3),
+    ('marché d''esclave', 'Endroit où les orcs achètent et vendent des esclaves', 150, 35, 50, 10, 100, 15, 0, 3),
 
     ('Tour de Mage', 'Endroit où les prochains mages sont formés', 20, 20, 1, 2, 170, 10, 0, 4),
     ('Arbre de Vie', 'Endroit où les elfes s''instruit', 180, 50, 50,20 , 200, 5, 0, 4),

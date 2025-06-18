@@ -177,6 +177,66 @@ public class DescriptionStage extends Stage {
                               + Vie moyenne
                         
                         * Humain :
+                            - Bâtiment : Église
+                              Édifice spirituel dédié aux Humains, offrant protection et recrutement d'unités pieuses
+                              + Production d'unité forte
+                            - Bâtiment : Château
+                            Résidence royale des Humains, servant de centre de commandement, lieu de commerce et offrant une grande protection
+                            Un lieu de savoir où les humains peuvent développer de nouvelles technologies
+                              + production d'or forte
+                              + production d'intelligence forte
+                            + production d'unité très faible
+                            
+                            - Unité : Ingénieur de combat
+                              Un combattant expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité
+                              + Prix moyen
+                              + Dégats puissants 
+                              + Vie moyen
+                            - Unité : Héros Légendaire
+                              L'un des humains les plus puissant du monde
+                              + Prix extrêmement élevé
+                              + Dégâts extrêmement puissants
+                              + Vie Elevée  
+                              
+                        * 0rc :
+                            - Bâtiment : Donjon
+                              Endroit qui respire la violence permettant de former des futur combattants
+                              + Production d''unité moyenne
+                            - Bâtiment : marché d'esclave
+                              Endroit où les orcs achètent et vendent des esclaves
+                              + Production d'or très forte
+                              + Production d'intelligence faible
+                            - Unité : Uruk Noir
+                              Créature imposante et très puissante mais débile
+                              + Prix elevé
+                              + Dégâts moyens
+                              + Vie élevée
+                            - Unité : Chef de guerre 0rc
+                              Un chef de guerre redoutable qui mène ses troupes à la victoire avec une force inégalée
+                              + Prix extrêmement élevé
+                              + Dégâts extrêmement puissants
+                              + Vie très élevée
+                        * Elfe :
+                            - Bâtiment : Arbre de vie
+                              Un arbre sacré qui produit de l'intelligence et des unités elfiques
+                              + Production d'intelligence moyenne
+                              + Production d'or très elevée
+                                + Production d'unité moyenne
+                            - Bâtiment : Tour de mage
+                                Une tour magique qui permet aux elfes de développer des sorts puissants
+                              + Production d'or ultra faible
+                              + Production d'intelligence faible
+                            + Production d'unité elevée
+                            - Unité : Mage Elfe
+                              Puissant mage
+                              + Prix tres élevé
+                              + Dégâts extrêmement puissants
+                              + Vie très faible
+                            - Unité : Archer Elfe
+                              Archer légendaire poossèdant la plus forte attaque à distance du monde
+                              + Prix extrêmement élevé
+                              + Dégâts ultra puissants
+                              + Vie moyenne
                         
                         
                             
