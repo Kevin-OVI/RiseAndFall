@@ -133,23 +133,23 @@ CREATE TABLE attack_player_order_unit (
 -- Insertion des données statiques
 INSERT INTO race (id, name, description, gold_multiplier, intelligence_multiplier, damage_multiplier, health_multiplier)
 VALUES
-    (1, 'Mort-Vivant', 'Individu mort qui revient à la vie', 1.25, 0.75, 1, 0.75),
+    (1, 'Mort-Vivant', 'Individu mort qui revient à la vie', 1.30, 0.75, 1, 0.75),
     (2, 'Humain', 'Race équilibrée avec des compétences militaires et économiques', 1, 1.25, 0.75, 1),
     (3, 'Orc', 'Créature verte, de taille humanoïde mais plus musclée et pourvue de crocs implantés au hasard. Il a un goût prononcé pour la violence mais il est débile', 0.75, 0.50, 1.5, 1.25),
-    (4, 'Elfe', 'Créature Mystique aux grandes oreilles possèdant une grande intelligence mais faible', 1, 2, 1, 0.75),
-    (5, 'Nain', 'Homme de petite taille,robuste et possèdant ENORMEMENT d''or', 1.5, 1, 0.75, 1.5),
+    (4, 'Elfe', 'Créature Mystique aux grandes oreilles possèdant une grande intelligence mais faible', 1, 2, 0.75, 0.75),
+    (5, 'Nain', 'Homme de petite taille,robuste et possèdant ENORMEMENT d''or', 1.5, 1, 0.75, 1.25),
     (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes le problèmes sont leurs économie', 0.5, 1, 1.25, 1.25),
-    (7, 'Primotaures', 'Premières créatures du monde, les primotaures sont riches mais pacifiques', 1.5, 1, 0.75, 1);
+    (7, 'Primotaures', 'Premières créatures du monde, les primotaures sont riches mais pacifiques', 1.5, 1, 0.60, 1);
 
 INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, resistance, max_units, initial_amount, accessible_race_id)
 VALUES
-    ('Carrière', 'Structure permettant d''extraire des ressources naturelles pour financer l''économie du royaume', 10, 0, 5, 0, 100, 0, 4, NULL),
-    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume mais nécessite de l''intelligence pour être débloquer', 20, 15, 10, 0, 120, 0, 0, NULL),
+    ('Carrière', 'Structure permettant d''extraire des ressources naturelles pour financer l''économie du royaume', 10, 0, 5, 0, 100, 0, 2, NULL),
+    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume mais nécessite de l''intelligence pour être débloquer', 25, 15, 25, 0, 120, 0, 0, NULL),
     ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 100, 3, 1, NULL),
-    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 4, 80, 0, 0, NULL),
+    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 80, 0, 0, NULL),
 
     ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 15, 10, 0, 0, 80, 8, 0, 1),
-    ('Tour obscur','Ancienne tour de mage rempli de rituel sinistre',120 ,25 ,15 ,20 ,150 ,10 ,0 ,1),
+    ('Nécropole','Ancienne ville de mage rempli de rituel sinistre',120 ,35 ,15 ,20 ,150 ,10 ,0 ,1),
 
     ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 12, 0, 0, 80, 8, 0, 2),
     ('Château', 'Résidence royale des Humains, servant de centre de commandement, lieu de commerce et offrant une grande protection', 100, 20, 30, 20, 250, 2, 0, 2),
@@ -160,20 +160,20 @@ VALUES
     ('Tour de Mage', 'Endroit où les prochains mages sont formés', 20, 20, 1, 2, 170, 10, 0, 4),
     ('Arbre de Vie', 'Endroit où les elfes s''instruit', 180, 50, 50,20 , 200, 5, 0, 4),
 
-    ('Mine de Nains', 'Mine d''or où les nains adultes passent 100% de leurs temps', 30, 6, 20, 0, 180, 0, 0, 5),
+    ('Mine de Nains', 'Mine d''or où les nains adultes passent 100% de leurs temps', 30, 6, 40, 0, 180, 0, 0, 5),
     ('Taverne de Nains','Bar dans lequel on recrute les futurs Nains', 130, 20, 0, 3, 100, 20, 0, 5 ),
 
     ('Tente', 'Endroit où les futurs combattants sont formés', 15, 4, 0, 0, 40, 8, 0, 6),
     ('Forge', 'Endroit où les Nerlk fabriquent leurs armes', 120, 25, 40, 5, 120, 0, 0, 6),
 
     ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 30, 6, 20, 3, 260, 1, 0, 7),
-    ('Temple', 'Endroit où les Primotaures s''instruisent et se forme', 150, 30, 10, 30, 90, 20, 0, 7);
+    ('Temple', 'Endroit où les Primotaures s''instruisent et se forme', 150, 30, 25, 30, 90, 20, 0, 7);
 
 INSERT INTO unit_type (name, description, price, required_intelligence, health, damage, accessible_race_id)
 VALUES
     ('Guerrier', 'Une unité de combat faible et polyvalente', 8.0, 0, 10.0, 20.0, NULL),
 
-    ('Ingénieur de combat', 'Un combattant expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 20, 20, 30.0, 50.0, 2),
+    ('Ingénieur de combat', 'Un combattant expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 15, 20, 30.0, 50.0, 2),
     ('Héros Légendaire','L''un des humains les plus puissant du monde', 220, 100.0, 110.0, 200.0, 2),
 
     ('Zombie', 'Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels avec ses griffes et ses morsures infectieuses', 20, 10, 10.0, 50.0, 1),

@@ -67,8 +67,8 @@ public class DescriptionStage extends Stage {
                           + Collecter des ressources
                           + Construire des bâtiments
                           + Recruter des unités
-                          + Déplacer ses unités
-                          + Attaquer ou interagir avec d’autres joueurs ou entités du monde
+                          + Combattre des unités ennemies
+                          + Attaquer ou interagir avec d’autres joueurs 
 
                         """);
 
@@ -82,6 +82,112 @@ public class DescriptionStage extends Stage {
                         • La stratégie de survie est aussi importante que l’agression ou la croissance.
                         """);
 
+        Text raceTitre = new Text("Choix de la race\n");
+        raceTitre.setStyle("-fx-font-weight: bold");
+        Text raceTexte = new Text(
+                """
+                        • Chaque joueur choisie une race au début de la partie.
+                        • Chaque race a ses propres unités et bâtiments ce qui les rend uniques.
+                        • Chaque race possède des bonus et malus qui influencent la stratégie de jeu du joueur.
+                        • Les bâtiments et unités spéficiques à chaque race sont débloqués au fur et à mesure de la partie.
+                        
+                  """);
+
+        Text ListeDesRaces = new Text("Liste des races avec leurs caractéristiques :\n");
+        ListeDesRaces.setStyle("-fx-font-weight: bold");
+        Text ListeDesRacesTexte = new Text(
+                """
+                        - Mort-Vivant : 
+                          + Avantages : 30% de production d'or en plus
+                          - Inconvénients : -25% de production d'intelligence, -25% de vie sur les unités
+                        - Humain : 
+                          + Avantages : 25% de production d'intelligence en plus
+                          - Inconvénients : -25% de dégats sur les unités
+                        - 0rc : 
+                          + Avantages : 50% de dégats en plus, 25% de vie en plus
+                          - Inconvénients : -50% de production d'intelligence, -25% de production d'or
+                          (Recommendé pour les joueurs agressifs)
+                        - Elfe :
+                          + Avantages : +100% de production d'intelligence, 
+                          - Inconvénients : -25% de vie sur les unités, -25% de dégats sur les unités
+                        - Nain : 
+                          + Avantages : 50% de production d'or en plus et 25% de vie en plus 
+                          - Inconvénients : -25% de dégats sur les unités
+                        - Nerlk :
+                          + Avantages : 25% de dégats en plus, 25% de vie en plus
+                          - Inconvénients :-50% de production d'or
+                        - Primotaure :
+                          + Avantages : 50% de production d'or en plus, 
+                          - Inconvénients : -40% de degats sur les unités,
+                        """
+        );
+
+        Text ListesBatimentsEtUnites = new Text("Liste des bâtiments :\n");
+        ListesBatimentsEtUnites.setStyle("-fx-font-weight: bold");
+        Text ListesBatimentsTexte = new Text(
+                """
+                        * Bâtiment  universel pour toutes les races :
+                
+                          - Carrière :
+                          Structure permettant d'extraire des ressources naturelles pour financer l'économie du royaume
+                          + Production d'or faible
+                          + Chaque joueur en possède 2 au début de la partie
+                          
+                        - Mine :
+                            Structure permettant d'extraire des ressources naturelles pour financer l'économie du royaume
+                            + Production d'or Forte
+                            + Chaque joueur en possède 0 au début de la partie
+                        
+                        - Caserne :
+                            Structure permettant de former des emplacements supplémentaires pour les unités de combat
+                            + Production d'emplacement d'unités faible
+                            + Chaque joueur en possède 1 au début de la partie
+                       
+                        - Bibliothèque :
+                            Centre de savoir produisant de l'intelligence pour le développement des technologies
+                            + Production d'intelligence faible
+                            + Chaque joueur en possède 0 au début de la partie
+                       * Unités universelles pour toutes les Races :
+                        - Guerrier :
+                            Une unité de combat faible et polyvalente
+                            + Prix faible
+                            + Dégâts faibles
+                            + Vie faible
+                            
+                      ** Bâtiments et unités spécifiques à chaque Race **
+                        * Mort-Vivant :
+                            - Bâtiment : Cimetière
+                              Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes
+                              + Production d'unités moyenne
+                            - Bâtiment : Nécropole
+                              Ancienne ville de mage rempli de rituel sinistre
+                              + Production d'intelligence forte
+                              + Production d'intelligence moyenne
+                              + Production d'unité Forte
+                           
+                            - Unité : Zombie
+                              Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels
+                              + Prix Moyen
+                              + Dégâts puissants
+                              + Vie faible
+                            - Unité : Nécromancien
+                                Un mage mort-vivant capable de lever des morts-vivants
+                              + Prix extrêmement élevé
+                              + Dégâts extrêmement puissants
+                              + Vie moyenne
+                        
+                        * Humain :
+                        
+                        
+                            
+                        
+                          
+                          
+                          
+                        """
+        );
+
+
         // Ajouter les morceaux de texte dans le TextFlow
         controller.textFlow.getChildren().addAll(
                 mainTitle,
@@ -89,6 +195,9 @@ public class DescriptionStage extends Stage {
                 objectifTitre, objectifTexte,
                 toursTitre, toursTexte,
                 finTitre, finTexte
+                , raceTitre, raceTexte
+                , ListeDesRaces, ListeDesRacesTexte
+                , ListesBatimentsEtUnites, ListesBatimentsTexte
         );
 
         // Centrer le texte dans le ScrollPane si sa hauteur est inférieure à celle du ScrollPane
