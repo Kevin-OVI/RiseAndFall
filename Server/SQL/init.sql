@@ -146,37 +146,49 @@ VALUES
     ('Carrière', 'Structure permettant d''extraire des ressources naturelles pour financer l''économie du royaume', 10, 0, 5, 0, 100, 0, 4, NULL),
     ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume mais nécessite de l''intelligence pour être débloquer', 20, 15, 10, 0, 120, 0, 0, NULL),
     ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 100, 3, 1, NULL),
-    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 4, 80, 0, 1, NULL),
-    ('Rampart','Sert de protection au royaume', 30, 10, 0, 0, 50, 0, 1, NULL),
-    ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 15, 10, 0, 0, 80, 15, 0, 1),
-    ('Tour obscur','Ancienne tour de mage rempli de rituel sinistre',40 ,4 ,0 ,20 ,150 ,0 ,0 ,1),
-    ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 6, 0, 0, 80, 5, 0, 2),
-    ('Château', 'Résidence royale des Humains, servant de centre de commandement, lieu de commerce et offrant une grande protection', 50, 20, 10, 1, 250, 0, 0, 2),
-    ('Donjon', 'Endroit qui respire la violence permettant de former des futur combattants', 50, 2, 0, 0, 70, 10, 0, 3),
-    ('marché aux esclaves', 'Endroit où les orcs achètent et vendent des esclaves', 20, 15, 25, 0, 100, 0, 0, 3),
-    ('Tour de Mage', 'Endroit où les prochains mages sont formés', 50, 70, 1, 5, 170, 1, 0, 4),
-    ('Arbre de Vie', 'Endroit où les elfes s''instruit', 10, 2, 0,20 , 100, 0, 0, 4),
+    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 4, 80, 0, 0, NULL),
+
+    ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 15, 10, 0, 0, 80, 8, 0, 1),
+    ('Tour obscur','Ancienne tour de mage rempli de rituel sinistre',120 ,25 ,15 ,20 ,150 ,10 ,0 ,1),
+
+    ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 12, 0, 0, 80, 8, 0, 2),
+    ('Château', 'Résidence royale des Humains, servant de centre de commandement, lieu de commerce et offrant une grande protection', 100, 20, 30, 20, 250, 2, 0, 2),
+
+    ('Donjon', 'Endroit qui respire la violence permettant de former des futur combattants', 20, 10, 0, 0, 70, 6, 0, 3),
+    ('marché aux esclaves', 'Endroit où les orcs achètent et vendent des esclaves', 150, 35, 50, 20, 100, 15, 0, 3),
+
+    ('Tour de Mage', 'Endroit où les prochains mages sont formés', 20, 20, 1, 2, 170, 10, 0, 4),
+    ('Arbre de Vie', 'Endroit où les elfes s''instruit', 180, 50, 50,20 , 200, 5, 0, 4),
+
     ('Mine de Nains', 'Mine d''or où les nains adultes passent 100% de leurs temps', 30, 6, 20, 0, 180, 0, 0, 5),
-    ('Taverne de Nains','Bar dans lequel on recrute les futurs Nains', 40, 15, 0, 0, 100, 10, 0, 5 ),
-    ('Tente', 'Endroit où les futurs combattants sont formés', 10, 4, 0, 0, 40, 15, 0, 6),
-    ('Forge', 'Endroit où les Nerlk fabriquent leurs armes', 20, 20, 40, 0, 120, 0, 0, 6),
-    ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 80, 4, 0, 0, 260, 1, 0, 7),
-    ('Temple', 'Endroit où les Primotaures s''instruisent et se forme', 100, 12, 10, 30, 90, 20, 0, 7);
+    ('Taverne de Nains','Bar dans lequel on recrute les futurs Nains', 130, 20, 0, 3, 100, 20, 0, 5 ),
+
+    ('Tente', 'Endroit où les futurs combattants sont formés', 15, 4, 0, 0, 40, 8, 0, 6),
+    ('Forge', 'Endroit où les Nerlk fabriquent leurs armes', 120, 25, 40, 5, 120, 0, 0, 6),
+
+    ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 30, 6, 20, 3, 260, 1, 0, 7),
+    ('Temple', 'Endroit où les Primotaures s''instruisent et se forme', 150, 30, 10, 30, 90, 20, 0, 7);
 
 INSERT INTO unit_type (name, description, price, required_intelligence, health, damage, accessible_race_id)
 VALUES
     ('Guerrier', 'Une unité de combat faible et polyvalente', 8.0, 0, 10.0, 20.0, NULL),
+
     ('Ingénieur de combat', 'Un combattant expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité', 20, 20, 30.0, 50.0, 2),
-    ('Héros Légendaire','L''un des humains les plus puissant du monde', 150, 40.0, 110.0, 200.0, 2),
-    ('Zombie', 'Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels avec ses griffes et ses morsures infectieuses', 30, 10, 10.0, 35.0, 1),
-    ('Nécromancien','Un ancien héro humain devenue mort et invoquant la mort derrière lui', 150, 40, 100.0, 210.0, 1),
-    ('Uruk Noir', 'Créature imposante et très puissante mais débile', 100, 10, 80.0, 30.0, 3),
-    ('Chef des Orcs','Chefs des Orcs ils sont extrenement puissants', 150, 20, 200.0, 100.0, 3),
+    ('Héros Légendaire','L''un des humains les plus puissant du monde', 220, 100.0, 110.0, 200.0, 2),
+
+    ('Zombie', 'Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels avec ses griffes et ses morsures infectieuses', 20, 10, 10.0, 50.0, 1),
+    ('Nécromancien','Un ancien héro humain devenue mort et invoquant la mort derrière lui', 250, 100, 100.0, 210.0, 1),
+
+    ('Uruk Noir', 'Créature imposante et très puissante mais débile', 80, 6, 80.0, 30.0, 3),
+    ('Chef des Orcs','Chefs des Orcs ils sont extrenement puissants', 200, 100, 200.0, 170.0, 3),
+
     ('Mage Elfique', 'Puissant mage', 80, 20, 15.0, 150.0, 4),
-    ('Archer Elfique', 'Unité dangereuse des elfes',150,40, 100.0,200.0,4),
-    ('Roi Mineur', 'Meilleurs des Nains', 50, 6, 35.0, 55.0, 5),
-    ('Nain Ultime''Les meilleurs parmis les meilleurs des Rois mineurs', 'DESCRIPTION À RÉDIGER', 150, 20, 100.0, 150.0,5),
-    ('Mage Orc', 'Issue de l''union entre elfes et orc, il est puissant mais petit', 40, 15, 15.0, 100.0, 6),
-    ('Berserker Nerlk', 'Unité de combat Nerlk, très puissante mais coûteuse', 150, 20, 110.0, 150.0, 6),
-    ('Minotaure', 'Issue du Labyrinthe ', 20, 20, 30.0, 70.0, 7),
-    ('Dieu Primotaures', 'Dieu des Primotaures, très puissant', 150, 50, 200.0, 300.0, 7);
+    ('Archer Elfique', 'Unité dangereuse des elfes',300,110, 100.0,300.0,4),
+
+    ('Roi Mineur', 'Meilleurs des Nains', 20, 6, 35.0, 50.0, 5),
+    ('Nain Ultime''Les meilleurs parmis les meilleurs des Rois mineurs', 'DESCRIPTION À RÉDIGER', 250, 100, 170.0, 150.0,5),
+
+    ('Mage Orc', 'Issue de l''union entre elfes et orc, il est puissant mais petit', 30, 15, 15.0, 50.0, 6),
+    ('Berserker Nerlk', 'Unité de combat Nerlk, très puissante mais coûteuse', 250, 120, 100.0, 150.0, 6),
+    ('Minotaure', 'Issue du Labyrinthe ', 20, 20, 30.0, 50.0, 7),
+    ('Dieu Primotaures', 'Dieu des Primotaures, très puissant', 350, 150, 200.0, 300.0, 7);
