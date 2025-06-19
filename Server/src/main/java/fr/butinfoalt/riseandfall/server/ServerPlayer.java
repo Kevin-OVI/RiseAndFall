@@ -57,6 +57,15 @@ public class ServerPlayer extends Player {
      * dans {@link #prepareAttack(AttacksExecutionContext)}.
      */
     public void executeOrders() {
+        float addGold = 0, addIntelligence = 0;
+        for (ObjectIntMap.Entry<BuildingType> entry : this.getBuildingMap()) {
+            addGold += entry.getValue() * entry.getKey().getGoldProduction();
+            addIntelligence += entry.getValue() * entry.getKey().getIntelligenceProduction();
+        }
+
+        this.addGoldAmount(addGold * this.getRace().getGoldMultiplier());
+        this.addIntelligence(addIntelligence * this.getRace().getIntelligenceMultiplier());
+
         for (ObjectIntMap.Entry<BuildingType> entry : this.getPendingBuildingsCreation()) {
             this.getBuildingMap().increment(entry.getKey(), entry.getValue());
             this.removeGoldAmount(entry.getKey().getPrice() * entry.getValue());
@@ -68,15 +77,6 @@ public class ServerPlayer extends Player {
             this.removeGoldAmount(entry.getKey().getPrice() * entry.getValue());
         }
         this.getPendingUnitsCreation().reset();
-
-        float addGold = 0, addIntelligence = 0;
-        for (ObjectIntMap.Entry<BuildingType> entry : this.getBuildingMap()) {
-            addGold += entry.getValue() * entry.getKey().getGoldProduction();
-            addIntelligence += entry.getValue() * entry.getKey().getIntelligenceProduction();
-        }
-
-        this.addGoldAmount(addGold * this.getRace().getGoldMultiplier());
-        this.addIntelligence(addIntelligence * this.getRace().getIntelligenceMultiplier());
     }
 
     /**
