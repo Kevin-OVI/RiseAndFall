@@ -2,7 +2,6 @@ package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
-import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
@@ -130,7 +129,8 @@ public class RiseAndFallServer extends BaseSocketServer {
                     int initialAmount = set.getInt("initial_amount");
                     int accessibleRaceId = set.getInt("accessible_race_id");
                     Race accessibleRace = set.wasNull() ? null : Identifiable.getById(races, accessibleRaceId);
-                    buildingTypes.add(new BuildingType(id, name, description, price, requiredIntelligence, goldProduction, intelligenceProduction, resistance, maxUnits, initialAmount, accessibleRace));
+                    boolean defensive = set.getBoolean("defensive");
+                    buildingTypes.add(new BuildingType(id, name, description, price, requiredIntelligence, goldProduction, intelligenceProduction, resistance, maxUnits, initialAmount, accessibleRace, defensive));
                 }
             }
 
@@ -193,7 +193,7 @@ public class RiseAndFallServer extends BaseSocketServer {
                     game.forceAddPlayer(player);
                 }
             }
-            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM player_building")){
+            try (PreparedStatement statement = this.getDb().prepareStatement("SELECT * FROM player_building")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     int playerId = set.getInt("player_id");

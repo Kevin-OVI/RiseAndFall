@@ -61,6 +61,7 @@ CREATE TABLE building_type (
     max_units INT NOT NULL,
     initial_amount INT NOT NULL,
     accessible_race_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'NULL si accessible à toutes les races, renseigné si accessible uniquement par une race particulière. Suppression en cascade pour ne pas rendre accessible à tous les bâtiments privés.',
+    defensive BOOLEAN NOT NULL,
     FOREIGN KEY (accessible_race_id) REFERENCES race(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -141,33 +142,34 @@ VALUES
     (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes le problèmes sont leurs économie', 0.5, 1, 1.25, 1.25),
     (7, 'Primotaures', 'Premières créatures du monde, les primotaures sont riches mais pacifiques', 1.5, 1, 0.60, 1);
 
-INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, resistance, max_units, initial_amount, accessible_race_id)
+INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, resistance, max_units, initial_amount, accessible_race_id, defensive)
 VALUES
-    ('Carrière', 'Structure permettant d''extraire des ressources naturelles pour financer l''économie du royaume', 10, 0, 5, 0, 100, 0, 2, NULL),
-    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume mais nécessite de l''intelligence pour être débloquer', 25, 15, 25, 0, 120, 0, 0, NULL),
-    ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 100, 3, 1, NULL),
-    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 80, 0, 0, NULL),
+    ('Carrière', 'Structure permettant d''extraire des ressources naturelles pour financer l''économie du royaume', 10, 0, 5, 0, 100, 0, 2, NULL, false),
+    ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume mais nécessite de l''intelligence pour être débloquer', 25, 15, 25, 0, 120, 0, 0, NULL, false),
+    ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 100, 3, 1, NULL, false),
+    ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 80, 0, 0, NULL, false),
+    ('Rempart','Sert de protection au royaume', 30, 10, 0, 0, 150, 0, 1, NULL, true),
 
-    ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 15, 10, 0, 0, 80, 8, 0, 1),
-    ('Nécropole','Ancienne ville de mage rempli de rituel sinistre',120 ,35 ,15 ,20 ,150 ,10 ,0 ,1),
+    ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 15, 10, 0, 0, 80, 8, 0, 1, false),
+    ('Nécropole','Ancienne ville de mage rempli de rituel sinistre',120 ,35 ,15 ,20 ,150 ,10 ,0 ,1, false),
 
-    ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 12, 0, 0, 80, 8, 0, 2),
-    ('Château', 'Résidence royale des Humains, servant de centre de commandement, lieu de commerce et offrant une grande protection', 100, 20, 30, 20, 250, 2, 0, 2),
+    ('Église', 'Édifice spirituel dédié aux Humains, offrant protection et recrutement d''unités pieuses', 10, 12, 0, 0, 80, 8, 0, 2, false),
+    ('Château', 'Résidence royale des Humains, servant de centre de commandement, lieu de commerce et offrant une grande protection', 100, 20, 30, 20, 250, 2, 0, 2, false),
 
-    ('Donjon', 'Endroit qui respire la violence permettant de former des futur combattants', 20, 10, 0, 0, 70, 6, 0, 3),
-    ('marché d''esclave', 'Endroit où les orcs achètent et vendent des esclaves', 150, 35, 50, 10, 100, 15, 0, 3),
+    ('Donjon', 'Endroit qui respire la violence permettant de former des futur combattants', 20, 10, 0, 0, 70, 6, 0, 3, false),
+    ('marché d''esclave', 'Endroit où les orcs achètent et vendent des esclaves', 150, 35, 50, 10, 100, 15, 0, 3, false),
 
-    ('Tour de Mage', 'Endroit où les prochains mages sont formés', 20, 20, 1, 2, 170, 10, 0, 4),
-    ('Arbre de Vie', 'Endroit où les elfes s''instruit', 180, 50, 50,20 , 200, 5, 0, 4),
+    ('Tour de Mage', 'Endroit où les prochains mages sont formés', 20, 20, 1, 2, 170, 10, 0, 4, false),
+    ('Arbre de Vie', 'Endroit où les elfes s''instruit', 180, 50, 50,20 , 200, 5, 0, 4, false),
 
-    ('Mine de Nains', 'Mine d''or où les nains adultes passent 100% de leurs temps', 30, 6, 40, 0, 180, 0, 0, 5),
-    ('Taverne de Nains','Bar dans lequel on recrute les futurs Nains', 130, 20, 0, 3, 100, 20, 0, 5 ),
+    ('Mine de Nains', 'Mine d''or où les nains adultes passent 100% de leurs temps', 30, 6, 40, 0, 180, 0, 0, 5, false),
+    ('Taverne de Nains','Bar dans lequel on recrute les futurs Nains', 130, 20, 0, 3, 100, 20, 0, 5, false),
 
-    ('Tente', 'Endroit où les futurs combattants sont formés', 15, 4, 0, 0, 40, 8, 0, 6),
-    ('Forge', 'Endroit où les Nerlk fabriquent leurs armes', 120, 25, 40, 5, 120, 0, 0, 6),
+    ('Tente', 'Endroit où les futurs combattants sont formés', 15, 4, 0, 0, 40, 8, 0, 6, false),
+    ('Forge', 'Endroit où les Nerlk fabriquent leurs armes', 120, 25, 40, 5, 120, 0, 0, 6, false),
 
-    ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 30, 6, 20, 3, 260, 1, 0, 7),
-    ('Temple', 'Endroit où les Primotaures s''instruisent et se forme', 150, 30, 25, 30, 90, 20, 0, 7);
+    ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 30, 6, 20, 3, 260, 1, 0, 7, false),
+    ('Temple', 'Endroit où les Primotaures s''instruisent et se forme', 150, 30, 25, 30, 90, 20, 0, 7, false);
 
 INSERT INTO unit_type (name, description, price, required_intelligence, health, damage, accessible_race_id)
 VALUES

@@ -45,7 +45,7 @@ public class ServerPlayer extends Player {
      *
      * @param context Le contexte d'exécution des attaques.
      */
-    public void prepareAttack(AttacksExecutionContext context) {
+    public void prepareAttacks(AttacksExecutionContext context) {
         for (AttackPlayerOrderData attack : this.getPendingAttacks()) {
             context.addAttack(this, attack.getTargetPlayer(), attack.getUsingUnits());
         }
@@ -54,7 +54,7 @@ public class ServerPlayer extends Player {
 
     /**
      * Exécute les ordres en attente pour le joueur, sauf les attaques qui sont exécutées
-     * dans {@link #prepareAttack(AttacksExecutionContext)}.
+     * dans {@link #prepareAttacks(AttacksExecutionContext)}.
      */
     public void executeOrders() {
         float addGold = 0, addIntelligence = 0;
