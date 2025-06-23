@@ -6,10 +6,7 @@ import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Classe représentant une partie côté client.
@@ -82,5 +79,11 @@ public class ClientGame extends Game {
 
     public List<AttackResult> getAttackResults(int turn) {
         return this.attackResults.getOrDefault(turn, Collections.emptyList());
+    }
+
+    public List<ClientPlayer> getAllPlayers() {
+        ArrayList<ClientPlayer> allPlayers = new ArrayList<>(this.otherPlayers.values());
+        allPlayers.add(RiseAndFall.getPlayer());
+        return Collections.unmodifiableList(allPlayers);
     }
 }

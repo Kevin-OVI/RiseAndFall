@@ -123,6 +123,10 @@ public class MainRunningGameController implements ViewController {
         RiseAndFallApplication.switchToView(View.ORDERS_ATTACK_LIST);
     }
 
+    public void showAttacksLogs() {
+        RiseAndFallApplication.switchToView(View.ATTACKS_LOGS);
+    }
+
     /**
      * Méthode appelée par JavaFX quand on clique sur le bouton pour passer au tour suivant.
      */
