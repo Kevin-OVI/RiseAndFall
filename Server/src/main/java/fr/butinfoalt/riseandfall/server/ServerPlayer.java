@@ -38,6 +38,13 @@ public class ServerPlayer extends Player {
         this.game = game;
     }
 
+    public ServerPlayer(int id, User user, ServerGame game, Race race, float gold, float intelligence, int eliminationTurn) {
+        this(id, user, game, race);
+        this.setGoldAmount(gold);
+        this.setIntelligence(intelligence);
+        this.setEliminationTurn(eliminationTurn);
+    }
+
     /**
      * Prépare les attaques en attente pour le joueur.
      * Cette méthode est appelée avant l'exécution des attaques pour les ajouter au contexte d'exécution.

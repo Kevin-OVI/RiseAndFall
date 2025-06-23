@@ -1,5 +1,5 @@
 -- Détruire les tables existantes
-DROP TABLE IF EXISTS attack_player_order_unit, attack_player_order, unit_creation_order, building_creation_order, player_unit, player_building, unit_type, building_type, player, game, user_token, user, race;
+DROP TABLE IF EXISTS attacks_lost_units, attacks_destroyed_units, attacks_destroyed_buildings, attacks_logs, attack_player_order_unit, attack_player_order, unit_creation_order, building_creation_order, player_unit, player_building, unit_type, building_type, player, game, user_token, user, race;
 
 -- Créer les tables nécessaires
 CREATE TABLE race (
@@ -44,6 +44,7 @@ CREATE TABLE player (
     race_id BIGINT UNSIGNED NOT NULL,
     gold DECIMAL(10, 2) NOT NULL DEFAULT 50,
     intelligence DECIMAL(10, 2)  NOT NULL DEFAULT 0,
+    elimination_turn INT DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id) ON UPDATE CASCADE ON DELETE SET NULL,
     FOREIGN KEY (game_id) REFERENCES game(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (race_id) REFERENCES race(id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -128,6 +129,42 @@ CREATE TABLE attack_player_order_unit (
     PRIMARY KEY (order_id, unit_type_id),
     FOREIGN KEY (order_id) REFERENCES attack_player_order(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (unit_type_id) REFERENCES unit_type(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE attacks_logs (
+    id SERIAL PRIMARY KEY,
+    attacker_player_id BIGINT UNSIGNED NOT NULL,
+    target_player_id BIGINT UNSIGNED NOT NULL,
+    turn INT NOT NULL,
+    FOREIGN KEY (attacker_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (target_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE attacks_destroyed_buildings (
+    attack_log_id BIGINT UNSIGNED NOT NULL,
+    building_type_id BIGINT UNSIGNED NOT NULL,
+    amount INT NOT NULL,
+    PRIMARY KEY (attack_log_id, building_type_id),
+    FOREIGN KEY (attack_log_id) REFERENCES attacks_logs(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (building_type_id) REFERENCES building_type(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE attacks_destroyed_units (
+    attack_log_id BIGINT UNSIGNED NOT NULL,
+    unit_type_id  BIGINT UNSIGNED NOT NULL,
+    amount INT NOT NULL,
+    PRIMARY KEY (attack_log_id, unit_type_id),
+    FOREIGN KEY (attack_log_id) REFERENCES attacks_logs (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (unit_type_id) REFERENCES unit_type (id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE attacks_lost_units (
+    attack_log_id BIGINT UNSIGNED NOT NULL,
+    unit_type_id  BIGINT UNSIGNED NOT NULL,
+    amount INT NOT NULL,
+    PRIMARY KEY (attack_log_id, unit_type_id),
+    FOREIGN KEY (attack_log_id) REFERENCES attacks_logs (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (unit_type_id) REFERENCES unit_type (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 

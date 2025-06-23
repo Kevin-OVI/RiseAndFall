@@ -30,16 +30,9 @@ public class AttacksExecutionContext {
     private final Map<Player, Map<ServerPlayer, ObjectIntMap<UnitType>>> attacksTowards = new HashMap<>();
 
     /**
-     * Attaques effectuées par les joueurs.
-     * La clé est le joueur attaquant, et la valeur est une liste des résultats d'attaques effectuées par ce joueur.
+     * Résultats des attaques effectuées par les joueurs.
      */
-    private final Map<Player, ArrayList<AttackResult>> undertakenAttacks = new HashMap<>();
-
-    /**
-     * Attaques subies par les joueurs.
-     * La clé est le joueur attaqué, et la valeur est une liste des résultats d'attaques subies par ce joueur.
-     */
-    private final Map<Player, ArrayList<AttackResult>> undergoneAttacks = new HashMap<>();
+    private final ArrayList<AttackResult> attackResults = new ArrayList<>();
 
     /**
      * Constructeur de l'exécution des ordres.
@@ -150,9 +143,7 @@ public class AttacksExecutionContext {
         attacker.getUnitMap().decrement(lostUnits);
 
         // On sauvegarde le résultat de l'attaque.
-        AttackResult attackResult = new AttackResult(attacker, target, destroyedBuildings, destroyedUnits, lostUnits);
-        this.undertakenAttacks.computeIfAbsent(attacker, p -> new ArrayList<>()).add(attackResult);
-        this.undergoneAttacks.computeIfAbsent(target, p -> new ArrayList<>()).add(attackResult);
+        this.attackResults.add(new AttackResult(attacker, target, destroyedBuildings, destroyedUnits, lostUnits));
     }
 
     /**
@@ -171,20 +162,11 @@ public class AttacksExecutionContext {
     }
 
     /**
-     * Récupère les attaques effectuées par les joueurs.
+     * Retourne les résultats des attaques effectuées par les joueurs.
      *
-     * @return Les attaques effectuées, association de chaque joueur à la liste des résultats d'attaques qu'il a effectuées.
+     * @return La liste des résultats d'attaques.
      */
-    public Map<Player, ArrayList<AttackResult>> getUndertakenAttacks() {
-        return this.undertakenAttacks;
-    }
-
-    /**
-     * Récupère les attaques subies par les joueurs.
-     *
-     * @return Les attaques subies, association de chaque joueur à la liste des résultats d'attaques qu'il a subies.
-     */
-    public Map<Player, ArrayList<AttackResult>> getUndergoneAttacks() {
-        return this.undergoneAttacks;
+    public ArrayList<AttackResult> getAttackResults() {
+        return this.attackResults;
     }
 }

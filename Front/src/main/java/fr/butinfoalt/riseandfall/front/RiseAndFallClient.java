@@ -5,6 +5,7 @@ import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.network.client.BaseSocketClient;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
@@ -46,6 +47,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendPacket((byte) 9, PacketRegister.class);
         this.registerReceivePacket((byte) 10, PacketWaitingGames.class, this::onWaitingGames, readHelper -> new PacketWaitingGames<>(readHelper, ClientGame::new));
         this.registerReceivePacket((byte) 11, PacketDiscoverPlayer.class, this::onDiscoverPlayer, PacketDiscoverPlayer::new);
+        this.registerReceivePacket((byte) 15, PacketTurnResults.class, this::onTurnResults, readHelper -> new PacketTurnResults(readHelper, ClientDataDeserializer.INSTANCE));
     }
 
     /**
@@ -223,6 +225,15 @@ public class RiseAndFallClient extends BaseSocketClient {
      */
     private void onDiscoverPlayer(SocketWrapper sender, PacketDiscoverPlayer packet) {
         RiseAndFall.getGame().addOtherPlayer(packet.getPlayerId(), packet.getPlayerRace(), packet.getPlayerName());
+    }
+
+    private void onTurnResults(SocketWrapper sender, PacketTurnResults packet) {
+        RiseAndFall.getGame().setAttackResults(packet.getTurn(), packet.getAttackResults());
+        for (Player player : packet.getEliminatedPlayers()) {
+            player.setEliminationTurn(packet.getTurn());
+        }
+        System.out.println("Turn results received for turn " + packet.getTurn() + ": " + packet.getAttackResults());
+        System.out.println("Eliminated players: " + packet.getEliminatedPlayers());
     }
 
     private void startConnectionLoop(long delay) {

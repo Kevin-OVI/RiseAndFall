@@ -5,6 +5,7 @@ import fr.butinfoalt.riseandfall.network.common.ISerializable;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
+import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 
 import java.io.IOException;
 
@@ -128,5 +129,16 @@ public class AttackResult implements ISerializable {
      */
     public ObjectIntMap<UnitType> getLostUnits() {
         return this.lostUnits;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringFormatter("AttackResult")
+                .add("attacker", this.attacker)
+                .add("target", this.target)
+                .add("destroyedBuildings", this.destroyedBuildings)
+                .add("destroyedUnits", this.destroyedUnits)
+                .add("lostUnits", this.lostUnits)
+                .build();
     }
 }

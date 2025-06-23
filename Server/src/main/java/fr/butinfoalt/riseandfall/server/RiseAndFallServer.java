@@ -82,6 +82,7 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.registerReceivePacket((byte) 9, PacketRegister.class, this.authManager::onRegister, PacketRegister::new);
         this.registerSendPacket((byte) 10, PacketWaitingGames.class);
         this.registerSendPacket((byte) 11, PacketDiscoverPlayer.class);
+        this.registerSendPacket((byte) 15, PacketTurnResults.class);
     }
 
     /**
@@ -185,9 +186,11 @@ public class RiseAndFallServer extends BaseSocketServer {
                     Race race = Identifiable.getById(races, set.getInt("race_id"));
                     float gold = set.getFloat("gold");
                     float intelligence = set.getFloat("intelligence");
-                    ServerPlayer player = new ServerPlayer(id, user, game, race);
-                    player.setGoldAmount(gold);
-                    player.setIntelligence(intelligence);
+                    int eliminationTurn = set.getInt("elimination_turn");
+                    if (set.wasNull()) {
+                        eliminationTurn = -1; // -1 signifie que le joueur n'est pas éliminé
+                    }
+                    ServerPlayer player = new ServerPlayer(id, user, game, race, gold, intelligence, eliminationTurn);
                     players.add(player);
                     // Ajout forcé car la partie peut avoir déjà démarré, mais on est dans un cas particulier car les données ne sont pas encore chargées
                     game.forceAddPlayer(player);

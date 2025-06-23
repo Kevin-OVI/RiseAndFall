@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.server.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
 import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.server.Environment;
@@ -192,7 +193,7 @@ public class ServerGame extends Game {
 
     private void printAttacksLogs(AttacksExecutionContext context) {
         StringBuilder messageBuilder = new StringBuilder("Résultats des attaques dans la partie ").append(this.name).append(" :");
-        context.getUndertakenAttacks().values().stream().flatMap(Collection::stream).forEach(attackResult -> {
+        context.getAttackResults().forEach(attackResult -> {
             ServerPlayer attacker = (ServerPlayer) attackResult.getAttacker(), target = (ServerPlayer) attackResult.getTarget();
             messageBuilder.append("\n- ").append(attacker.getUser().getUsername()).append(" a attaqué ").append(target.getUser().getUsername()).append(" :");
             if (!attackResult.getDestroyedUnits().isEmpty()) {
@@ -233,6 +234,8 @@ public class ServerGame extends Game {
         }
         AttacksExecutionContext context = new AttacksExecutionContext(this);
         List<ServerPlayer> remainingPlayers = this.players.values().stream().filter(player -> !player.isEliminated()).toList();
+        List<Player> eliminatedPlayers = new ArrayList<>();
+
         for (ServerPlayer player : remainingPlayers) {
             player.prepareAttacks(context);
         }
@@ -243,6 +246,8 @@ public class ServerGame extends Game {
 
         for (ServerPlayer player : remainingPlayers) {
             if (player.isEliminated()) {
+                eliminatedPlayers.add(player);
+                player.setEliminationTurn(this.currentTurn);
                 LogManager.logMessage("Le joueur %s a été éliminé de la partie %s.".formatted(player.getUser().getUsername(), this.name));
                 continue; // Ne pas exécuter les ordres d'un joueur éliminé
             }
@@ -253,7 +258,10 @@ public class ServerGame extends Game {
         LogManager.logMessage("Passage au tour %d de la partie %s.".formatted(this.currentTurn, this.name));
         this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
         this.scheduleNextTurn();
-        this.server.getGameManager().handleGameUpdate(this);
+
+        GameManager gameManager = this.server.getGameManager();
+        gameManager.handleTurnExecuted(this, context, eliminatedPlayers);
+        gameManager.handleGameUpdate(this);
     }
 
     /**

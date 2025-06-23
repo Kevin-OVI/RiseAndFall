@@ -286,6 +286,7 @@ public class AuthenticationManager {
         GameManager gameManager = this.server.getGameManager();
         gameManager.sendJoinGamePacket(sender, user);
         gameManager.sendDiscoverPlayerPacket(sender, user);
+        gameManager.sendTurnsResults(sender, user);
     }
 
     /**
