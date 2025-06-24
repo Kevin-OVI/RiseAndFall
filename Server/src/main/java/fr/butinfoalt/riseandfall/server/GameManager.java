@@ -2,11 +2,8 @@ package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
-import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.data.Identifiable;
-import fr.butinfoalt.riseandfall.gamelogic.data.Race;
-import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
-import fr.butinfoalt.riseandfall.gamelogic.data.AttackPlayerOrderData;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
+import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
@@ -15,6 +12,7 @@ import fr.butinfoalt.riseandfall.network.packets.data.OrderDeserializationContex
 import fr.butinfoalt.riseandfall.server.data.GameNameGenerator;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
+import fr.butinfoalt.riseandfall.server.orders.AttacksExecutionContext;
 import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
@@ -22,10 +20,9 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.IntFunction;
+import java.util.stream.Collectors;
 
 /**
  * Classe gérant les parties de jeu.
@@ -501,6 +498,62 @@ public class GameManager {
     }
 
     /**
+     * Envoie les résultats d'un tour à un client spécifique.
+     *
+     * @param connection La connexion du client qui recevra les résultats du tour.
+     * @param packet     Le paquet contenant les résultats du tour à envoyer au client.
+     */
+    private void sendTurnResults(SocketWrapper connection, PacketTurnResults packet) {
+        try {
+            connection.sendPacket(packet);
+        } catch (IOException e) {
+            LogManager.logError("Erreur lors de l'envoi des résultats du tour au client " + connection.getName(), e);
+        }
+    }
+
+    /**
+     * Envoie les résultats des attaques effectuées durant le tour à un joueur spécifique.
+     *
+     * @param player            Le joueur à qui envoyer les résultats des attaques.
+     * @param attacksResults    La liste des résultats des attaques effectuées durant le tour.
+     * @param eliminatedPlayers La liste des joueurs éliminés durant le tour.
+     */
+    private void sendTurnResults(ServerPlayer player, int turn, List<AttackResult> attacksResults, List<Player> eliminatedPlayers) {
+        List<SocketWrapper> connections = this.getConnectionsFor(player);
+        if (!connections.isEmpty()) {
+            PacketTurnResults packet = new PacketTurnResults(turn, attacksResults, eliminatedPlayers);
+            for (SocketWrapper connection : connections) {
+                this.sendTurnResults(connection, packet);
+            }
+        }
+    }
+
+    /**
+     * Envoie les résultats de tous les tours précédents à une connexion spécifique.
+     *
+     * @param connection La connexion du client qui recevra les résultats des tours.
+     * @param user       L'utilisateur pour lequel on envoie les résultats des tours.
+     */
+    public void sendTurnsResults(SocketWrapper connection, User user) {
+        ServerPlayer player = this.getPlayerInRunningGame(user);
+        if (player != null) {
+            ServerGame game = player.getGame();
+            Map<Integer, List<AttackResult>> attackResults = this.loadAttackResultsInvolvingPlayer(player);
+            Map<Integer, List<Player>> eliminatedPlayers = game.getPlayers().stream()
+                    .filter(playerInGame -> playerInGame.getEliminationTurn() != -1)
+                    .collect(Collectors.groupingBy(Player::getEliminationTurn, Collectors.toCollection(ArrayList::new)));
+
+            for (int turn = 1; turn < game.getCurrentTurn(); turn++) {
+                this.sendTurnResults(connection, new PacketTurnResults(
+                        turn,
+                        attackResults.getOrDefault(turn, Collections.emptyList()),
+                        eliminatedPlayers.getOrDefault(turn, Collections.emptyList())
+                ));
+            }
+        }
+    }
+
+    /**
      * Appelée lorsqu'une partie est mise à jour.
      * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
      * Cette méthode est une surcharge de la méthode {@link #handleGameUpdate(ServerGame game, ServerPlayer exceptPlayer)} avec exceptPlayer à null.
@@ -546,6 +599,154 @@ public class GameManager {
     }
 
     /**
+     * Prépare les détails des résultats d'attaques pour l'insertion dans la base de données.
+     *
+     * @param map         La map contenant ces détails du résultat d'attaque, où la clé est un objet identifiable (par exemple, un type de bâtiment ou d'unité) et la valeur est le nombre d'instances détruites ou perdues.
+     * @param statement   La requête préparée pour insérer les détails des résultats d'attaques.
+     * @param attackLogId L'identifiant du journal d'attaque auquel ces détails sont associés.
+     * @throws SQLException Si une erreur SQL se produit lors de l'exécution de la requête.
+     */
+    private void saveAttackResultDetails(ObjectIntMap<? extends Identifiable> map, PreparedStatement statement, int attackLogId) throws SQLException {
+        for (ObjectIntMap.Entry<? extends Identifiable> entry : map) {
+            statement.setInt(1, attackLogId);
+            statement.setInt(2, entry.getKey().getId());
+            statement.setInt(3, entry.getValue());
+            statement.addBatch();
+        }
+    }
+
+    /**
+     * Charge les détails d'un résultat d'attaque à partir de la base de données.
+     *
+     * @param map              La map dans laquelle les détails seront chargés, où la clé est un objet identifiable (par exemple, un type de bâtiment ou d'unité) et la valeur est le nombre d'instances détruites ou perdues.
+     * @param tableName        Le nom de la table à partir de laquelle charger les détails des résultats d'attaques.
+     * @param objectColumnName Le nom de la colonne dans la table qui contient l'identifiant de l'objet (par exemple, `building_type_id` ou `unit_type_id`).
+     * @param attackLogId      L'identifiant du journal d'attaque auquel ces détails sont associés.
+     * @param typeResolver     Une fonction qui résout l'identifiant de l'objet en un type spécifique (par exemple, `BuildingType` ou `UnitType`).
+     * @param <T>              Le type de l'objet identifiable (par exemple, `BuildingType` ou `UnitType`).
+     * @throws SQLException Si une erreur SQL se produit lors de l'exécution de la requête.
+     */
+    private <T> void loadAttackResultDetails(ObjectIntMap<T> map, String tableName, String objectColumnName, int attackLogId, IntFunction<T> typeResolver) throws SQLException {
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT * FROM " + tableName + " WHERE attack_log_id = ?")) {
+            statement.setInt(1, attackLogId);
+            ResultSet destroyedBuildingsResultSet = statement.executeQuery();
+            while (destroyedBuildingsResultSet.next()) {
+                int objectId = destroyedBuildingsResultSet.getInt(objectColumnName);
+                int amount = destroyedBuildingsResultSet.getInt("amount");
+                map.set(typeResolver.apply(objectId), amount);
+            }
+        }
+    }
+
+    /**
+     * Charge les résultats des attaques impliquant un joueur spécifique à partir de la base de données.
+     *
+     * @param player Le joueur pour lequel on veut charger les résultats des attaques.
+     * @return Une map où la clé est le numéro du tour et la valeur est une liste des résultats d'attaques pour ce tour.
+     */
+    private Map<Integer, List<AttackResult>> loadAttackResultsInvolvingPlayer(ServerPlayer player) {
+        Map<Integer, List<AttackResult>> attackResults = new HashMap<>();
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT * FROM attacks_logs WHERE attacker_player_id = ? OR target_player_id = ?")) {
+            statement.setInt(1, player.getId());
+            statement.setInt(2, player.getId());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                int attackLogId = resultSet.getInt("id");
+                int attackerId = resultSet.getInt("attacker_player_id");
+                int targetId = resultSet.getInt("target_player_id");
+                int turn = resultSet.getInt("turn");
+
+                ServerPlayer attacker = this.server.getUserManager().getPlayer(attackerId);
+                ServerPlayer target = this.server.getUserManager().getPlayer(targetId);
+
+                ObjectIntMap<BuildingType> destroyedBuildings = target.getBuildingMap().createEmptyClone();
+                this.loadAttackResultDetails(destroyedBuildings, "attacks_destroyed_buildings", "building_type_id", attackLogId, value -> Identifiable.getById(ServerData.getBuildingTypes(), value));
+                ObjectIntMap<UnitType> destroyedUnits = target.getUnitMap().createEmptyClone();
+                this.loadAttackResultDetails(destroyedUnits, "attacks_destroyed_units", "unit_type_id", attackLogId, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
+
+                ObjectIntMap<UnitType> lostUnits = attacker.getUnitMap().createEmptyClone();
+                if (attacker.equals(player)) { // On n'envoie pas les unités perdues si le joueur n'est pas l'attaquant
+                    this.loadAttackResultDetails(lostUnits, "attacks_lost_units", "unit_type_id", attackLogId, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
+                }
+
+                attackResults.computeIfAbsent(turn, k -> new ArrayList<>()).add(new AttackResult(attacker, target, destroyedBuildings, destroyedUnits, lostUnits));
+            }
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de la récupération des résultats d'attaques impliquant le joueur " + player.getUser().getUsername() + ".", e);
+        }
+        return attackResults;
+    }
+
+    /**
+     * Enregistre les résultats des attaques effectuées durant le tour dans la base de données.
+     *
+     * @param game                    La partie dans laquelle les attaques ont été effectuées.
+     * @param attacksExecutionContext Le contexte d'exécution des attaques, contenant les résultats des attaques effectuées durant le tour.
+     */
+    public void saveAttackResults(ServerGame game, AttacksExecutionContext attacksExecutionContext) {
+        // Préparation de la requête primaire
+        try (PreparedStatement attacksStatement = this.server.getDb().prepareStatement("INSERT INTO attacks_logs(attacker_player_id, target_player_id, turn) VALUES (?, ?, ?) RETURNING id")) {
+            for (AttackResult result : attacksExecutionContext.getAttackResults()) {
+                attacksStatement.setInt(1, result.getAttacker().getId());
+                attacksStatement.setInt(2, result.getTarget().getId());
+                attacksStatement.setInt(3, game.getCurrentTurn());
+                attacksStatement.addBatch();
+            }
+            // Exécution de la requête primaire
+            attacksStatement.executeBatch();
+
+            // On récupère les identifiants des attaques insérées et on prépare les requêtes secondaires.
+            ResultSet resultSet = attacksStatement.getResultSet();
+            Iterator<AttackResult> iterator = attacksExecutionContext.getAttackResults().iterator();
+            try (PreparedStatement destroyedBuildingsStatement = this.server.getDb().prepareStatement("INSERT INTO attacks_destroyed_buildings(attack_log_id, building_type_id, amount) VALUES (?, ?, ?)");
+                 PreparedStatement destroyedUnitsStatement = this.server.getDb().prepareStatement("INSERT INTO attacks_destroyed_units(attack_log_id, unit_type_id, amount) VALUES (?, ?, ?)");
+                 PreparedStatement lostUnitsStatement = this.server.getDb().prepareStatement("INSERT INTO attacks_lost_units(attack_log_id, unit_type_id, amount) VALUES (?, ?, ?)")) {
+                while (resultSet.next()) {
+                    assert iterator.hasNext() : "Des résultats d'attaques supplémentaires ont été retournés par la base de données !";
+                    int attackLogId = resultSet.getInt("id");
+                    AttackResult result = iterator.next();
+
+                    this.saveAttackResultDetails(result.getDestroyedBuildings(), destroyedBuildingsStatement, attackLogId);
+                    this.saveAttackResultDetails(result.getDestroyedUnits(), destroyedUnitsStatement, attackLogId);
+                    this.saveAttackResultDetails(result.getLostUnits(), lostUnitsStatement, attackLogId);
+                }
+                assert !iterator.hasNext() : "Il reste des attaques à traiter mais la base de données n'a pas retourné assez de résultats !";
+
+                // On exécute les requêtes secondaires.
+                destroyedBuildingsStatement.executeBatch();
+                destroyedUnitsStatement.executeBatch();
+                lostUnitsStatement.executeBatch();
+            }
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de l'enregistrement des attaques pour le tour " + game.getCurrentTurn() + " de la partie " + game.getName() + ".", e);
+        }
+    }
+
+    /**
+     * Appelée lorsqu'un tour est exécuté.
+     *
+     * @param game                    La partie dans laquelle le tour a été exécuté.
+     * @param attacksExecutionContext Le contexte d'exécution des attaques, contenant les résultats des attaques effectuées durant le tour.
+     * @param eliminatedPlayers       La liste des joueurs éliminés durant le tour.
+     */
+    public void handleTurnExecuted(ServerGame game, AttacksExecutionContext attacksExecutionContext, List<Player> eliminatedPlayers) {
+        if (!attacksExecutionContext.getAttackResults().isEmpty()) {
+            this.saveAttackResults(game, attacksExecutionContext);
+            Map<Player, List<AttackResult>> attackResultsByPlayer = new HashMap<>();
+            for (AttackResult result : attacksExecutionContext.getAttackResults()) {
+                attackResultsByPlayer.computeIfAbsent(result.getAttacker(), k -> new ArrayList<>()).add(result);
+                // On filtre les résultats pour ne pas envoyer les unités perdues au joueur cible.
+                AttackResult filteredAttackResult = result.getLostUnits().isEmpty() ? result : new AttackResult(result.getAttacker(), result.getTarget(), result.getDestroyedBuildings(), result.getDestroyedUnits(), result.getLostUnits().createEmptyClone());
+                attackResultsByPlayer.computeIfAbsent(result.getTarget(), k -> new ArrayList<>()).add(filteredAttackResult);
+            }
+            for (ServerPlayer player : game.getPlayers()) {
+                List<AttackResult> results = attackResultsByPlayer.getOrDefault(player, Collections.emptyList());
+                this.sendTurnResults(player, game.getCurrentTurn(), results, eliminatedPlayers);
+            }
+        }
+    }
+
+    /**
      * Appelée lorsqu'une partie est mise à jour.
      * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
      *
@@ -566,10 +767,15 @@ public class GameManager {
         }
 
         for (ServerPlayer player : game.getPlayers()) {
-            try (PreparedStatement statement = this.server.getDb().prepareStatement("UPDATE player SET gold = ?, intelligence = ? WHERE id = ?")) {
+            try (PreparedStatement statement = this.server.getDb().prepareStatement("UPDATE player SET gold = ?, intelligence = ?, elimination_turn = ? WHERE id = ?")) {
                 statement.setFloat(1, player.getGoldAmount());
                 statement.setFloat(2, player.getIntelligence());
-                statement.setInt(3, player.getId());
+                if (player.getEliminationTurn() == -1) {
+                    statement.setNull(3, Types.INTEGER); // Si le joueur n'est pas éliminé, on met la colonne à NULL
+                } else {
+                    statement.setInt(3, player.getEliminationTurn());
+                }
+                statement.setInt(4, player.getId());
                 statement.executeUpdate();
             } catch (SQLException e) {
                 LogManager.logError("Erreur lors de la mise à jour des données du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
@@ -826,7 +1032,7 @@ public class GameManager {
                                 unitsStatement.addBatch();
                             }
                         }
-                        assert !iterator.hasNext() : "Il reste des ordres d'attaque à traiter, mais aucun résultat n'a été retourné par la base de données.";
+                        assert !iterator.hasNext() : "Il reste des ordres d'attaque à traiter, mais il n'y a pas assez de résultats retournés par la base de données.";
                         unitsStatement.executeBatch();
                     }
                 } catch (SQLException e) {

@@ -37,6 +37,7 @@ public class CurrentClientPlayer extends ClientPlayer {
     public void updateModifiableData(ReadHelper readHelper) throws IOException {
         this.setGoldAmount(readHelper.readFloat());
         this.setIntelligence(readHelper.readFloat());
+        this.setEliminationTurn(readHelper.readInt());
         ObjectIntMap.deserialize(this.getBuildingMap(), readHelper, value -> Identifiable.getById(ServerData.getBuildingTypes(), value));
         ObjectIntMap.deserialize(this.getUnitMap(), readHelper, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
         ObjectIntMap.deserialize(this.getPendingUnitsCreation(), readHelper, value -> Identifiable.getById(ServerData.getUnitTypes(), value));

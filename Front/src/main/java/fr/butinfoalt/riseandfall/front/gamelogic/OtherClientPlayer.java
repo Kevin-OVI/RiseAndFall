@@ -45,4 +45,10 @@ public class OtherClientPlayer extends ClientPlayer implements NamedItem {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public boolean isEliminated() {
+        // La liste de bâtiments et d'unités est toujours vide pour les autres joueurs sur le client.
+        return this.getEliminationTurn() != -1;
+    }
 }
