@@ -1,7 +1,6 @@
 package fr.butinfoalt.riseandfall.front.game;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
-import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
@@ -16,12 +15,11 @@ import java.io.IOException;
 
 public class VictoryScreenController implements ViewController {
     @FXML
-    private void onReturnToMainMenu() {
-        // TODO : Faire quitter la partie pour autoriser à rejoindre une nouvelle coté serveur
+    private void onReturnToGameList() {
         try {
-            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.REQUEST_GAME_LIST));
+            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.EXIT_GAME));
         } catch (IOException e) {
-            LogManager.logError("Failed to send game list request packet", e);
+            LogManager.logError("Failed to send exit game packet", e);
             return;
         }
         RiseAndFallApplication.switchToView(View.LOADING);

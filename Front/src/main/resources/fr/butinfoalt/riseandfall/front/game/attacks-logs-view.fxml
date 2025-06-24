@@ -19,6 +19,6 @@
             <VBox fx:id="listContainer" alignment="CENTER" spacing="20"/>
         </ScrollPane>
 
-        <Button text="Retour" onAction="#switchBack" fx:id="backButton"/>
+        <Button onAction="#switchBack" fx:id="backButton"/>
     </VBox>
 </VBox>

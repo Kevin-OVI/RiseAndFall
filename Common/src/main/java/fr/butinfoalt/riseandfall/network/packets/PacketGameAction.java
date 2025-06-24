@@ -71,7 +71,10 @@ public class PacketGameAction implements IPacket {
          */
         NEXT_TURN,
 
-        REQUEST_GAME_LIST,
+        /**
+         * Envoyé au serveur pour quitter la partie en cours et retourner au menu de sélection des parties.
+         */
+        EXIT_GAME,
         ;
     }
 }

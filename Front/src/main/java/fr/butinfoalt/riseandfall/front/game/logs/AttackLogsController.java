@@ -8,6 +8,7 @@ import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
+import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -75,7 +76,17 @@ public class AttackLogsController implements ViewController {
      */
     @FXML
     public void switchBack() {
-        RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
+        if (RiseAndFall.getPlayer().isEliminated()) {
+            try {
+                RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.EXIT_GAME));
+            } catch (IOException e) {
+                LogManager.logError("Failed to send exit game packet", e);
+                return;
+            }
+            RiseAndFallApplication.switchToView(View.LOADING);
+        } else {
+            RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
+        }
     }
 
     /**
@@ -91,11 +102,13 @@ public class AttackLogsController implements ViewController {
         CurrentClientPlayer currentPlayer = RiseAndFall.getPlayer();
         ClientGame game = RiseAndFall.getGame();
 
-        boolean eliminated = currentPlayer.isEliminated();
-        this.backButton.setVisible(!eliminated);
-        this.eliminatedLabel.setVisible(eliminated);
-        if (eliminated) {
+        if (currentPlayer.isEliminated()) {
+            this.backButton.setText("Relever un nouveau défi");
             this.eliminatedLabel.setText("Vous avez été éliminé au tour %d, vous ne pouvez plus jouer.".formatted(currentPlayer.getEliminationTurn()));
+            this.eliminatedLabel.setVisible(true);
+        } else {
+            this.backButton.setText("Retour");
+            this.eliminatedLabel.setVisible(false);
         }
 
         this.listContainer.getChildren().clear();

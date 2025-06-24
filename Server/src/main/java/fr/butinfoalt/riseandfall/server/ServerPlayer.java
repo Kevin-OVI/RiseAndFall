@@ -26,6 +26,11 @@ public class ServerPlayer extends Player {
     private final ServerGame game;
 
     /**
+     * Indique si le joueur a quitté la partie.
+     */
+    private boolean exitedGame = false;
+
+    /**
      * Constructeur de la classe Player.
      *
      * @param id   Identifiant du joueur dans la base de données.
@@ -38,11 +43,12 @@ public class ServerPlayer extends Player {
         this.game = game;
     }
 
-    public ServerPlayer(int id, User user, ServerGame game, Race race, float gold, float intelligence, int eliminationTurn) {
+    public ServerPlayer(int id, User user, ServerGame game, Race race, float gold, float intelligence, int eliminationTurn, boolean exitedGame) {
         this(id, user, game, race);
         this.setGoldAmount(gold);
         this.setIntelligence(intelligence);
         this.setEliminationTurn(eliminationTurn);
+        this.setExitedGame(exitedGame);
     }
 
     /**
@@ -104,10 +110,19 @@ public class ServerPlayer extends Player {
         return this.game;
     }
 
+    public boolean hasExitedGame() {
+        return this.exitedGame;
+    }
+
+    public void setExitedGame(boolean exitedGame) {
+        this.exitedGame = exitedGame;
+    }
+
     @Override
     public ToStringFormatter toStringFormatter() {
         return super.toStringFormatter()
                 .add("user.id", this.user.getId())
-                .add("game.id", this.game.getId());
+                .add("game.id", this.game.getId())
+                .add("exitedGame", this.exitedGame);
     }
 }

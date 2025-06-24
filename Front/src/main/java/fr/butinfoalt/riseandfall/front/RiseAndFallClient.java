@@ -134,7 +134,7 @@ public class RiseAndFallClient extends BaseSocketClient {
                 RiseAndFallApplication.switchToView(displayView, errorMessage);
             }
             case ENDED -> {
-                // TODO : Afficher un message de fin de partie (victoire, défaite)
+                RiseAndFallApplication.switchToView(RiseAndFall.getPlayer().isEliminated() ? View.ATTACKS_LOGS : View.VICTORY_SCREEN, errorMessage);
             }
         }
     }
