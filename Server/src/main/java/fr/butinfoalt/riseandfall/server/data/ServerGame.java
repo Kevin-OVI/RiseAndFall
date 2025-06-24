@@ -3,14 +3,11 @@ package fr.butinfoalt.riseandfall.server.data;
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.data.BuildingType;
-import fr.butinfoalt.riseandfall.gamelogic.data.UnitType;
 import fr.butinfoalt.riseandfall.server.Environment;
 import fr.butinfoalt.riseandfall.server.GameManager;
 import fr.butinfoalt.riseandfall.server.RiseAndFallServer;
 import fr.butinfoalt.riseandfall.server.ServerPlayer;
 import fr.butinfoalt.riseandfall.server.orders.AttacksExecutionContext;
-import fr.butinfoalt.riseandfall.util.ObjectIntMap;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
@@ -191,36 +188,6 @@ public class ServerGame extends Game {
         this.scheduleNextAction("Passage au tour suivant de la partie %s dans %d secondes.", this::nextTurn);
     }
 
-    private void printAttacksLogs(AttacksExecutionContext context) {
-        StringBuilder messageBuilder = new StringBuilder("Résultats des attaques dans la partie ").append(this.name).append(" :");
-        context.getAttackResults().forEach(attackResult -> {
-            ServerPlayer attacker = (ServerPlayer) attackResult.getAttacker(), target = (ServerPlayer) attackResult.getTarget();
-            messageBuilder.append("\n- ").append(attacker.getUser().getUsername()).append(" a attaqué ").append(target.getUser().getUsername()).append(" :");
-            if (!attackResult.getDestroyedUnits().isEmpty()) {
-                messageBuilder.append("\n  - Unités détruites : ");
-                for (ObjectIntMap.Entry<UnitType> entry : attackResult.getDestroyedUnits()) {
-                    messageBuilder.append(entry.getValue()).append(" ").append(entry.getKey().getName()).append(", ");
-                }
-                messageBuilder.setLength(messageBuilder.length() - 2); // Enlever la dernière virgule et l'espace
-            }
-            if (!attackResult.getDestroyedBuildings().isEmpty()) {
-                messageBuilder.append("\n  - Bâtiments détruits : ");
-                for (ObjectIntMap.Entry<BuildingType> entry : attackResult.getDestroyedBuildings()) {
-                    messageBuilder.append(entry.getValue()).append(" ").append(entry.getKey().getName()).append(", ");
-                }
-                messageBuilder.setLength(messageBuilder.length() - 2); // Enlever la dernière virgule et l'espace
-            }
-            if (!attackResult.getLostUnits().isEmpty()) {
-                messageBuilder.append("\n  - Unités perdues par l'attaquant : ");
-                for (ObjectIntMap.Entry<UnitType> entry : attackResult.getLostUnits()) {
-                    messageBuilder.append(entry.getValue()).append(" ").append(entry.getKey().getName()).append(", ");
-                }
-                messageBuilder.setLength(messageBuilder.length() - 2); // Enlever la dernière virgule et l'espace
-            }
-        });
-        System.out.println(messageBuilder);
-    }
-
     /**
      * Méthode pour passer au tour suivant. La partie ne peut passer au tour suivant que si elle est en cours.
      * On commence par exécuter les attaques des joueurs, puis on exécute le reste des ordres de chaque joueur.
@@ -241,9 +208,6 @@ public class ServerGame extends Game {
         }
         context.executeAttacks();
 
-        // TODO : Envoyer les résultats des attaques aux joueurs concernés au lieu de les afficher dans la console.
-        this.printAttacksLogs(context);
-
         for (ServerPlayer player : remainingPlayers) {
             if (player.isEliminated()) {
                 eliminatedPlayers.add(player);
@@ -254,13 +218,15 @@ public class ServerGame extends Game {
             player.executeOrders();
         }
         // TODO : Condition de Victoire pour arrêter la partie si nécessaire, pour le moment la partie ne s'arrête jamais.
+
+        GameManager gameManager = this.server.getGameManager();
+        gameManager.handleTurnExecuted(this, context, eliminatedPlayers);
+
         this.currentTurn++;
         LogManager.logMessage("Passage au tour %d de la partie %s.".formatted(this.currentTurn, this.name));
         this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
         this.scheduleNextTurn();
 
-        GameManager gameManager = this.server.getGameManager();
-        gameManager.handleTurnExecuted(this, context, eliminatedPlayers);
         gameManager.handleGameUpdate(this);
     }
 

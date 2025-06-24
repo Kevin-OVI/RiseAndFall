@@ -409,6 +409,14 @@ public class GameManager {
         this.emptyTableByPlayer(player, "player_unit");
     }
 
+    /**
+     * Prépare les détails des résultats d'attaques pour l'insertion dans la base de données.
+     *
+     * @param map         La map contenant ces détails du résultat d'attaque, où la clé est un objet identifiable (par exemple, un type de bâtiment ou d'unité) et la valeur est le nombre d'instances détruites ou perdues.
+     * @param statement   La requête préparée pour insérer les détails des résultats d'attaques.
+     * @param attackLogId L'identifiant du journal d'attaque auquel ces détails sont associés.
+     * @throws SQLException Si une erreur SQL se produit lors de l'exécution de la requête.
+     */
     private void saveAttackResultDetails(ObjectIntMap<? extends Identifiable> map, PreparedStatement statement, int attackLogId) throws SQLException {
         for (ObjectIntMap.Entry<? extends Identifiable> entry : map) {
             statement.setInt(1, attackLogId);
@@ -418,16 +426,35 @@ public class GameManager {
         }
     }
 
-    private <T> void loadAttackResultDetails(ObjectIntMap<T> map, PreparedStatement statement, String objectColumnName, int attackLogId, IntFunction<T> typeResolver) throws SQLException {
-        statement.setInt(1, attackLogId);
-        ResultSet destroyedBuildingsResultSet = statement.executeQuery();
-        while (destroyedBuildingsResultSet.next()) {
-            int objectId = destroyedBuildingsResultSet.getInt(objectColumnName);
-            int amount = destroyedBuildingsResultSet.getInt("amount");
-            map.set(typeResolver.apply(objectId), amount);
+    /**
+     * Charge les détails d'un résultat d'attaque à partir de la base de données.
+     *
+     * @param map              La map dans laquelle les détails seront chargés, où la clé est un objet identifiable (par exemple, un type de bâtiment ou d'unité) et la valeur est le nombre d'instances détruites ou perdues.
+     * @param tableName        Le nom de la table à partir de laquelle charger les détails des résultats d'attaques.
+     * @param objectColumnName Le nom de la colonne dans la table qui contient l'identifiant de l'objet (par exemple, `building_type_id` ou `unit_type_id`).
+     * @param attackLogId      L'identifiant du journal d'attaque auquel ces détails sont associés.
+     * @param typeResolver     Une fonction qui résout l'identifiant de l'objet en un type spécifique (par exemple, `BuildingType` ou `UnitType`).
+     * @param <T>              Le type de l'objet identifiable (par exemple, `BuildingType` ou `UnitType`).
+     * @throws SQLException Si une erreur SQL se produit lors de l'exécution de la requête.
+     */
+    private <T> void loadAttackResultDetails(ObjectIntMap<T> map, String tableName, String objectColumnName, int attackLogId, IntFunction<T> typeResolver) throws SQLException {
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT * FROM " + tableName + " WHERE attack_log_id = ?")) {
+            statement.setInt(1, attackLogId);
+            ResultSet destroyedBuildingsResultSet = statement.executeQuery();
+            while (destroyedBuildingsResultSet.next()) {
+                int objectId = destroyedBuildingsResultSet.getInt(objectColumnName);
+                int amount = destroyedBuildingsResultSet.getInt("amount");
+                map.set(typeResolver.apply(objectId), amount);
+            }
         }
     }
 
+    /**
+     * Charge les résultats des attaques impliquant un joueur spécifique à partir de la base de données.
+     *
+     * @param player Le joueur pour lequel on veut charger les résultats des attaques.
+     * @return Une map où la clé est le numéro du tour et la valeur est une liste des résultats d'attaques pour ce tour.
+     */
     private Map<Integer, List<AttackResult>> loadAttackResultsInvolvingPlayer(ServerPlayer player) {
         Map<Integer, List<AttackResult>> attackResults = new HashMap<>();
         try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT * FROM attacks_logs WHERE attacker_player_id = ? OR target_player_id = ?")) {
@@ -444,16 +471,13 @@ public class GameManager {
                 ServerPlayer target = this.server.getUserManager().getPlayer(targetId);
 
                 ObjectIntMap<BuildingType> destroyedBuildings = target.getBuildingMap().createEmptyClone();
+                this.loadAttackResultDetails(destroyedBuildings, "attacks_destroyed_buildings", "building_type_id", attackLogId, value -> Identifiable.getById(ServerData.getBuildingTypes(), value));
                 ObjectIntMap<UnitType> destroyedUnits = target.getUnitMap().createEmptyClone();
+                this.loadAttackResultDetails(destroyedUnits, "attacks_destroyed_units", "unit_type_id", attackLogId, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
+
                 ObjectIntMap<UnitType> lostUnits = attacker.getUnitMap().createEmptyClone();
-
-                try (PreparedStatement destroyedBuildingsStatement = this.server.getDb().prepareStatement("SELECT * FROM attacks_destroyed_buildings WHERE attack_log_id = ?");
-                     PreparedStatement destroyedUnitsStatement = this.server.getDb().prepareStatement("SELECT * FROM attacks_destroyed_units WHERE attack_log_id = ?");
-                     PreparedStatement lostUnitsStatement = this.server.getDb().prepareStatement("SELECT * FROM attacks_lost_units WHERE attack_log_id = ?")) {
-
-                    this.loadAttackResultDetails(destroyedBuildings, destroyedBuildingsStatement, "building_type_id", attackLogId, value -> Identifiable.getById(ServerData.getBuildingTypes(), value));
-                    this.loadAttackResultDetails(destroyedUnits, destroyedUnitsStatement, "unit_type_id", attackLogId, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
-                    this.loadAttackResultDetails(lostUnits, lostUnitsStatement, "unit_type_id", attackLogId, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
+                if (attacker.equals(player)) { // On n'envoie pas les unités perdues si le joueur n'est pas l'attaquant
+                    this.loadAttackResultDetails(lostUnits, "attacks_lost_units", "unit_type_id", attackLogId, value -> Identifiable.getById(ServerData.getUnitTypes(), value));
                 }
 
                 attackResults.computeIfAbsent(turn, k -> new ArrayList<>()).add(new AttackResult(attacker, target, destroyedBuildings, destroyedUnits, lostUnits));
@@ -522,7 +546,9 @@ public class GameManager {
             Map<Player, List<AttackResult>> attackResultsByPlayer = new HashMap<>();
             for (AttackResult result : attacksExecutionContext.getAttackResults()) {
                 attackResultsByPlayer.computeIfAbsent(result.getAttacker(), k -> new ArrayList<>()).add(result);
-                attackResultsByPlayer.computeIfAbsent(result.getTarget(), k -> new ArrayList<>()).add(result);
+                // On filtre les résultats pour ne pas envoyer les unités perdues au joueur cible.
+                AttackResult filteredAttackResult = result.getLostUnits().isEmpty() ? result : new AttackResult(result.getAttacker(), result.getTarget(), result.getDestroyedBuildings(), result.getDestroyedUnits(), result.getLostUnits().createEmptyClone());
+                attackResultsByPlayer.computeIfAbsent(result.getTarget(), k -> new ArrayList<>()).add(filteredAttackResult);
             }
             for (ServerPlayer player : game.getPlayers()) {
                 List<AttackResult> results = attackResultsByPlayer.getOrDefault(player, Collections.emptyList());

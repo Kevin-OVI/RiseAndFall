@@ -14,10 +14,11 @@
     <VBox fx:id="root" alignment="CENTER" spacing="20">
         <TitleLabel style="-fx-font-size: 130%">Historique des attaques</TitleLabel>
 
+        <Label fx:id="eliminatedLabel" textFill="red" style="-fx-font-size: 120%"/>
         <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent">
             <VBox fx:id="listContainer" alignment="CENTER" spacing="20"/>
         </ScrollPane>
 
-        <Button text="Retour" onAction="#switchBack"/>
+        <Button text="Retour" onAction="#switchBack" fx:id="backButton"/>
     </VBox>
 </VBox>
