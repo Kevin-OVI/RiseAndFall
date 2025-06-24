@@ -295,7 +295,7 @@ public class GameManager {
 
         for (ServerPlayer otherPlayer : game.getPlayers()) {
             if (otherPlayer != player) {
-                chats[index] = new Chat(index + 1, otherPlayer);
+                chats[index] = new Chat(otherPlayer.getId(), otherPlayer);
                 playerIds[index] = otherPlayer.getId();
                 index++;
             }
@@ -441,7 +441,7 @@ public class GameManager {
             LogManager.logError("Le joueur avec l'ID " + packetMessage.getSenderId() + " n'existe pas.");
             return;
         }
-        int otherPlayerId = packetMessage.getSenderId();
+        int otherPlayerId = packetMessage.getReceiverId();
 
         ServerPlayer receiver = sender.getGame().getPlayers().stream()
                 .filter(player -> player.getId() == otherPlayerId)
