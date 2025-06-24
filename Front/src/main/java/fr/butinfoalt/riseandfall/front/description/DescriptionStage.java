@@ -77,9 +77,21 @@ public class DescriptionStage extends Stage {
 
         Text finTexte = new Text(
                 """
-                        Opportunité de gagner la partie :
+                        Comment se termine une partie de Rise & Fall ?\n
+                        Une partie de Rise & Fall peut se terminer de deux manières :
                         • La partie se termine lorsqu’il ne reste plus qu’un joueur en vie 
                         • Toutes les civilisations vivantes au bout de 50 tours sont déclarées gagnantes 
+                        
+                        Un joueurs perd lorqu'il n'a plus de bâtiments ou d'unités.
+                        Règle de combat - Priorité des dégâts :
+                         
+                          Lors d'un affrontement :
+                          1. Les remparts subissent les dégâts en premier.
+                          2. Une fois les remparts détruits, les unités du joueur sont attaquées.
+                          3. Enfin, si toutes les unités sont éliminées, les bâtiments restants subissent les dégâts.
+                         
+                          ⚠️ Cela signifie que les remparts jouent un rôle crucial dans la défense de votre royaume.
+                         
                        
                         """);
 
@@ -90,6 +102,7 @@ public class DescriptionStage extends Stage {
                         • Les joueurs peuvent attaquer les unités et bâtiments des autres joueurs.
                         • Les remparts sont toujours attaqués en premier, puis les unités puis vos bâtiments .Il ne faut donc pas négliger la défense de ses bâtiments.
                         • Le tchat est disponible pour discuter avec les autres joueurs afin de négocier des alliances.
+                        • Rappelez-vous que les alliances sont très importantes dans Rise & Fall, car elles peuvent vous aider à survivre plus longtemps et à vaincre vos adversaires.
                         
                   """);
 

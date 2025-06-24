@@ -225,7 +225,7 @@ VALUES
     ('Archer Elfique', 'Unité dangereuse des elfes',300,110, 100.0,300.0,4),
 
     ('Roi Mineur', 'Meilleurs des Nains', 20, 6, 15.0, 50.0, 5),
-    ('Nain Ultime''Les meilleurs parmis les meilleurs des Rois mineurs', 'DESCRIPTION À RÉDIGER', 250, 100, 170.0, 150.0,5),
+    ('Nain Ultime','Les meilleurs parmis les meilleurs des Rois mineurs', 'DESCRIPTION À RÉDIGER', 250, 100, 170.0, 150.0,5),
 
     ('Guerrier Nerlk', 'Issue de l''union entre elfes et orc, il est puissant mais petit', 30, 15, 15.0, 50.0, 6),
     ('Berserker Nerlk', 'Unité de combat Nerlk, très puissante mais coûteuse', 250, 120, 100.0, 250.0, 6),
