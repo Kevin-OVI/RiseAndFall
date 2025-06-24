@@ -304,7 +304,6 @@ public class GameManager {
         sqlBuilder.append("WHERE (sender_player_id = ? OR receiver_player_id = ?) ");
         sqlBuilder.append("AND (");
 
-        // Ajouter les conditions pour chaque joueur
         for (int i = 0; i < playerIds.length; i++) {
             if (i > 0) {
                 sqlBuilder.append(" OR ");
@@ -318,7 +317,6 @@ public class GameManager {
             preparedStatement.setInt(paramIndex++, player.getId());
             preparedStatement.setInt(paramIndex++, player.getId());
 
-            // Ajouter les IDs des autres joueurs (2 fois chacun pour sender et receiver)
             for (int playerId : playerIds) {
                 preparedStatement.setInt(paramIndex++, playerId);
                 preparedStatement.setInt(paramIndex++, playerId);
@@ -332,12 +330,11 @@ public class GameManager {
                 String message = resultSet.getString("message");
                 long timestamp = resultSet.getTimestamp("sent_at").getTime();
 
-                // Déterminer l'autre joueur (celui qui n'est pas le joueur actuel)
                 int otherPlayerId = (senderId == player.getId()) ? receiverId : senderId;
 
-                // Trouver le chat correspondant
                 Chat targetChat = null;
                 ServerPlayer sender = null;
+                ServerPlayer receiver = null;
 
                 for (int i = 0; i < chats.length; i++) {
                     if (chats[i].getReceiver().getId() == otherPlayerId) {
@@ -346,7 +343,6 @@ public class GameManager {
                     }
                 }
 
-                // Trouver le joueur expéditeur
                 for (ServerPlayer serverPlayer : game.getPlayers()) {
                     if (serverPlayer.getId() == senderId) {
                         sender = serverPlayer;
@@ -354,9 +350,15 @@ public class GameManager {
                     }
                 }
 
-                // Ajouter le message au chat approprié
-                if (targetChat != null && sender != null) {
-                    ChatMessage chatMessage = new ChatMessage(targetChat, sender, message, timestamp);
+                for (ServerPlayer serverPlayer : game.getPlayers()) {
+                    if (serverPlayer.getId() == receiverId) {
+                        receiver = serverPlayer;
+                        break;
+                    }
+                }
+
+                if (targetChat != null && sender != null && receiver != null) {
+                    ChatMessage chatMessage = new ChatMessage(targetChat, sender, receiver, message, timestamp);
                     targetChat.addMessage(chatMessage);
                 }
             }
@@ -365,22 +367,17 @@ public class GameManager {
             LogManager.logError("Erreur lors de la récupération des messages de chat du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
         }
 
-        // Trier les chats par ordre du dernier message (le plus récent en premier)
-        // Si pas de message, trier par ID
         java.util.Arrays.sort(chats, (chat1, chat2) -> {
             long lastMessageTime1 = getLastMessageTime(chat1);
             long lastMessageTime2 = getLastMessageTime(chat2);
 
-            // Si les deux chats ont des messages, comparer par timestamp (plus récent en premier)
             if (lastMessageTime1 != 0 && lastMessageTime2 != 0) {
-                return Long.compare(lastMessageTime2, lastMessageTime1); // ordre décroissant
+                return Long.compare(lastMessageTime2, lastMessageTime1);
             }
 
-            // Si un seul chat a des messages, il passe en premier
             if (lastMessageTime1 != 0) return -1;
             if (lastMessageTime2 != 0) return 1;
 
-            // Si aucun chat n'a de messages, trier par ID (ordre croissant)
             return Integer.compare(chat1.getId(), chat2.getId());
         });
 
@@ -417,8 +414,8 @@ public class GameManager {
 
                     for (ChatMessage message : chat.getMessages()) {
                         PacketMessage packetMessage = new PacketMessage(
-                                chat.getId(),
                                 message.getSender().getId(),
+                                message.getReceiver().getId(),
                                 message.getMessage(),
                                 message.getTimestamp()
                         );

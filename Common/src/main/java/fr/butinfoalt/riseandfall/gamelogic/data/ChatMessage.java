@@ -8,12 +8,14 @@ import java.io.IOException;
 public class ChatMessage {
     private Chat chat;
     private Player sender;
+    private Player receiver;
     private String message;
     private long timestamp;
 
-    public ChatMessage(Chat chat, Player sender, String message) {
+    public ChatMessage(Chat chat, Player sender, Player receiver, String message) {
         this.chat = chat;
         this.sender = sender;
+        this.receiver = receiver;
         this.message = message;
         this.timestamp = System.currentTimeMillis();
     }
@@ -21,6 +23,8 @@ public class ChatMessage {
     public Player getSender() {
         return sender;
     }
+
+    public Player getReceiver() {return receiver;}
 
     public String getMessage() {
         return message;
@@ -43,9 +47,10 @@ public class ChatMessage {
      * @param message Le contenu du message.
      * @param timestamp L'horodatage du message, en millisecondes depuis l'époque Unix.
      */
-    public ChatMessage(Chat chat, Player sender, String message, long timestamp) {
+    public ChatMessage(Chat chat, Player sender, Player receiver, String message, long timestamp) {
         this.chat = chat;
         this.sender = sender;
+        this.receiver = receiver;
         this.message = message;
         this.timestamp = timestamp;
     }

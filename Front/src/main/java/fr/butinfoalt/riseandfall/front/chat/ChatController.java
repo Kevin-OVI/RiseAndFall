@@ -83,10 +83,10 @@ public class ChatController implements ViewController {
         }
 
         String messageText = messageField.getText().trim();
-        ChatMessage newMessage = new ChatMessage(currentChat, RiseAndFall.getPlayer(), messageText);
+        ChatMessage newMessage = new ChatMessage(currentChat, RiseAndFall.getPlayer(), currentChat.getReceiver(), messageText);
 
         try {
-            RiseAndFall.getClient().sendPacket(new PacketMessage(RiseAndFall.getPlayer().getId(), newMessage.getChat().getReceiver().getId(), messageText, newMessage.getTimestamp()));
+            RiseAndFall.getClient().sendPacket(new PacketMessage(RiseAndFall.getPlayer().getId(), newMessage.getReceiver().getId(), messageText, newMessage.getTimestamp()));
             currentChat.addMessage(newMessage);
             addMessageToView(newMessage);
             messageField.clear();
@@ -101,9 +101,8 @@ public class ChatController implements ViewController {
         HBox messageBox = new HBox(10);
         messageBox.setPadding(new Insets(5));
 
-        boolean isOwnMessage = message.getSender().equals(RiseAndFall.getPlayer());
+        boolean isOwnMessage = message.getSender().getId() == RiseAndFall.getPlayer().getId();
 
-        // Bulle de message
         VBox bubble = new VBox(5);
         bubble.setMaxWidth(400);
         bubble.setPadding(new Insets(10));
@@ -111,25 +110,21 @@ public class ChatController implements ViewController {
                 "-fx-background-color: white; -fx-background-radius: 15;" :
                 "-fx-background-color: #e0e0e0; -fx-background-radius: 15;");
 
-        // Nom de l'expéditeur (seulement pour les messages reçus)
         if (!isOwnMessage) {
             Label senderLabel = new Label(((OtherClientPlayer)message.getSender()).getName());
             senderLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #666;");
             bubble.getChildren().add(senderLabel);
         }
 
-        // Texte du message
         Label messageText = new Label(message.getMessage());
         messageText.setWrapText(true);
         messageText.setMaxWidth(380);
         bubble.getChildren().add(messageText);
 
-        // Heure
         Label timeLabel = new Label(dateFormat.format(new Date(message.getTimestamp())));
         timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #999;");
         bubble.getChildren().add(timeLabel);
 
-        // Espaceur pour aligner les messages
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
