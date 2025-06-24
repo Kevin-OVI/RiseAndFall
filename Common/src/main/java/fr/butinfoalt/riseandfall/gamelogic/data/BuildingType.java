@@ -154,6 +154,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      *
      * @return La description du type de bâtiment.
      */
+    @Override
     public String getDescription() {
         return this.description;
     }
@@ -228,6 +229,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      *
      * @return La race qui peut construire ce type de bâtiment, ou null si toutes les races le peuvent.
      */
+    @Override
     public Race getAccessibleByRace() {
         return this.accessibleByRace;
     }

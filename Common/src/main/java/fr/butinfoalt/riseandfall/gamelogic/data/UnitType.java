@@ -122,6 +122,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      *
      * @return La description de l'unité.
      */
+    @Override
     public String getDescription() {
         return this.description;
     }
@@ -169,6 +170,7 @@ public class UnitType implements Identifiable, PurchasableItem, ISerializable {
      *
      * @return La race qui peut construire cette unité.
      */
+    @Override
     public Race getAccessibleByRace() {
         return this.accessibleByRace;
     }

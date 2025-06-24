@@ -18,4 +18,18 @@ public interface PurchasableItem extends NamedItem {
      * @return La quantité d'intelligence requise pour construire l'unité.
      */
     float getRequiredIntelligence();
+
+    /**
+     * Obtient la race qui peut accéder à cet objet.
+     *
+     * @return La race qui peut accéder à cet objet, ou null si toutes les races le peuvent.
+     */
+    Race getAccessibleByRace();
+
+    /**
+     * Obtient la description de l'objet.
+     *
+     * @return La description de l'objet.
+     */
+    String getDescription();
 }

@@ -3,6 +3,7 @@ package fr.butinfoalt.riseandfall.front.game.gamelist;
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
+import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.NamedItemStringConverter;
@@ -116,6 +117,16 @@ public class GameListController implements ViewController {
             return;
         }
         RiseAndFallApplication.switchToView(View.LOADING);
+    }
+
+    /**
+     * Méthode appelée par JavaFX lorsque l'utilisateur clique sur le bouton "Description".
+     * Elle affiche la fenêtre de description des éléments du jeu.
+     */
+    @FXML
+    public void switchToDescriptionPage() {
+        DescriptionStage.INSTANCE.show();
+        DescriptionStage.INSTANCE.toFront();
     }
 
     @Override

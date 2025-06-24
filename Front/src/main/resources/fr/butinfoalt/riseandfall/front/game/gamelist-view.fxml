@@ -1,8 +1,6 @@
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -35,6 +33,8 @@
             </VBox>
 
             <Label fx:id="errorMessage" style="-fx-text-fill: red;" visible="false"/>
+
+            <Button text="Règles du jeu" onAction="#switchToDescriptionPage"/>
         </VBox>
     </ScrollPane>
 </VBox>

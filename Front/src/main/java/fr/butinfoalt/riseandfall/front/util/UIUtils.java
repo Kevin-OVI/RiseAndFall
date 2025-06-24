@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.front.util;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
+import fr.butinfoalt.riseandfall.util.MathUtils;
 import javafx.beans.InvalidationListener;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -75,5 +76,14 @@ public class UIUtils {
      */
     public static void setBackgroundImage(String imagePath, Scene scene, ImageView backgroundImageView) {
         setBackgroundImage(imagePath, scene, backgroundImageView, null);
+    }
+
+    public static String displayOptimisedFloat(float value) {
+        int intValue = (int) value;
+        if (value == intValue) {
+            return String.valueOf(intValue);
+        } else {
+            return String.valueOf(MathUtils.roundToDecimalPlaces(value, 2));
+        }
     }
 }

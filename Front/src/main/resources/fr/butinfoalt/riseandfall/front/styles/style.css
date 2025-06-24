@@ -1,4 +1,4 @@
-.root {
+.root, .title-label.force-custom-font {
     -fx-font-family: "IM FELL ENGLISH SC", Times, serif;
     -fx-font-size: 12pt;
 }

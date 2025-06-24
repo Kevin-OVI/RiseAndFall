@@ -2,11 +2,14 @@ package fr.butinfoalt.riseandfall.front.description;
 
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
-import javafx.beans.InvalidationListener;
+import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import javafx.scene.Scene;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * Classe représentant la scène de description du jeu.
@@ -26,6 +29,55 @@ public class DescriptionStage extends Stage {
         this.setScene(View.DESCRIPTION.getScene(1024, 768, this::setupScene));
     }
 
+    private static <T extends PurchasableItem> void constructPurchasableItemText(List<T> items, Function<T, List<String>> detailsAdder, String universalTitle, String raceTitleTemplate, TextFlow textFlow) {
+        Map<Race, StringBuilder> textMap = new HashMap<>();
+        for (T item : items) {
+            StringBuilder builder = textMap.computeIfAbsent(item.getAccessibleByRace(), k -> new StringBuilder());
+            builder.append(item.getName()).append("\n");
+            List<String> details = new ArrayList<>(Arrays.asList(
+                    item.getDescription(),
+                    "Prix : " + UIUtils.displayOptimisedFloat(item.getPrice())
+            ));
+            if (item.getRequiredIntelligence() > 0) {
+                details.add("Intelligence requise : " + UIUtils.displayOptimisedFloat(item.getRequiredIntelligence()));
+            }
+            details.addAll(detailsAdder.apply(item));
+
+            for (String detail : details) {
+                builder.append("  • ").append(detail).append("\n");
+            }
+            builder.append("\n");
+        }
+
+        textMap.entrySet().stream().sorted((o1, o2) -> {
+            if (o1.getKey() == null) {
+                return -1; // Universel en premier
+            } else if (o2.getKey() == null) {
+                return 1; // Universel en dernier
+            } else {
+                return Integer.compare(o1.getKey().getId(), o2.getKey().getId());
+            }
+        }).forEach(entry -> {
+            String title = (entry.getKey() == null ? universalTitle : String.format(raceTitleTemplate, entry.getKey().getName())) + " :\n";
+            Text titleText = new Text(title);
+            titleText.setStyle("-fx-font-size: 150%");
+            textFlow.getChildren().add(titleText);
+            Text contentText = new Text(entry.getValue().toString());
+            contentText.setStyle("-fx-font-size: 20px;");
+            textFlow.getChildren().add(contentText);
+        });
+    }
+
+    private static void formatModifier(List<String> modifiersList, float value, String unit) {
+        if (value > 1) {
+            float percentage = (value - 1) * 100;
+            modifiersList.addFirst(String.format("+%s %s", UIUtils.displayOptimisedFloat(percentage), unit));
+        } else if (value < 1 && value >= 0) {
+            float percentage = (1 - value) * 100;
+            modifiersList.add(String.format("-%s %s", UIUtils.displayOptimisedFloat(percentage), unit));
+        }
+    }
+
     /**
      * Méthode pour configurer la scène de description.
      * Elle définit l'image de fond, adapte la taille de l'image à la fenêtre,
@@ -37,443 +89,60 @@ public class DescriptionStage extends Stage {
         DescriptionController controller = View.DESCRIPTION.getController();
 
         UIUtils.setBackgroundImage("images/map.jpg", scene, controller.backgroundImageView);
-        Text mainTitle = new Text("Rise & Fall\n");
-        mainTitle.setTextAlignment(TextAlignment.CENTER);
-        mainTitle.setStyle("-fx-font-size: 36px; -fx-font-weight: bold;");
-
-        // Texte formaté avec des titres en gras
-        Text intro1 = new Text("Rise & Fall est un jeu développé par une équipe de choc.\n");
-        Text intro2 = new Text("Le but est de créer un jeu tour par tour dans un monde fantasy.\n");
-        Text intro3 = new Text("On a présenté le projet, maintenant passons aux règles du jeu :\n\n");
-
-        Text objectifTitre = new Text("Objectif de jeu :\n");
-        objectifTitre.setStyle("-fx-font-weight: bold");
-
-        Text objectifTexte = new Text(
-                """
-                        Dans Rise & Fall, chaque joueur incarne une civilisation dans un monde fantasy. \
-                        Le but est de faire prospérer sa civilisation en gérant ses ressources, en développant son économie, \
-                        et en étendant son territoire tout en survivant jusqu’à la fin de la partie.
-
-                        """);
-
-        Text toursTitre = new Text("Déroulement des tours :\n");
-        toursTitre.setStyle("-fx-font-weight: bold");
-
-        Text toursTexte = new Text(
-                """
-                        • Le jeu se joue au tour par tour.
-                        • À chaque tour, un joueur peut :
-                          + Collecter des ressources
-                          + Construire des bâtiments
-                          + Recruter des unités
-                          + Combattre des unités ennemies
-                          + Attaquer ou interagir avec d’autres joueurs 
-
-                        """);
-
-        Text finTitre = new Text("Fin de partie\n");
-        finTitre.setStyle("-fx-font-weight: bold");
-
-        Text finTexte = new Text(
-                """
-                        Comment se termine une partie de Rise & Fall ?\n
-                        Une partie de Rise & Fall peut se terminer de deux manières :
-                        • La partie se termine lorsqu’il ne reste plus qu’un joueur en vie 
-                        • Toutes les civilisations vivantes au bout de 50 tours sont déclarées gagnantes 
-                        
-                        Un joueurs perd lorqu'il n'a plus de bâtiments ou d'unités.
-                        Règle de combat - Priorité des dégâts :
-                         
-                          Lors d'un affrontement :
-                          1. Les remparts subissent les dégâts en premier.
-                          2. Une fois les remparts détruits, les unités du joueur sont attaquées.
-                          3. Enfin, si toutes les unités sont éliminées, les bâtiments restants subissent les dégâts.
-                         
-                          ⚠️ Cela signifie que les remparts jouent un rôle crucial dans la défense de votre royaume.
-                         
-                       
-                        """);
-
-        Text CombatTitre = new Text("Combats et interactions entre joueurs\n");
-        CombatTitre.setStyle("-fx-font-weight: bold");
-        Text CombatTexte = new Text(
-                """
-                        • Les joueurs peuvent attaquer les unités et bâtiments des autres joueurs.
-                        • Les remparts sont toujours attaqués en premier, puis les unités puis vos bâtiments .Il ne faut donc pas négliger la défense de ses bâtiments.
-                        • Le tchat est disponible pour discuter avec les autres joueurs afin de négocier des alliances.
-                        • Rappelez-vous que les alliances sont très importantes dans Rise & Fall, car elles peuvent vous aider à survivre plus longtemps et à vaincre vos adversaires.
-                        
-                  """);
-
-        Text raceTitre = new Text("Choix de la race\n");
-        raceTitre.setStyle("-fx-font-weight: bold");
-        Text raceTexte = new Text(
-                """
-                        • Chaque joueur choisie une race au début de la partie.
-                        • Chaque race a ses propres unités et bâtiments ce qui les rend uniques.
-                        • Chaque race possède des bonus et malus qui influencent la stratégie de jeu du joueur.
-                        • Les bâtiments et unités spéficiques à chaque race sont débloqués au fur et à mesure de la partie.
-                        
-                  """);
-
-        Text ListeDesRaces = new Text("Liste des races avec leurs caractéristiques :\n");
-        ListeDesRaces.setStyle("-fx-font-weight: bold");
-        Text ListeDesRacesTexte = new Text(
-                """
-                        - Mort-Vivant : 
-                          + Avantages : 30% de production d'or en plus
-                          - Inconvénients : -25% de production d'intelligence, -25% de vie sur les unités
-                        - Humain : 
-                          + Avantages : 25% de production d'intelligence en plus
-                          - Inconvénients : -25% de dégats sur les unités
-                        - 0rc : 
-                          + Avantages : 50% de dégats en plus, 25% de vie en plus
-                          - Inconvénients : -50% de production d'intelligence, -25% de production d'or
-                          (Recommendé pour les joueurs agressifs)
-                        - Elfe :
-                          + Avantages : +100% de production d'intelligence, 
-                          - Inconvénients : -25% de vie sur les unités, -25% de dégats sur les unités
-                        - Nain : 
-                          + Avantages : 50% de production d'or en plus et 25% de vie en plus 
-                          - Inconvénients : -25% de dégats sur les unités
-                        - Nerlk :
-                          + Avantages : 25% de dégats en plus, 25% de vie en plus
-                          - Inconvénients :-50% de production d'or
-                        - Primotaure :
-                          + Avantages : 50% de production d'or en plus, 
-                          - Inconvénients : -40% de degats sur les unités,
-                        """
-        );
-
-        Text ListesBatimentsEtUnites = new Text("Liste des bâtiments :\n");
-        ListesBatimentsEtUnites.setStyle("-fx-font-weight: bold");
-        Text ListesBatimentsTexte = new Text(
-                """
-                        
-                             ==========================
-                             Bâtiments universels
-                             ==========================
-                                                
-                            /**
-                             * Carrière :
-                             * - Structure permettant d'extraire des ressources naturelles.
-                             * - Production d'or : FAIBLE
-                             * - Chaque joueur en possède 2 au début de la partie.
-                             */
-                           \s
-                            /**
-                             * Mine :
-                             * - Extraction de ressources à plus grande échelle.
-                             * - Production d'or : FORTE
-                             * - Chaque joueur en possède 0 au début.
-                             */
-                           \s
-                            /**
-                             * Caserne :
-                             * - Permet de former plus d'unités de combat.
-                             * - Production d'emplacements d'unités : FAIBLE
-                             * - Chaque joueur en possède 1 au début.
-                             */
-                           \s
-                            /**
-                             * Bibliothèque :
-                             * - Centre de savoir pour le développement des technologies.
-                             * - Production d'intelligence : FAIBLE
-                             * - Chaque joueur en possède 0 au début.
-                             */
-                           \s
-                            /**
-                             * Rempart :
-                             * - Mur de protection contre les attaques ennemies.
-                             * - Production de défense
-                             * - Chaque joueur en possède 1 au début.
-                             */
-                                                
-                             ==========================
-                             Unité universelle
-                             ==========================
-                                                
-                            /**
-                             * Guerrier :
-                             * - Unité de base polyvalente.
-                             * - Prix : FAIBLE
-                             * - Dégâts : FAIBLES
-                             * - Vie : FAIBLE
-                             */
-                                                
-                             ==========================
-                             Race : Mort-Vivant
-                             ==========================
-                                                
-                            /**
-                             * Cimetière :
-                             * - Permet de lever de nouvelles troupes.
-                             * - Production d'unités : MOYENNE
-                             */
-                                                
-                            /**
-                             * Nécropole :
-                             * - Ancienne ville magique, haut lieu de rituels.
-                             * - Production d'intelligence : FORTE
-                             * - Production d'unités : FORTE
-                             */
-                                                
-                            /**
-                             * Zombie :
-                             * - Créature lente, mais dangereuse.
-                             * - Prix : MOYEN
-                             * - Dégâts : PUISSANTS
-                             * - Vie : FAIBLE
-                             */
-                                                
-                            /**
-                             * Nécromancien :
-                             * - Mage capable de lever les morts.
-                             * - Prix : EXTRÊMEMENT ÉLEVÉ
-                             * - Dégâts : EXTRÊMEMENT PUISSANTS
-                             * - Vie : MOYENNE
-                             */
-                                                
-                             ==========================
-                             Race : Humain
-                             ==========================
-                                                
-                            /**
-                             * Église :
-                             * - Lieu de foi et recrutement de troupes sacrées.
-                             * - Production d'unités : FORTE
-                             */
-                                                
-                            /**
-                             * Château :
-                             * - Centre de commandement, commerce et recherche.
-                             * - Production d'or : FORTE
-                             * - Production d'intelligence : FORTE
-                             * - Production d'unités : TRÈS FAIBLE
-                             */
-                                                
-                            /**
-                             * Ingénieur de combat :
-                             * - Expert en construction et réparation.
-                             * - Prix : MOYEN
-                             * - Dégâts : PUISSANTS
-                             * - Vie : MOYENNE
-                             */
-                                                
-                            /**
-                             * Héros Légendaire :
-                             * - Héros humain le plus puissant.
-                             * - Prix : EXTRÊMEMENT ÉLEVÉ
-                             * - Dégâts : EXTRÊMEMENT PUISSANTS
-                             * - Vie : ÉLEVÉE
-                             */
-                                                
-                             ==========================
-                             Race : Orc
-                             ==========================
-                                                
-                            /**
-                             * Donjon :
-                             * - Centre d'entraînement brutal.
-                             * - Production d'unités : MOYENNE
-                             */
-                                                
-                            /**
-                             * Marché d'esclaves :
-                             * - Commerce d'esclaves orc.
-                             * - Production d'or : TRÈS FORTE
-                             * - Production d'intelligence : FAIBLE
-                             */
-                                                
-                            /**
-                             * Uruk Noir :
-                             * - Créature puissante mais peu intelligente.
-                             * - Prix : ÉLEVÉ
-                             * - Dégâts : MOYENS
-                             * - Vie : ÉLEVÉE
-                             */
-                                                
-                            /**
-                             * Chef de guerre Orc :
-                             * - Meneur redoutable.
-                             * - Prix : EXTRÊMEMENT ÉLEVÉ
-                             * - Dégâts : EXTRÊMEMENT PUISSANTS
-                             * - Vie : TRÈS ÉLEVÉE
-                             */
-                                                
-                             ==========================
-                             Race : Elfe
-                             ==========================
-                                                
-                            /**
-                             * Arbre de Vie :
-                             * - Source de vie et de sagesse.
-                             * - Production d’intelligence : MOYENNE
-                             * - Production d’or : TRÈS ÉLEVÉE
-                             * - Production d’unités : MOYENNE
-                             */
-                                                
-                            /**
-                             * Tour de Mage :
-                             * - Développement de sorts puissants.
-                             * - Production d’or : ULTRA FAIBLE
-                             * - Production d’intelligence : FAIBLE
-                             * - Production d’unités : ÉLEVÉE
-                             */
-                                                
-                            /**
-                             * Mage Elfe :
-                             * - Lanceur de sorts surpuissants.
-                             * - Prix : TRÈS ÉLEVÉ
-                             * - Dégâts : EXTRÊMEMENT PUISSANTS
-                             * - Vie : TRÈS FAIBLE
-                             */
-                                                
-                            /**
-                             * Archer Elfe :
-                             * - Maître du tir à distance.
-                             * - Prix : EXTRÊMEMENT ÉLEVÉ
-                             * - Dégâts : ULTRA PUISSANTS
-                             * - Vie : MOYENNE
-                             */
-                                                
-                             ==========================
-                             Race : Nain
-                             ==========================
-                                                
-                            /**
-                             * Mine de Nain :
-                             * - Source massive d’or.
-                             * - Production d’or : TRÈS FORTE
-                             */
-                                                
-                            /**
-                             * Taverne de Nain :
-                             * - Recrutement de troupes.
-                             * - Production d’intelligence : FAIBLE
-                             * - Production d’unités : TRÈS ÉLEVÉE
-                             */
-                                                
-                            /**
-                             * Roi Mineur :
-                             * - Souverain nain.
-                             * - Prix : MOYEN
-                             * - Dégâts : PUISSANTS
-                             * - Vie : FAIBLE
-                             */
-                                                
-                            /**
-                             * Nain Ultime :
-                             * - Guerrier légendaire.
-                             * - Prix : TRÈS ÉLEVÉ
-                             * - Dégâts : TRÈS ÉLEVÉS
-                             * - Vie : ÉLEVÉE
-                             */
-                                                
-                             ==========================
-                             Race : Nerlk
-                             ==========================
-                                                
-                            /**
-                             * Tente :
-                             * - Formation des troupes.
-                             * - Production d’unités : MOYENNE
-                             */
-                                                
-                            /**
-                             * Forge de Nerlk :
-                             * - Création d’armes enchantées.
-                             * - Production d’or : TRÈS ÉLEVÉE
-                             * - Production d’intelligence : MOYENNE
-                             */
-                                                
-                            /**
-                             * Guerrier Nerlk :
-                             * - Croisement Elfe-Orc, petit mais puissant.
-                             * - Prix : MOYEN
-                             * - Dégâts : PUISSANTS
-                             * - Vie : FAIBLE
-                             */
-                                                
-                            /**
-                             * Berserker Nerlk :
-                             * - Guerrier enragé.
-                             * - Prix : TRÈS ÉLEVÉ
-                             * - Dégâts : ULTRA PUISSANTS
-                             * - Vie : MOYENNE
-                             */
-                                                
-                             ==========================
-                             Race : Primotaure
-                             ==========================
-                                                
-                            /**
-                             * Labyrinthe :
-                             * - Bâtiment très résistant qui protège le royaume.
-                             * - Production d’or : MOYENNE
-                             * - Production d’intelligence : FAIBLE
-                             * - Production d’unités : TRÈS FAIBLE
-                             */
-                                                
-                            /**
-                             * Temple :
-                             * - Lieu de formation et de savoir.
-                             * - Production d’or : ÉLEVÉE
-                             * - Production d’intelligence : TRÈS FORTE
-                             * - Production d’unités : TRÈS ÉLEVÉE
-                             */
-                                                
-                            /**
-                             * Minotaure :
-                             * - Guerrier robuste et puissant.
-                             * - Prix : MOYEN
-                             * - Dégâts : PUISSANTS
-                             * - Vie : MOYENNE
-                             */
-                                                
-                            /**
-                             * Dieu des Primotaures :
-                             * - Être mythique, puissance divine.
-                             * - Prix : ULTRA ÉLEVÉ
-                             * - Dégâts : ULTRA PUISSANTS
-                             * - Vie : ULTRA ÉLEVÉE
-                             */
-                        """
-        );
 
 
-        // Ajouter les morceaux de texte dans le TextFlow
-        controller.textFlow.getChildren().addAll(
-                mainTitle,
-                intro1, intro2, intro3,
-                objectifTitre, objectifTexte,
-                toursTitre, toursTexte,
-                finTitre, finTexte
-                , raceTitre, raceTexte
-                , ListeDesRaces, ListeDesRacesTexte
-                , ListesBatimentsEtUnites, ListesBatimentsTexte
-        );
-
-        // Centrer le texte dans le ScrollPane si sa hauteur est inférieure à celle du ScrollPane
-        InvalidationListener adaptTextPosition = (observable) -> {
-            double viewportWidth = controller.textScrollPane.getViewportBounds().getWidth();
-            if (controller.textFlow.getWidth() < viewportWidth) {
-                controller.textFlow.setTranslateX((viewportWidth - controller.textFlow.getWidth()) / 2);
-            } else {
-                controller.textFlow.setTranslateX(0);
+        for (Race race : ServerData.getRaces()) {
+            Text titleText = new Text(race.getName() + " :\n");
+            titleText.setStyle("-fx-font-size: 120%");
+            controller.racesList.getChildren().add(titleText);
+            StringBuilder contentBuilder = new StringBuilder();
+            contentBuilder.append("  • ").append(race.getDescription()).append("\n");
+            ArrayList<String> modifiers = new ArrayList<>();
+            formatModifier(modifiers, race.getGoldMultiplier(), "d'or");
+            formatModifier(modifiers, race.getIntelligenceMultiplier(), "d'intelligence");
+            formatModifier(modifiers, race.getDamageMultiplier(), "de dégâts");
+            formatModifier(modifiers, race.getHealthMultiplier(), "de vie");
+            if (!modifiers.isEmpty()) {
+                contentBuilder.append("  • ").append(String.join(", ", modifiers)).append("\n");
             }
+            Text contentText = new Text(contentBuilder.toString());
+            contentText.setStyle("-fx-font-size: 20px;");
+            controller.racesList.getChildren().add(contentText);
+        }
 
-            double viewportHeight = controller.textScrollPane.getViewportBounds().getHeight();
-            if (controller.textFlow.getHeight() < viewportHeight) {
-                controller.textFlow.setTranslateY((viewportHeight - controller.textFlow.getHeight()) / 2);
-            } else {
-                controller.textFlow.setTranslateY(0);
+        constructPurchasableItemText(ServerData.getBuildingTypes(), buildingType -> {
+            List<String> details = new ArrayList<>();
+
+            if (buildingType.getGoldProduction() > 0) {
+                details.add("Production d'or : " + UIUtils.displayOptimisedFloat(buildingType.getGoldProduction()));
             }
-        };
+            if (buildingType.getIntelligenceProduction() > 0) {
+                details.add("Production d'intelligence : " + UIUtils.displayOptimisedFloat(buildingType.getIntelligenceProduction()));
+            }
+            if (buildingType.getResistance() > 0) {
+                details.add("Résistance : " + UIUtils.displayOptimisedFloat(buildingType.getResistance()));
+            }
+            if (buildingType.getMaxUnits() > 0) {
+                details.add("Capacité de formation d'unités : " + buildingType.getMaxUnits());
+            }
+            if (buildingType.getInitialAmount() > 0) {
+                details.add("Chaque joueur en possède " + buildingType.getInitialAmount() + " au début.");
+            }
+            if (buildingType.isDefensive()) {
+                details.add("Première défense contre les attaques ennemies");
+            }
+            return details;
+        }, "Bâtiments universels", "Bâtiments de la race %s", controller.buildingsList);
 
-        controller.textScrollPane.viewportBoundsProperty().addListener(adaptTextPosition);
-        controller.textFlow.widthProperty().addListener(adaptTextPosition);
-        controller.textFlow.heightProperty().addListener(adaptTextPosition);
+        constructPurchasableItemText(ServerData.getUnitTypes(), unitType -> {
+            List<String> details = new ArrayList<>();
+            if (unitType.getDamage() > 0) {
+                details.add("Dégâts : " + UIUtils.displayOptimisedFloat(unitType.getDamage()));
+            }
+            if (unitType.getHealth() > 0) {
+                details.add("Vie : " + UIUtils.displayOptimisedFloat(unitType.getHealth()));
+            }
+            return details;
+        }, "Unités universelles", "Unités de la race %s", controller.unitsList);
     }
 }

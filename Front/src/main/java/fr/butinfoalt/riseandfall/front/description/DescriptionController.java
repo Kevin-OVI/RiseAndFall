@@ -21,9 +21,12 @@ public class DescriptionController {
     @FXML
     public ScrollPane textScrollPane;
 
-    /**
-     * Champ pour le composant de texte.
-     */
     @FXML
-    public TextFlow textFlow;
+    public TextFlow racesList;
+
+    @FXML
+    public TextFlow buildingsList;
+
+    @FXML
+    public TextFlow unitsList;
 }
