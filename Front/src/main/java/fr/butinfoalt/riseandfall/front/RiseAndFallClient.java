@@ -79,10 +79,6 @@ public class RiseAndFallClient extends BaseSocketClient {
     private void onMessageReceived(SocketWrapper socketWrapper, PacketMessage packetMessage) {
         Chat chat = RiseAndFall.getGame().getChatByReceiver(packetMessage.getSenderId());
 
-        System.out.println("Message reçu de " + packetMessage.getSenderId() + " à " + packetMessage.getReceiverId() + ": " + packetMessage.getMessage());
-        System.out.println("Timestamp du message : " + packetMessage.getTimestamp());
-        System.out.println("Chat trouvé : " + (chat != null ? chat.getId() : "null"));
-        System.out.println("Liste des chats : " + RiseAndFall.getGame().getChats().toString());
         if (chat == null)
             chat = RiseAndFall.getGame().getChatByReceiver(packetMessage.getReceiverId());
 
