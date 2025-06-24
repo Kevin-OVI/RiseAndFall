@@ -112,7 +112,7 @@ public class OrderAttacksListController implements ViewController {
             this.noAttacksScheduledTitle.setVisible(false);
             this.scheduledAttacksTitle.setVisible(true);
         }
-        this.addAttackButton.setDisable(this.pendingAttacks.size() >= RiseAndFall.getGame().getOtherPlayersCount() || this.getRemainingUnits().isEmpty());
+        this.addAttackButton.setDisable(this.getAttackablePlayers().isEmpty() || this.getRemainingUnits().isEmpty());
     }
 
     /**
@@ -250,13 +250,13 @@ public class OrderAttacksListController implements ViewController {
      *
      * @return Une liste de joueurs qui n'ont pas encore été attaqués.
      */
-    List<OtherClientPlayer> getNotAttackedPlayers() {
+    List<OtherClientPlayer> getAttackablePlayers() {
         Set<OtherClientPlayer> alreadyAttackingPlayers = this.pendingAttacks.stream()
                 .map(attackPlayerOrderData -> (OtherClientPlayer) attackPlayerOrderData.getTargetPlayer())
                 .collect(Collectors.toSet());
 
         return RiseAndFall.getGame().getOtherPlayers().stream()
-                .filter(otherClientPlayer -> !alreadyAttackingPlayers.contains(otherClientPlayer))
+                .filter(otherClientPlayer -> !alreadyAttackingPlayers.contains(otherClientPlayer) && !otherClientPlayer.isEliminated())
                 .toList();
     }
 

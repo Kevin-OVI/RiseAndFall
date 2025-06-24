@@ -174,7 +174,7 @@ public class OrderAttackController implements ViewController {
 
         ObservableList<OtherClientPlayer> selectablePlayers = this.targetPlayerSelector.getItems();
         selectablePlayers.clear();
-        selectablePlayers.addAll(listController.getNotAttackedPlayers());
+        selectablePlayers.addAll(listController.getAttackablePlayers());
         ObjectIntMap<UnitType> remainingUnits = listController.getRemainingUnits();
 
         if (attack != null) {
