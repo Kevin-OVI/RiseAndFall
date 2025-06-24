@@ -177,7 +177,7 @@ VALUES
     (4, 'Elfe', 'Créature Mystique aux grandes oreilles possèdant une grande intelligence mais faible', 1, 2, 0.75, 0.75),
     (5, 'Nain', 'Homme de petite taille,robuste et possèdant ENORMEMENT d''or', 1.5, 1, 0.75, 1.25),
     (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes le problèmes sont leurs économie', 0.5, 1, 1.25, 1.25),
-    (7, 'Primotaures', 'Premières créatures du monde, les primotaures sont riches mais pacifiques', 1.5, 1, 0.60, 1);
+    (7, 'Primotaures', 'Premières créatures du monde, les primotaures sont riches mais pacifiques', 1.25, 1, 0.625, 1);
 
 INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, resistance, max_units, initial_amount, accessible_race_id, defensive)
 VALUES
@@ -185,7 +185,7 @@ VALUES
     ('Mine', 'Structure permettant d''extraire de l''or pour financer l''économie du royaume mais nécessite de l''intelligence pour être débloquer', 25, 15, 25, 0, 120, 0, 0, NULL, false),
     ('Caserne', 'Bâtiment militaire utilisé pour entraîner et héberger des unités de combat', 10, 0, 0, 0, 100, 3, 1, NULL, false),
     ('Bibliothèque', 'Centre de savoir produisant de l''intelligence pour le développement des technologies', 10, 0, 0, 2, 80, 0, 0, NULL, false),
-    ('Rempart','Sert de protection au royaume', 30, 10, 0, 0, 150, 0, 1, NULL, true),
+    ('Rempart','Sert de protection au royaume', 60, 10, 0, 0, 150, 0, 1, NULL, true),
 
     ('Cimetière', 'Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes', 15, 10, 0, 0, 80, 8, 0, 1, false),
     ('Nécropole','Ancienne ville de mage rempli de rituel sinistre',120 ,35 ,15 ,20 ,150 ,10 ,0 ,1, false),
@@ -199,14 +199,14 @@ VALUES
     ('Tour de Mage', 'Endroit où les prochains mages sont formés', 20, 20, 1, 2, 170, 10, 0, 4, false),
     ('Arbre de Vie', 'Endroit où les elfes s''instruit', 180, 50, 50,20 , 200, 5, 0, 4, false),
 
-    ('Mine de Nains', 'Mine d''or où les nains adultes passent 100% de leurs temps', 30, 6, 40, 0, 180, 0, 0, 5, false),
-    ('Taverne de Nains','Bar dans lequel on recrute les futurs Nains', 130, 20, 0, 3, 100, 20, 0, 5, false),
+    ('Mine de Nain', 'Mine d''or où les nains adultes passent 100% de leurs temps', 30, 6, 40, 0, 180, 0, 0, 5, false),
+    ('Taverne de Nain','Bar dans lequel on recrute les futurs Nains', 130, 20, 0, 3, 100, 20, 0, 5, false),
 
     ('Tente', 'Endroit où les futurs combattants sont formés', 15, 4, 0, 0, 40, 8, 0, 6, false),
-    ('Forge', 'Endroit où les Nerlk fabriquent leurs armes', 120, 25, 40, 5, 120, 0, 0, 6, false),
+    ('Forge de Nerlk', 'Forge magique où les Nerlk créent des armes enchantées', 120, 25, 40, 5, 120, 0, 0, 6, false),
 
-    ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 30, 6, 20, 3, 260, 1, 0, 7, false),
-    ('Temple', 'Endroit où les Primotaures s''instruisent et se forme', 150, 30, 25, 30, 90, 20, 0, 7, false);
+    ('Labyrinthe', 'Connu pour défendre le royaume des attaquants', 40, 6, 10, 3, 280, 1, 0, 7, false),
+    ('Temple', 'Endroit où les Primotaures s''instruisent et se forment', 150, 30, 25, 30, 90, 20, 0, 7, false);
 
 INSERT INTO unit_type (name, description, price, required_intelligence, health, damage, accessible_race_id)
 VALUES
@@ -224,10 +224,11 @@ VALUES
     ('Mage Elfique', 'Puissant mage', 80, 20, 15.0, 150.0, 4),
     ('Archer Elfique', 'Unité dangereuse des elfes',300,110, 100.0,300.0,4),
 
-    ('Roi Mineur', 'Meilleurs des Nains', 20, 6, 35.0, 50.0, 5),
+    ('Roi Mineur', 'Meilleurs des Nains', 20, 6, 15.0, 50.0, 5),
     ('Nain Ultime''Les meilleurs parmis les meilleurs des Rois mineurs', 'DESCRIPTION À RÉDIGER', 250, 100, 170.0, 150.0,5),
 
-    ('Mage Orc', 'Issue de l''union entre elfes et orc, il est puissant mais petit', 30, 15, 15.0, 50.0, 6),
-    ('Berserker Nerlk', 'Unité de combat Nerlk, très puissante mais coûteuse', 250, 120, 100.0, 150.0, 6),
+    ('Guerrier Nerlk', 'Issue de l''union entre elfes et orc, il est puissant mais petit', 30, 15, 15.0, 50.0, 6),
+    ('Berserker Nerlk', 'Unité de combat Nerlk, très puissante mais coûteuse', 250, 120, 100.0, 250.0, 6),
+
     ('Minotaure', 'Issue du Labyrinthe ', 20, 20, 30.0, 50.0, 7),
-    ('Dieu Primotaures', 'Dieu des Primotaures, très puissant', 350, 150, 200.0, 300.0, 7);
+    ('Dieu Primotaures', 'Dieu des Primotaures, très puissant', 360, 250, 300.0, 300.0, 7);

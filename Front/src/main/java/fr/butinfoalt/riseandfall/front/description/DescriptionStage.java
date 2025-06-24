@@ -77,10 +77,21 @@ public class DescriptionStage extends Stage {
 
         Text finTexte = new Text(
                 """
-                        • La partie se termine lorsqu’il ne reste plus qu’un nombre limité de civilisations en jeu (par exemple : 2 ou 3 joueurs survivants, selon le nombre initial).
-                        • L’objectif est donc de faire partie des derniers survivants en éliminant ou surpassant ses adversaires.
-                        • La stratégie de survie est aussi importante que l’agression ou la croissance.
+                        Opportunité de gagner la partie :
+                        • La partie se termine lorsqu’il ne reste plus qu’un joueur en vie 
+                        • Toutes les civilisations vivantes au bout de 50 tours sont déclarées gagnantes 
+                       
                         """);
+
+        Text CombatTitre = new Text("Combats et interactions entre joueurs\n");
+        CombatTitre.setStyle("-fx-font-weight: bold");
+        Text CombatTexte = new Text(
+                """
+                        • Les joueurs peuvent attaquer les unités et bâtiments des autres joueurs.
+                        • Les remparts sont toujours attaqués en premier, puis les unités puis vos bâtiments .Il ne faut donc pas négliger la défense de ses bâtiments.
+                        • Le tchat est disponible pour discuter avec les autres joueurs afin de négocier des alliances.
+                        
+                  """);
 
         Text raceTitre = new Text("Choix de la race\n");
         raceTitre.setStyle("-fx-font-weight: bold");
@@ -126,124 +137,295 @@ public class DescriptionStage extends Stage {
         ListesBatimentsEtUnites.setStyle("-fx-font-weight: bold");
         Text ListesBatimentsTexte = new Text(
                 """
-                        * Bâtiment  universel pour toutes les races :
-                
-                          - Carrière :
-                          Structure permettant d'extraire des ressources naturelles pour financer l'économie du royaume
-                          + Production d'or faible
-                          + Chaque joueur en possède 2 au début de la partie
-                          
-                        - Mine :
-                            Structure permettant d'extraire des ressources naturelles pour financer l'économie du royaume
-                            + Production d'or Forte
-                            + Chaque joueur en possède 0 au début de la partie
                         
-                        - Caserne :
-                            Structure permettant de former des emplacements supplémentaires pour les unités de combat
-                            + Production d'emplacement d'unités faible
-                            + Chaque joueur en possède 1 au début de la partie
-                       
-                        - Bibliothèque :
-                            Centre de savoir produisant de l'intelligence pour le développement des technologies
-                            + Production d'intelligence faible
-                            + Chaque joueur en possède 0 au début de la partie
-                       * Unités universelles pour toutes les Races :
-                        - Guerrier :
-                            Une unité de combat faible et polyvalente
-                            + Prix faible
-                            + Dégâts faibles
-                            + Vie faible
-                            
-                      ** Bâtiments et unités spécifiques à chaque Race **
-                        * Mort-Vivant :
-                            - Bâtiment : Cimetière
-                              Lieu sacré des morts où les Mort-Vivants peuvent lever de nouvelles troupes
-                              + Production d'unités moyenne
-                            - Bâtiment : Nécropole
-                              Ancienne ville de mage rempli de rituel sinistre
-                              + Production d'intelligence forte
-                              + Production d'intelligence moyenne
-                              + Production d'unité Forte
-                           
-                            - Unité : Zombie
-                              Une créature morte-vivante qui se déplace lentement, mais inflige des dégâts mortels
-                              + Prix Moyen
-                              + Dégâts puissants
-                              + Vie faible
-                            - Unité : Nécromancien
-                                Un mage mort-vivant capable de lever des morts-vivants
-                              + Prix extrêmement élevé
-                              + Dégâts extrêmement puissants
-                              + Vie moyenne
-                        
-                        * Humain :
-                            - Bâtiment : Église
-                              Édifice spirituel dédié aux Humains, offrant protection et recrutement d'unités pieuses
-                              + Production d'unité forte
-                            - Bâtiment : Château
-                            Résidence royale des Humains, servant de centre de commandement, lieu de commerce et offrant une grande protection
-                            Un lieu de savoir où les humains peuvent développer de nouvelles technologies
-                              + production d'or forte
-                              + production d'intelligence forte
-                            + production d'unité très faible
-                            
-                            - Unité : Ingénieur de combat
-                              Un combattant expert en ingénierie capable de construire et de réparer les infrastructures avec rapidité et efficacité
-                              + Prix moyen
-                              + Dégats puissants 
-                              + Vie moyen
-                            - Unité : Héros Légendaire
-                              L'un des humains les plus puissant du monde
-                              + Prix extrêmement élevé
-                              + Dégâts extrêmement puissants
-                              + Vie Elevée  
-                              
-                        * 0rc :
-                            - Bâtiment : Donjon
-                              Endroit qui respire la violence permettant de former des futur combattants
-                              + Production d''unité moyenne
-                            - Bâtiment : marché d'esclave
-                              Endroit où les orcs achètent et vendent des esclaves
-                              + Production d'or très forte
-                              + Production d'intelligence faible
-                            - Unité : Uruk Noir
-                              Créature imposante et très puissante mais débile
-                              + Prix elevé
-                              + Dégâts moyens
-                              + Vie élevée
-                            - Unité : Chef de guerre 0rc
-                              Un chef de guerre redoutable qui mène ses troupes à la victoire avec une force inégalée
-                              + Prix extrêmement élevé
-                              + Dégâts extrêmement puissants
-                              + Vie très élevée
-                        * Elfe :
-                            - Bâtiment : Arbre de vie
-                              Un arbre sacré qui produit de l'intelligence et des unités elfiques
-                              + Production d'intelligence moyenne
-                              + Production d'or très elevée
-                                + Production d'unité moyenne
-                            - Bâtiment : Tour de mage
-                                Une tour magique qui permet aux elfes de développer des sorts puissants
-                              + Production d'or ultra faible
-                              + Production d'intelligence faible
-                            + Production d'unité elevée
-                            - Unité : Mage Elfe
-                              Puissant mage
-                              + Prix tres élevé
-                              + Dégâts extrêmement puissants
-                              + Vie très faible
-                            - Unité : Archer Elfe
-                              Archer légendaire poossèdant la plus forte attaque à distance du monde
-                              + Prix extrêmement élevé
-                              + Dégâts ultra puissants
-                              + Vie moyenne
-                        
-                        
-                            
-                        
-                          
-                          
-                          
+                             ==========================
+                             Bâtiments universels
+                             ==========================
+                                                
+                            /**
+                             * Carrière :
+                             * - Structure permettant d'extraire des ressources naturelles.
+                             * - Production d'or : FAIBLE
+                             * - Chaque joueur en possède 2 au début de la partie.
+                             */
+                           \s
+                            /**
+                             * Mine :
+                             * - Extraction de ressources à plus grande échelle.
+                             * - Production d'or : FORTE
+                             * - Chaque joueur en possède 0 au début.
+                             */
+                           \s
+                            /**
+                             * Caserne :
+                             * - Permet de former plus d'unités de combat.
+                             * - Production d'emplacements d'unités : FAIBLE
+                             * - Chaque joueur en possède 1 au début.
+                             */
+                           \s
+                            /**
+                             * Bibliothèque :
+                             * - Centre de savoir pour le développement des technologies.
+                             * - Production d'intelligence : FAIBLE
+                             * - Chaque joueur en possède 0 au début.
+                             */
+                           \s
+                            /**
+                             * Rempart :
+                             * - Mur de protection contre les attaques ennemies.
+                             * - Production de défense
+                             * - Chaque joueur en possède 1 au début.
+                             */
+                                                
+                             ==========================
+                             Unité universelle
+                             ==========================
+                                                
+                            /**
+                             * Guerrier :
+                             * - Unité de base polyvalente.
+                             * - Prix : FAIBLE
+                             * - Dégâts : FAIBLES
+                             * - Vie : FAIBLE
+                             */
+                                                
+                             ==========================
+                             Race : Mort-Vivant
+                             ==========================
+                                                
+                            /**
+                             * Cimetière :
+                             * - Permet de lever de nouvelles troupes.
+                             * - Production d'unités : MOYENNE
+                             */
+                                                
+                            /**
+                             * Nécropole :
+                             * - Ancienne ville magique, haut lieu de rituels.
+                             * - Production d'intelligence : FORTE
+                             * - Production d'unités : FORTE
+                             */
+                                                
+                            /**
+                             * Zombie :
+                             * - Créature lente, mais dangereuse.
+                             * - Prix : MOYEN
+                             * - Dégâts : PUISSANTS
+                             * - Vie : FAIBLE
+                             */
+                                                
+                            /**
+                             * Nécromancien :
+                             * - Mage capable de lever les morts.
+                             * - Prix : EXTRÊMEMENT ÉLEVÉ
+                             * - Dégâts : EXTRÊMEMENT PUISSANTS
+                             * - Vie : MOYENNE
+                             */
+                                                
+                             ==========================
+                             Race : Humain
+                             ==========================
+                                                
+                            /**
+                             * Église :
+                             * - Lieu de foi et recrutement de troupes sacrées.
+                             * - Production d'unités : FORTE
+                             */
+                                                
+                            /**
+                             * Château :
+                             * - Centre de commandement, commerce et recherche.
+                             * - Production d'or : FORTE
+                             * - Production d'intelligence : FORTE
+                             * - Production d'unités : TRÈS FAIBLE
+                             */
+                                                
+                            /**
+                             * Ingénieur de combat :
+                             * - Expert en construction et réparation.
+                             * - Prix : MOYEN
+                             * - Dégâts : PUISSANTS
+                             * - Vie : MOYENNE
+                             */
+                                                
+                            /**
+                             * Héros Légendaire :
+                             * - Héros humain le plus puissant.
+                             * - Prix : EXTRÊMEMENT ÉLEVÉ
+                             * - Dégâts : EXTRÊMEMENT PUISSANTS
+                             * - Vie : ÉLEVÉE
+                             */
+                                                
+                             ==========================
+                             Race : Orc
+                             ==========================
+                                                
+                            /**
+                             * Donjon :
+                             * - Centre d'entraînement brutal.
+                             * - Production d'unités : MOYENNE
+                             */
+                                                
+                            /**
+                             * Marché d'esclaves :
+                             * - Commerce d'esclaves orc.
+                             * - Production d'or : TRÈS FORTE
+                             * - Production d'intelligence : FAIBLE
+                             */
+                                                
+                            /**
+                             * Uruk Noir :
+                             * - Créature puissante mais peu intelligente.
+                             * - Prix : ÉLEVÉ
+                             * - Dégâts : MOYENS
+                             * - Vie : ÉLEVÉE
+                             */
+                                                
+                            /**
+                             * Chef de guerre Orc :
+                             * - Meneur redoutable.
+                             * - Prix : EXTRÊMEMENT ÉLEVÉ
+                             * - Dégâts : EXTRÊMEMENT PUISSANTS
+                             * - Vie : TRÈS ÉLEVÉE
+                             */
+                                                
+                             ==========================
+                             Race : Elfe
+                             ==========================
+                                                
+                            /**
+                             * Arbre de Vie :
+                             * - Source de vie et de sagesse.
+                             * - Production d’intelligence : MOYENNE
+                             * - Production d’or : TRÈS ÉLEVÉE
+                             * - Production d’unités : MOYENNE
+                             */
+                                                
+                            /**
+                             * Tour de Mage :
+                             * - Développement de sorts puissants.
+                             * - Production d’or : ULTRA FAIBLE
+                             * - Production d’intelligence : FAIBLE
+                             * - Production d’unités : ÉLEVÉE
+                             */
+                                                
+                            /**
+                             * Mage Elfe :
+                             * - Lanceur de sorts surpuissants.
+                             * - Prix : TRÈS ÉLEVÉ
+                             * - Dégâts : EXTRÊMEMENT PUISSANTS
+                             * - Vie : TRÈS FAIBLE
+                             */
+                                                
+                            /**
+                             * Archer Elfe :
+                             * - Maître du tir à distance.
+                             * - Prix : EXTRÊMEMENT ÉLEVÉ
+                             * - Dégâts : ULTRA PUISSANTS
+                             * - Vie : MOYENNE
+                             */
+                                                
+                             ==========================
+                             Race : Nain
+                             ==========================
+                                                
+                            /**
+                             * Mine de Nain :
+                             * - Source massive d’or.
+                             * - Production d’or : TRÈS FORTE
+                             */
+                                                
+                            /**
+                             * Taverne de Nain :
+                             * - Recrutement de troupes.
+                             * - Production d’intelligence : FAIBLE
+                             * - Production d’unités : TRÈS ÉLEVÉE
+                             */
+                                                
+                            /**
+                             * Roi Mineur :
+                             * - Souverain nain.
+                             * - Prix : MOYEN
+                             * - Dégâts : PUISSANTS
+                             * - Vie : FAIBLE
+                             */
+                                                
+                            /**
+                             * Nain Ultime :
+                             * - Guerrier légendaire.
+                             * - Prix : TRÈS ÉLEVÉ
+                             * - Dégâts : TRÈS ÉLEVÉS
+                             * - Vie : ÉLEVÉE
+                             */
+                                                
+                             ==========================
+                             Race : Nerlk
+                             ==========================
+                                                
+                            /**
+                             * Tente :
+                             * - Formation des troupes.
+                             * - Production d’unités : MOYENNE
+                             */
+                                                
+                            /**
+                             * Forge de Nerlk :
+                             * - Création d’armes enchantées.
+                             * - Production d’or : TRÈS ÉLEVÉE
+                             * - Production d’intelligence : MOYENNE
+                             */
+                                                
+                            /**
+                             * Guerrier Nerlk :
+                             * - Croisement Elfe-Orc, petit mais puissant.
+                             * - Prix : MOYEN
+                             * - Dégâts : PUISSANTS
+                             * - Vie : FAIBLE
+                             */
+                                                
+                            /**
+                             * Berserker Nerlk :
+                             * - Guerrier enragé.
+                             * - Prix : TRÈS ÉLEVÉ
+                             * - Dégâts : ULTRA PUISSANTS
+                             * - Vie : MOYENNE
+                             */
+                                                
+                             ==========================
+                             Race : Primotaure
+                             ==========================
+                                                
+                            /**
+                             * Labyrinthe :
+                             * - Bâtiment très résistant qui protège le royaume.
+                             * - Production d’or : MOYENNE
+                             * - Production d’intelligence : FAIBLE
+                             * - Production d’unités : TRÈS FAIBLE
+                             */
+                                                
+                            /**
+                             * Temple :
+                             * - Lieu de formation et de savoir.
+                             * - Production d’or : ÉLEVÉE
+                             * - Production d’intelligence : TRÈS FORTE
+                             * - Production d’unités : TRÈS ÉLEVÉE
+                             */
+                                                
+                            /**
+                             * Minotaure :
+                             * - Guerrier robuste et puissant.
+                             * - Prix : MOYEN
+                             * - Dégâts : PUISSANTS
+                             * - Vie : MOYENNE
+                             */
+                                                
+                            /**
+                             * Dieu des Primotaures :
+                             * - Être mythique, puissance divine.
+                             * - Prix : ULTRA ÉLEVÉ
+                             * - Dégâts : ULTRA PUISSANTS
+                             * - Vie : ULTRA ÉLEVÉE
+                             */
                         """
         );
 
