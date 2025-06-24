@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import fr.butinfoalt.riseandfall.front.game.SimpleTable?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
@@ -15,29 +16,23 @@
                 <HBox alignment="TOP_CENTER" spacing="30">
                     <VBox alignment="TOP_CENTER" spacing="10">
                         <TitleLabel>Information de la partie</TitleLabel>
-                        <Label fx:id="turnNumberField"/>
-                        <Label fx:id="nextTurnInField" prefWidth="300"/>
+                        <SimpleTable fx:id="gameInfoTable" prefWidth="300"/>
                     </VBox>
 
                     <VBox alignment="TOP_CENTER" spacing="10">
                         <TitleLabel>Votre royaume</TitleLabel>
-
-                        <Label fx:id="goldField"/>
-                        <Label fx:id="intelligenceField"/>
-                        <Label fx:id="raceField"/>
+                        <SimpleTable fx:id="playerInfoTable" prefWidth="300"/>
                     </VBox>
                 </HBox>
 
                 <VBox alignment="CENTER" spacing="10">
                     <TitleLabel>Vos unités</TitleLabel>
-                    <!--Ce composant est rempli dynamiquement avec les types d'unités-->
-                    <VBox fx:id="unitVBox" alignment="CENTER" spacing="10"/>
+                    <SimpleTable fx:id="unitsTable" prefWidth="630"/>
                 </VBox>
 
                 <VBox alignment="CENTER" spacing="10">
                     <TitleLabel>Vos bâtiments</TitleLabel>
-                    <!--Ce composant est rempli dynamiquement avec les types de bâtiments-->
-                    <VBox fx:id="buildingsVBox" alignment="CENTER" spacing="10"/>
+                    <SimpleTable fx:id="buildingsTable" prefWidth="630"/>
                 </VBox>
             </VBox>
             <HBox fx:id="buttonsContainer" alignment="CENTER" spacing="10">

@@ -1,7 +1,10 @@
 package fr.butinfoalt.riseandfall.front.components;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 /**
@@ -26,9 +29,27 @@ public class HeightAdaptedTableView<S> extends TableView<S> {
      * On considère qu'une ligne fait 40 pixels de haut.
      */
     private void init() {
+        this.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        this.setEditable(false);
+        // On empêche la sélection d'une ligne en forçant la sélection à null
+        this.selectionModelProperty().bind(new ReadOnlyObjectWrapper<>(null));
+
+        this.getStyleClass().add("table");
+        this.getColumns().addListener((ListChangeListener<TableColumn<?, ?>>) change -> {
+            while (change.next()) {
+                for (TableColumn<?, ?> column : change.getAddedSubList()) {
+                    column.getStyleClass().add("table-column");
+                }
+            }
+        });
+
         this.setFixedCellSize(40);
-        InvalidationListener listener = (observable) -> this.setMaxHeight((this.getItems().size() + 1) * this.getFixedCellSize());
+        InvalidationListener listener = (observable) -> this.updateHeight();
         this.getItems().addListener(listener);
         listener.invalidated(this.itemsProperty());
+    }
+
+    public void updateHeight() {
+        this.setMaxHeight((this.getItems().size() + 1) * this.getFixedCellSize());
     }
 }
