@@ -53,6 +53,7 @@
                 <Button text="Description" onAction="#switchToDescriptionPage"/>
                 <Button text="Modifier les ordres" onAction="#switchToOrders"/>
                 <Button text="Modifier les attaques" onAction="#manageAttacks"/>
+                <Button text="Journal des attaques" onAction="#showAttacksLogs"/>
 
                 <!-- Bouton pour passer au tour suivant -->
                 <Button fx:id="nextTurnButton" text="Tour suivant" onAction="#handleEndTurn"/>

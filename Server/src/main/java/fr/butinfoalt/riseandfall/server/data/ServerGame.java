@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.server.data;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.server.Environment;
 import fr.butinfoalt.riseandfall.server.GameManager;
 import fr.butinfoalt.riseandfall.server.RiseAndFallServer;
@@ -200,23 +201,33 @@ public class ServerGame extends Game {
         }
         AttacksExecutionContext context = new AttacksExecutionContext(this);
         List<ServerPlayer> remainingPlayers = this.players.values().stream().filter(player -> !player.isEliminated()).toList();
+        List<Player> eliminatedPlayers = new ArrayList<>();
+
         for (ServerPlayer player : remainingPlayers) {
-            player.prepareAttack(context);
+            player.prepareAttacks(context);
         }
         context.executeAttacks();
+
         for (ServerPlayer player : remainingPlayers) {
             if (player.isEliminated()) {
+                eliminatedPlayers.add(player);
+                player.setEliminationTurn(this.currentTurn);
                 LogManager.logMessage("Le joueur %s a été éliminé de la partie %s.".formatted(player.getUser().getUsername(), this.name));
                 continue; // Ne pas exécuter les ordres d'un joueur éliminé
             }
             player.executeOrders();
         }
         // TODO : Condition de Victoire pour arrêter la partie si nécessaire, pour le moment la partie ne s'arrête jamais.
+
+        GameManager gameManager = this.server.getGameManager();
+        gameManager.handleTurnExecuted(this, context, eliminatedPlayers);
+
         this.currentTurn++;
         LogManager.logMessage("Passage au tour %d de la partie %s.".formatted(this.currentTurn, this.name));
         this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
         this.scheduleNextTurn();
-        this.server.getGameManager().handleGameUpdate(this);
+
+        gameManager.handleGameUpdate(this);
     }
 
     /**

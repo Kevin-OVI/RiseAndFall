@@ -68,6 +68,12 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
     private final Race accessibleByRace;
 
     /**
+     * Indique si le bâtiment est défensif ou non.
+     * Un bâtiment défensif sera attaqué en priorité avant les unités.
+     */
+    private final boolean defensive;
+
+    /**
      * Constructeur de la classe BuildingType à partir des valeurs de chaque champ.
      * Il est utilisé sur le serveur au moment de charger les données depuis la base de données.
      *
@@ -82,8 +88,9 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
      * @param maxUnits               Le nombre maximum d'unités pouvant être construites par ce type de bâtiment par tour.
      * @param initialAmount          Le nombre initial de bâtiments de ce type.
      * @param accessibleByRace       La race qui peut construire ce bâtiment.
+     * @param defensive              Indique si le bâtiment est défensif ou non. Un bâtiment défensif sera attaqué en priorité avant les unités.
      */
-    public BuildingType(int id, String name, String description, float price, float requiredIntelligence, float goldProduction, float intelligenceProduction, float resistance, int maxUnits, int initialAmount, Race accessibleByRace) {
+    public BuildingType(int id, String name, String description, float price, float requiredIntelligence, float goldProduction, float intelligenceProduction, float resistance, int maxUnits, int initialAmount, Race accessibleByRace, boolean defensive) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -95,6 +102,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         this.maxUnits = maxUnits;
         this.initialAmount = initialAmount;
         this.accessibleByRace = accessibleByRace;
+        this.defensive = defensive;
     }
 
     /**
@@ -118,6 +126,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         this.initialAmount = readHelper.readInt();
         int unitAccessibleRaceId = readHelper.readInt();
         this.accessibleByRace = Identifiable.getByIdOrNull(races, unitAccessibleRaceId);
+        this.defensive = readHelper.readBoolean();
     }
 
     /**
@@ -223,6 +232,16 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         return this.accessibleByRace;
     }
 
+    /**
+     * Méthode pour savoir si le bâtiment est défensif ou non.
+     * Un bâtiment défensif sera attaqué en priorité avant les unités.
+     *
+     * @return true si le bâtiment est défensif, false sinon.
+     */
+    public boolean isDefensive() {
+        return defensive;
+    }
+
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
         writeHelper.writeInt(this.id);
@@ -236,6 +255,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
         writeHelper.writeInt(this.maxUnits);
         writeHelper.writeInt(this.initialAmount);
         writeHelper.writeInt(this.accessibleByRace == null ? -1 : this.accessibleByRace.getId());
+        writeHelper.writeBoolean(this.defensive);
     }
 
     @Override
@@ -252,6 +272,7 @@ public class BuildingType implements Identifiable, PurchasableItem, ISerializabl
                 .add("maxUnits", this.maxUnits)
                 .add("initialAmount", this.initialAmount)
                 .add("accessibleByRace", this.accessibleByRace)
+                .add("defensive", this.defensive)
                 .build();
     }
 }

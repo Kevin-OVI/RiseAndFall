@@ -38,6 +38,13 @@ public class ServerPlayer extends Player {
         this.game = game;
     }
 
+    public ServerPlayer(int id, User user, ServerGame game, Race race, float gold, float intelligence, int eliminationTurn) {
+        this(id, user, game, race);
+        this.setGoldAmount(gold);
+        this.setIntelligence(intelligence);
+        this.setEliminationTurn(eliminationTurn);
+    }
+
     /**
      * Prépare les attaques en attente pour le joueur.
      * Cette méthode est appelée avant l'exécution des attaques pour les ajouter au contexte d'exécution.
@@ -45,7 +52,7 @@ public class ServerPlayer extends Player {
      *
      * @param context Le contexte d'exécution des attaques.
      */
-    public void prepareAttack(AttacksExecutionContext context) {
+    public void prepareAttacks(AttacksExecutionContext context) {
         for (AttackPlayerOrderData attack : this.getPendingAttacks()) {
             context.addAttack(this, attack.getTargetPlayer(), attack.getUsingUnits());
         }
@@ -54,9 +61,18 @@ public class ServerPlayer extends Player {
 
     /**
      * Exécute les ordres en attente pour le joueur, sauf les attaques qui sont exécutées
-     * dans {@link #prepareAttack(AttacksExecutionContext)}.
+     * dans {@link #prepareAttacks(AttacksExecutionContext)}.
      */
     public void executeOrders() {
+        float addGold = 0, addIntelligence = 0;
+        for (ObjectIntMap.Entry<BuildingType> entry : this.getBuildingMap()) {
+            addGold += entry.getValue() * entry.getKey().getGoldProduction();
+            addIntelligence += entry.getValue() * entry.getKey().getIntelligenceProduction();
+        }
+
+        this.addGoldAmount(addGold * this.getRace().getGoldMultiplier());
+        this.addIntelligence(addIntelligence * this.getRace().getIntelligenceMultiplier());
+
         for (ObjectIntMap.Entry<BuildingType> entry : this.getPendingBuildingsCreation()) {
             this.getBuildingMap().increment(entry.getKey(), entry.getValue());
             this.removeGoldAmount(entry.getKey().getPrice() * entry.getValue());
@@ -68,15 +84,6 @@ public class ServerPlayer extends Player {
             this.removeGoldAmount(entry.getKey().getPrice() * entry.getValue());
         }
         this.getPendingUnitsCreation().reset();
-
-        float addGold = 0, addIntelligence = 0;
-        for (ObjectIntMap.Entry<BuildingType> entry : this.getBuildingMap()) {
-            addGold += entry.getValue() * entry.getKey().getGoldProduction();
-            addIntelligence += entry.getValue() * entry.getKey().getIntelligenceProduction();
-        }
-
-        this.addGoldAmount(addGold * this.getRace().getGoldMultiplier());
-        this.addIntelligence(addIntelligence * this.getRace().getIntelligenceMultiplier());
     }
 
     /**

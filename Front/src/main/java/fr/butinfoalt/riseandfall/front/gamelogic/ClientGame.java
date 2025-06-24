@@ -1,15 +1,14 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.gamelogic.Game;
+import fr.butinfoalt.riseandfall.gamelogic.data.AttackResult;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Classe représentant une partie côté client.
@@ -17,6 +16,7 @@ import java.util.HashMap;
  */
 public class ClientGame extends Game {
     private final HashMap<Integer, OtherClientPlayer> otherPlayers = new HashMap<>();
+    private final HashMap<Integer, List<AttackResult>> attackResults = new HashMap<>();
 
     private final HashMap<Integer, Chat> chats = new HashMap<>();
 
@@ -34,7 +34,9 @@ public class ClientGame extends Game {
     /**
      * Ajoute un joueur à la liste des joueurs découverts par le client.
      *
-     * @param player Le joueur à ajouter.
+     * @param playerId L'identifiant du joueur à ajouter.
+     * @param name     Le nom du joueur
+     * @param race     La race du joueur
      */
     public void addOtherPlayer(int playerId, Race race, String name) {
         OtherClientPlayer otherPlayer = otherPlayers.get(playerId);
@@ -73,6 +75,20 @@ public class ClientGame extends Game {
      */
     public int getOtherPlayersCount() {
         return this.otherPlayers.size();
+    }
+
+    public void setAttackResults(int turn, List<AttackResult> attackResults) {
+        this.attackResults.put(turn, attackResults);
+    }
+
+    public List<AttackResult> getAttackResults(int turn) {
+        return this.attackResults.getOrDefault(turn, Collections.emptyList());
+    }
+
+    public List<ClientPlayer> getAllPlayers() {
+        ArrayList<ClientPlayer> allPlayers = new ArrayList<>(this.otherPlayers.values());
+        allPlayers.add(RiseAndFall.getPlayer());
+        return Collections.unmodifiableList(allPlayers);
     }
 
     public void addChat(Chat chat) {
