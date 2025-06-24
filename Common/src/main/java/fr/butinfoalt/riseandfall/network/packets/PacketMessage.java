@@ -1,5 +1,7 @@
 package fr.butinfoalt.riseandfall.network.packets;
 
+import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
+import fr.butinfoalt.riseandfall.gamelogic.data.ChatMessage;
 import fr.butinfoalt.riseandfall.network.common.IPacket;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
@@ -10,19 +12,23 @@ import java.io.IOException;
  * Représente un paquet de chat contenant un message.
  * Ce paquet pourra être utilisé pour envoyer des messages depuis le joueur
  */
-public class PacketChat implements IPacket {
-    /**
-     * Le message du paquet
-     */
-    private final String message;
+public class PacketMessage implements IPacket {
+    private int senderId;
+    private int receiverId;
+    private String message;
+    private long timestamp;
+
 
     /**
      * Constructeur du paquet de chat
      *
      * @param message Le message à envoyer
      */
-    public PacketChat(String message) {
+    public PacketMessage(int senderId, int receiverId, String message, long timestamp) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
         this.message = message;
+        this.timestamp = timestamp;
     }
 
     /**
@@ -31,8 +37,11 @@ public class PacketChat implements IPacket {
      * @param readHelper Le helper de lecture pour lire les données du paquet
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation
      */
-    public PacketChat(ReadHelper readHelper) throws IOException {
+    public PacketMessage(ReadHelper readHelper) throws IOException {
+        this.senderId = readHelper.readInt();
+        this.receiverId = readHelper.readInt();
         this.message = readHelper.readString();
+        this.timestamp = readHelper.readLong();
     }
 
     /**
@@ -43,7 +52,10 @@ public class PacketChat implements IPacket {
      */
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
+        writeHelper.writeInt(this.senderId);
+        writeHelper.writeInt(this.receiverId);
         writeHelper.writeString(this.message);
+        writeHelper.writeLong(this.timestamp);
     }
 
     /**
@@ -53,5 +65,17 @@ public class PacketChat implements IPacket {
      */
     public String getMessage() {
         return this.message;
+    }
+
+    public int getSenderId() {
+        return senderId;
+    }
+
+    public int getReceiverId() {
+        return receiverId;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 }

@@ -68,6 +68,12 @@ public enum View {
      * Vue de la description et des règles du jeu.
      */
     DESCRIPTION("description-view.fxml", "Rise & Fall - Description et règles du jeu"),
+
+    /**
+     * Vue du chat.
+     */
+    CHAT("chat-view.fxml", "Rise & Fall - Chat")
+
     ;
 
     private static final String GENERAL_STYLESHEET = Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/style.css")).toExternalForm();

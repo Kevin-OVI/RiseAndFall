@@ -1,6 +1,7 @@
 package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
+import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
@@ -17,6 +18,8 @@ import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.*;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
@@ -278,6 +281,189 @@ public class GameManager {
                 }
             }
         }
+        sendChat(connection, player, game);
+    }
+
+    private Chat[] getChatForPlayer(ServerPlayer player, ServerGame game) {
+        int size = game.getPlayers().size() - 1;
+        Chat[] chats = new Chat[size];
+        int[] playerIds = new int[size];
+        int index = 0;
+
+        for (ServerPlayer otherPlayer : game.getPlayers()) {
+            if (otherPlayer != player) {
+                chats[index] = new Chat(otherPlayer.getId(), otherPlayer);
+                playerIds[index] = otherPlayer.getId();
+                index++;
+            }
+        }
+
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT sender_player_id, receiver_player_id, message, sent_at ");
+        sqlBuilder.append("FROM chat_message ");
+        sqlBuilder.append("WHERE (sender_player_id = ? OR receiver_player_id = ?) ");
+        sqlBuilder.append("AND (");
+
+        for (int i = 0; i < playerIds.length; i++) {
+            if (i > 0) {
+                sqlBuilder.append(" OR ");
+            }
+            sqlBuilder.append("sender_player_id = ? OR receiver_player_id = ?");
+        }
+        sqlBuilder.append(") ORDER BY sent_at ASC");
+
+        try (PreparedStatement preparedStatement = this.server.getDb().prepareStatement(sqlBuilder.toString())) {
+            int paramIndex = 1;
+            preparedStatement.setInt(paramIndex++, player.getId());
+            preparedStatement.setInt(paramIndex++, player.getId());
+
+            for (int playerId : playerIds) {
+                preparedStatement.setInt(paramIndex++, playerId);
+                preparedStatement.setInt(paramIndex++, playerId);
+            }
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                int senderId = resultSet.getInt("sender_player_id");
+                int receiverId = resultSet.getInt("receiver_player_id");
+                String message = resultSet.getString("message");
+                long timestamp = resultSet.getTimestamp("sent_at").getTime();
+
+                int otherPlayerId = (senderId == player.getId()) ? receiverId : senderId;
+
+                Chat targetChat = null;
+                ServerPlayer sender = null;
+                ServerPlayer receiver = null;
+
+                for (int i = 0; i < chats.length; i++) {
+                    if (chats[i].getReceiver().getId() == otherPlayerId) {
+                        targetChat = chats[i];
+                        break;
+                    }
+                }
+
+                for (ServerPlayer serverPlayer : game.getPlayers()) {
+                    if (serverPlayer.getId() == senderId) {
+                        sender = serverPlayer;
+                        break;
+                    }
+                }
+
+                for (ServerPlayer serverPlayer : game.getPlayers()) {
+                    if (serverPlayer.getId() == receiverId) {
+                        receiver = serverPlayer;
+                        break;
+                    }
+                }
+
+                if (targetChat != null && sender != null && receiver != null) {
+                    ChatMessage chatMessage = new ChatMessage(targetChat, sender, receiver, message, timestamp);
+                    targetChat.addMessage(chatMessage);
+                }
+            }
+
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de la récupération des messages de chat du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
+        }
+
+        java.util.Arrays.sort(chats, (chat1, chat2) -> {
+            long lastMessageTime1 = getLastMessageTime(chat1);
+            long lastMessageTime2 = getLastMessageTime(chat2);
+
+            if (lastMessageTime1 != 0 && lastMessageTime2 != 0) {
+                return Long.compare(lastMessageTime2, lastMessageTime1);
+            }
+
+            if (lastMessageTime1 != 0) return -1;
+            if (lastMessageTime2 != 0) return 1;
+
+            return Integer.compare(chat1.getId(), chat2.getId());
+        });
+
+        return chats;
+    }
+
+    /**
+     * Récupère le timestamp du dernier message dans un chat
+     * @param chat Le chat à examiner
+     * @return Le timestamp du dernier message, ou 0 si aucun message
+     */
+    private long getLastMessageTime(Chat chat) {
+        ChatMessage[] messages = chat.getMessages();
+        if (messages.length == 0) {
+            return 0;
+        }
+
+        long lastTime = 0;
+        for (ChatMessage message : messages) {
+            if (message.getTimestamp() > lastTime) {
+                lastTime = message.getTimestamp();
+            }
+        }
+        return lastTime;
+    }
+
+    private void sendChat(SocketWrapper connection, ServerPlayer player, ServerGame game) {
+        Chat[] chats = getChatForPlayer(player, game);
+
+        for (Chat chat : chats) {
+                try {
+                    connection.sendPacket(new PacketChats(chat.getId(), chat.getReceiver().getId()));
+                    System.out.println("Envoi du paquet de chat " + chat.getId() + " au joueur " + player.getUser().getUsername() + " à la connexion " + connection.getName());
+
+                    for (ChatMessage message : chat.getMessages()) {
+                        PacketMessage packetMessage = new PacketMessage(
+                                message.getSender().getId(),
+                                message.getReceiver().getId(),
+                                message.getMessage(),
+                                message.getTimestamp()
+                        );
+                        System.out.println("Envoie du message à : " + this.server.getAuthManager().getUser(connection).getUsername());
+                        connection.sendPacket(packetMessage);
+                    }
+                } catch (IOException e) {
+                    LogManager.logError("Erreur lors de l'envoi du paquet de chat au joueur " + player.getUser().getUsername() + " à la connexion " + connection.getName(), e);
+                }
+        }
+    }
+
+    public void onChatMessage(SocketWrapper socketWrapper, PacketMessage packetMessage) {
+        System.out.println("Message de " + this.server.getAuthManager().getUser(socketWrapper) + " : " + packetMessage.getMessage());
+        ServerPlayer sender = this.server.getUserManager().getPlayer(packetMessage.getSenderId());
+        if (sender == null) {
+            LogManager.logError("Le joueur avec l'ID " + packetMessage.getSenderId() + " n'existe pas.");
+            return;
+        }
+        int otherPlayerId = packetMessage.getReceiverId();
+
+        ServerPlayer receiver = sender.getGame().getPlayers().stream()
+                .filter(player -> player.getId() == otherPlayerId)
+                .findFirst()
+                .orElse(null);
+        if (receiver == null) {
+            LogManager.logError("Le joueur destinataire avec l'ID " + otherPlayerId + " n'existe pas.");
+            return;
+        }
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO chat_message (sender_player_id, receiver_player_id, message) VALUES (?, ?, ?)")) {
+            statement.setInt(1, sender.getId());
+            statement.setInt(2, receiver.getId());
+            statement.setString(3, packetMessage.getMessage());
+            statement.executeUpdate();
+        } catch (Exception e) {
+            LogManager.logError("Erreur lors de l'enregistrement du message en base de données", e);
+        }
+
+        getConnectionsFor(receiver).forEach(connection -> {
+            try {
+                java.util.Date currentDate = new Date();
+                long timestamp = currentDate.getTime();
+                connection.sendPacket(new PacketMessage(sender.getId(), receiver.getId(), packetMessage.getMessage(), timestamp));
+                System.out.println("Envoie du message à : " + this.server.getAuthManager().getUser(connection).getUsername());
+            } catch (IOException e) {
+                LogManager.logError("Erreur lors de l'envoi du message au destinataire", e);
+            }
+        });
     }
 
     /**

@@ -1,5 +1,23 @@
 -- Détruire les tables existantes
-DROP TABLE IF EXISTS attacks_lost_units, attacks_destroyed_units, attacks_destroyed_buildings, attacks_logs, attack_player_order_unit, attack_player_order, unit_creation_order, building_creation_order, player_unit, player_building, unit_type, building_type, player, game, user_token, user, race;
+DROP TABLE IF EXISTS
+    chat_message,
+    attacks_lost_units,
+    attacks_destroyed_units,
+    attacks_destroyed_buildings,
+    attacks_logs,
+    attack_player_order_unit,
+    attack_player_order,
+    unit_creation_order,
+    building_creation_order,
+    player_unit,
+    player_building,
+    unit_type,
+    building_type,
+    player,
+    game,
+    user_token,
+    user,
+    race;
 
 -- Créer les tables nécessaires
 CREATE TABLE race (
@@ -165,6 +183,19 @@ CREATE TABLE attacks_lost_units (
     PRIMARY KEY (attack_log_id, unit_type_id),
     FOREIGN KEY (attack_log_id) REFERENCES attacks_logs (id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (unit_type_id) REFERENCES unit_type (id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE chat_message (
+    id SERIAL PRIMARY KEY,
+    sender_player_id BIGINT UNSIGNED NOT NULL,
+    receiver_player_id BIGINT UNSIGNED NOT NULL,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (sender_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (receiver_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    INDEX idx_receiver_sent_at (receiver_player_id, sent_at),
+    INDEX idx_sender_sent_at (sender_player_id, sent_at)
 );
 
 

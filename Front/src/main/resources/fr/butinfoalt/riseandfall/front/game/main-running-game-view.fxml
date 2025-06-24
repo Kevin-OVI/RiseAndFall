@@ -7,11 +7,20 @@
 <?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
       fx:controller="fr.butinfoalt.riseandfall.front.game.MainRunningGameController">
+
     <ImageView fx:id="backgroundImageView" managed="false"/>
 
     <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="root">
         <VBox alignment="CENTER" spacing="20.0">
-
+            <HBox alignment="TOP_RIGHT">
+                <Button fx:id="chatButton" onAction="#switchToChat"
+                        style="-fx-background-color: #007bff; -fx-background-radius: 20; -fx-border-radius: 20; -fx-border-width: 0; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 8 12 8 12;">
+                    <graphic>
+                        <!-- Icône de bulle de chat -->
+                        <Label text="💬" style="-fx-text-fill: white; -fx-font-size: 16px;"/>
+                    </graphic>
+                </Button>
+            </HBox>
             <VBox alignment="CENTER" spacing="20">
                 <HBox alignment="TOP_CENTER" spacing="30">
                     <VBox alignment="TOP_CENTER" spacing="10">
