@@ -72,12 +72,8 @@ public class GameManager {
      */
     public ServerPlayer getPlayerInRunningGame(User user) {
         for (ServerGame game : this.games) {
-            // On ignore les parties qui sont terminées
-            if (game.getState() == GameState.ENDED) {
-                continue;
-            }
             ServerPlayer player = game.getPlayerFor(user);
-            if (player != null) {
+            if (player != null && !player.hasExitedGame()) {
                 return player;
             }
         }
@@ -743,6 +739,23 @@ public class GameManager {
         }
     }
 
+    private void savePlayer(ServerPlayer player) {
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("UPDATE player SET gold = ?, intelligence = ?, elimination_turn = ?, exited_game = ? WHERE id = ?")) {
+            statement.setFloat(1, player.getGoldAmount());
+            statement.setFloat(2, player.getIntelligence());
+            if (player.getEliminationTurn() == -1) {
+                statement.setNull(3, Types.INTEGER); // Si le joueur n'est pas éliminé, on met la colonne à NULL
+            } else {
+                statement.setInt(3, player.getEliminationTurn());
+            }
+            statement.setBoolean(4, player.hasExitedGame());
+            statement.setInt(5, player.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            LogManager.logError("Erreur lors de la mise à jour des données du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
+        }
+    }
+
     /**
      * Appelée lorsqu'une partie est mise à jour.
      * Elle met à jour l'état de la partie dans la base de données et envoie les mises à jour de données aux joueurs de la partie.
@@ -764,19 +777,7 @@ public class GameManager {
         }
 
         for (ServerPlayer player : game.getPlayers()) {
-            try (PreparedStatement statement = this.server.getDb().prepareStatement("UPDATE player SET gold = ?, intelligence = ?, elimination_turn = ? WHERE id = ?")) {
-                statement.setFloat(1, player.getGoldAmount());
-                statement.setFloat(2, player.getIntelligence());
-                if (player.getEliminationTurn() == -1) {
-                    statement.setNull(3, Types.INTEGER); // Si le joueur n'est pas éliminé, on met la colonne à NULL
-                } else {
-                    statement.setInt(3, player.getEliminationTurn());
-                }
-                statement.setInt(4, player.getId());
-                statement.executeUpdate();
-            } catch (SQLException e) {
-                LogManager.logError("Erreur lors de la mise à jour des données du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
-            }
+            this.savePlayer(player);
             this.clearPendingOrders(player);
 
             this.clearBuildingsAndUnits(player);
@@ -1127,5 +1128,25 @@ public class GameManager {
             }
             this.sendWaitingGames(connection);
         }
+    }
+
+    /**
+     * Méthode appelée lorsqu'un joueur quitte une partie.
+     * Elle marque le joueur comme ayant quitté la partie et envoie les mises à jour de la liste des parties en attente.
+     *
+     * @param sender Le socket du client qui a envoyé la demande de quitter la partie.
+     */
+    public synchronized void onExitGame(SocketWrapper sender) {
+        ServerPlayer player = this.getPlayerInRunningGame(sender);
+        if (player != null) {
+            ServerGame game = player.getGame();
+            if (game.getState() != GameState.ENDED && !player.isEliminated()) {
+                this.sendJoinGamePacket(new PacketJoinedGame<>(game, player), sender);
+                return;
+            }
+            player.setExitedGame(true);
+            this.savePlayer(player);
+        }
+        this.sendWaitingGames(sender);
     }
 }

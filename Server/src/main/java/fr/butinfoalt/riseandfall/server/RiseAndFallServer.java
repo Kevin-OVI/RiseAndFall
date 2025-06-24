@@ -193,7 +193,8 @@ public class RiseAndFallServer extends BaseSocketServer {
                     if (set.wasNull()) {
                         eliminationTurn = -1; // -1 signifie que le joueur n'est pas éliminé
                     }
-                    ServerPlayer player = new ServerPlayer(id, user, game, race, gold, intelligence, eliminationTurn);
+                    boolean exitedGame = set.getBoolean("exited_game");
+                    ServerPlayer player = new ServerPlayer(id, user, game, race, gold, intelligence, eliminationTurn, exitedGame);
                     players.add(player);
                     // Ajout forcé car la partie peut avoir déjà démarré, mais on est dans un cas particulier car les données ne sont pas encore chargées
                     game.forceAddPlayer(player);
@@ -329,6 +330,7 @@ public class RiseAndFallServer extends BaseSocketServer {
             case QUIT_GAME -> this.gameManager.onClientQuitGame(sender);
             case LOG_OUT -> this.authManager.onClientDisconnected(sender);
             case NEXT_TURN -> this.gameManager.onNextTurn(sender);
+            case EXIT_GAME -> this.gameManager.onExitGame(sender);
         }
     }
 

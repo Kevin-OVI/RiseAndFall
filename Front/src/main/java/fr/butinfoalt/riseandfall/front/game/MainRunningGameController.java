@@ -134,6 +134,10 @@ public class MainRunningGameController implements ViewController {
      */
     private void updateNextTurnIn() {
         Timestamp timestamp = RiseAndFall.getGame().getNextActionAt();
+        if (timestamp == null) {
+            this.updateTimer.stop();
+            return;
+        }
         long timeRemaining = timestamp.getTime() - System.currentTimeMillis();
         if (timeRemaining < 0) { // En cas d'une latence entre le serveur et le client
             timeRemaining = 0;

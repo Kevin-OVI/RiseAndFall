@@ -1,0 +1,22 @@
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
+      fx:controller="fr.butinfoalt.riseandfall.front.game.VictoryScreenController">
+    <ImageView fx:id="backgroundImageView" managed="false"/>
+    <VBox alignment="CENTER" spacing="20.0">
+
+        <Label text="Félicitations !"
+               style="-fx-font-size: 30; -fx-text-fill: green; -fx-padding: 20;"/>
+        <Label text="Vous avez remporté la partie !"
+               style="-fx-font-size: 20; -fx-padding: 10;"/>
+        <Label text="Que vous ayez réduit vos rivaux en cendres ou surpassé tous les défis du temps, votre civilisation se dresse désormais au sommet du monde.."
+               style="-fx-font-size: 16; -fx-padding: 10;"/>
+        <Button text="Relever un nouveau défi"
+                onAction="#onReturnToGameList"
+                style="-fx-font-size: 16; -fx-padding: 10;"/>
+
+    </VBox>
+
+</VBox>

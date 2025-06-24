@@ -217,15 +217,18 @@ public class ServerGame extends Game {
             }
             player.executeOrders();
         }
-        // TODO : Condition de Victoire pour arrêter la partie si nécessaire, pour le moment la partie ne s'arrête jamais.
-
         GameManager gameManager = this.server.getGameManager();
         gameManager.handleTurnExecuted(this, context, eliminatedPlayers);
 
-        this.currentTurn++;
-        LogManager.logMessage("Passage au tour %d de la partie %s.".formatted(this.currentTurn, this.name));
-        this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
-        this.scheduleNextTurn();
+        if (this.canGameEnd()) {
+            this.end();
+        } else {
+            this.currentTurn++;
+            LogManager.logMessage("Passage au tour %d de la partie %s.".formatted(this.currentTurn, this.name));
+
+            this.nextActionAt = new Timestamp(System.currentTimeMillis() + this.turnInterval * 60_000L);
+            this.scheduleNextTurn();
+        }
 
         gameManager.handleGameUpdate(this);
     }
@@ -317,6 +320,17 @@ public class ServerGame extends Game {
      */
     public synchronized boolean hasSufficientPlayers() {
         return this.players.size() >= this.minPlayers;
+    }
+
+    public synchronized boolean canGameEnd() {
+        int alivePlayers = 0;
+        for (ServerPlayer player : this.players.values()) {
+            if (!player.isEliminated()) {
+                alivePlayers++;
+            }
+        }
+        // La partie peut se terminer si un seul joueur est en vie ou si le tour 50 est atteint avec 3 joueurs ou moins
+        return alivePlayers <= 1 || (this.currentTurn >= 50 && alivePlayers <= 3);
     }
 
     @Override

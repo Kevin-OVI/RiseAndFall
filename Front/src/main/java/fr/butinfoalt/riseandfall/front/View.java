@@ -72,8 +72,12 @@ public enum View {
     /**
      * Vue du chat.
      */
-    CHAT("chat-view.fxml", "Rise & Fall - Chat")
+    CHAT("chat-view.fxml", "Rise & Fall - Chat"),
 
+    /**
+     * Vue de l'écran de victoire.
+     */
+    VICTORY_SCREEN("game/victory-screen-view.fxml", "Rise & Fall - Victoire"),
     ;
 
     private static final String GENERAL_STYLESHEET = Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/style.css")).toExternalForm();
