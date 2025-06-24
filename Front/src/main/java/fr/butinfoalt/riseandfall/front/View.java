@@ -68,6 +68,11 @@ public enum View {
      * Vue de la description et des règles du jeu.
      */
     DESCRIPTION("description-view.fxml", "Rise & Fall - Description et règles du jeu"),
+
+    /**
+     * Vue de l'écran de victoire.
+     */
+    VICTORY_SCREEN("game/victory-screen-view.fxml", "Rise & Fall - Victoire")
     ;
 
     private static final String GENERAL_STYLESHEET = Objects.requireNonNull(RiseAndFallApplication.class.getResource("styles/style.css")).toExternalForm();

@@ -326,6 +326,7 @@ public class RiseAndFallServer extends BaseSocketServer {
             case QUIT_GAME -> this.gameManager.onClientQuitGame(sender);
             case LOG_OUT -> this.authManager.onClientDisconnected(sender);
             case NEXT_TURN -> this.gameManager.onNextTurn(sender);
+            case REQUEST_GAME_LIST -> this.gameManager.sendWaitingGames(sender);
         }
     }
 
