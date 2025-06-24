@@ -11,12 +11,12 @@
 
     <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="root">
         <VBox alignment="CENTER" spacing="20.0">
-            <HBox alignment="TOP_LEFT">
+            <HBox alignment="TOP_RIGHT">
                 <Button fx:id="chatButton" onAction="#switchToChat"
-                        style="-fx-background-color: red; -fx-border-width: 0;">
+                        style="-fx-background-color: #007bff; -fx-background-radius: 20; -fx-border-radius: 20; -fx-border-width: 0; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 8 12 8 12;">
                     <graphic>
-                        <!-- Gros carré rouge pour tester le placement -->
-                        <Pane style="-fx-background-color: red; -fx-min-width: 40; -fx-min-height: 40; -fx-max-width: 40; -fx-max-height: 40;"/>
+                        <!-- Icône de bulle de chat -->
+                        <Label text="💬" style="-fx-text-fill: white; -fx-font-size: 16px;"/>
                     </graphic>
                 </Button>
             </HBox>
