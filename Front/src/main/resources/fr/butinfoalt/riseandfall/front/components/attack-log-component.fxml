@@ -10,4 +10,5 @@
 
     <VBox fx:id="attacksLogs"/>
     <VBox fx:id="eliminatedPlayersLogs"/>
+    <VBox fx:id="winningPlayersLogs" visible="false"/>
 </VBox>

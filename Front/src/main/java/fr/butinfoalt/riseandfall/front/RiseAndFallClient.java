@@ -33,7 +33,6 @@ public class RiseAndFallClient extends BaseSocketClient {
             View.MAIN_RUNNING_GAME,
             View.ORDERS,
             View.ORDERS_ATTACK_LIST,
-            View.ORDERS_ATTACK,
             View.ATTACKS_LOGS
     );
 

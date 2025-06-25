@@ -24,7 +24,7 @@
                         <TitleLabel style="-fx-font-size: 250%;" styleClass="force-custom-font" text="Rise &amp; Fall"/>
                     </VBox>
 
-                    <TextFlow style="-fx-font-size: 20px;">
+                    <TextFlow styleClass="description-text">
                         <Text text="Rise &amp; Fall est un jeu développé par une équipe de choc.&#xA;"/>
                         <Text text="Le but est de créer un jeu tour par tour dans un monde fantasy.&#xA;"/>
                         <Text text="On a présenté le projet, maintenant passons aux règles du jeu."/>
@@ -33,7 +33,7 @@
                     <VBox>
                         <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
                                     text="Objectif du jeu :"/>
-                        <TextFlow style="-fx-font-size: 20px;">
+                        <TextFlow styleClass="description-text">
                             <Text text="Dans Rise &amp; Fall, chaque joueur incarne une civilisation dans un monde fantasy. Le but est de faire prospérer sa civilisation en gérant ses ressources, en développant son économie, et en étendant son territoire tout en survivant jusqu'à la fin de la partie."/>
                         </TextFlow>
                     </VBox>
@@ -41,7 +41,7 @@
                     <VBox>
                         <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
                                     text="Début de la partie :"/>
-                        <TextFlow style="-fx-font-size: 20px;">
+                        <TextFlow styleClass="description-text">
                             <Text text="• Au début de chaque partie, chaque joueur doit choisir une race parmi les 7 disponibles. Chaque race a des caractéristiques, des bâtiments et des unités différents. Elles influencent donc la stratégie du joueur au fil de la partie. Leurs caractéristiques sont détaillées plus bas.&#xA;"/>
                             <Text text="• Au moins 3 joueurs doivent rejoindre une partie afin qu'elle puisse démarrer."/>
                         </TextFlow>
@@ -49,7 +49,7 @@
 
                     <VBox>
                         <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font" text="Ressources :"/>
-                        <TextFlow style="-fx-font-size: 20px;">
+                        <TextFlow styleClass="description-text">
                             <Text text="Chaque joueur dispose de ressources pour développer sa civilisation. Les ressources sont l'or et l'intelligence :&#xA;"/>
                             <Text text="• L'or est utilisé pour construire des bâtiments et recruter des unités.&#xA;"/>
                             <Text text="• L'intelligence est utilisée pour débloquer des bâtiments et unités plus puissants.&#xA;"/>
@@ -61,7 +61,7 @@
                     <VBox>
                         <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
                                     text="Déroulement des tours :"/>
-                        <TextFlow style="-fx-font-size: 20px;">
+                        <TextFlow styleClass="description-text">
                             <Text text="À chaque tour, les joueurs disposent d'un temps pour définir des ordres afin de :&#xA;"/>
                             <Text text="• Construire des bâtiments&#xA;• Recruter des unités&#xA;• Attaquer ou interagir avec d'autres joueurs"/>
                             <Text text="Tous les ordres sont ensuite exécutés simultanément, et la partie passe au tour suivant."/>
@@ -71,7 +71,7 @@
                     <VBox>
                         <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
                                     text="Déroulement des combats :"/>
-                        <TextFlow style="-fx-font-size: 20px;">
+                        <TextFlow styleClass="description-text">
                             <Text text="Chaque joueur peut décider d'attaquer un autre royaume en choisissant quelles unités seront utilisées. Les unités qui ne sont pas impliquées peuvent défendre leur royaume des autres attaques le ciblant.&#xA;"/>
                             <Text text="Chaque attaque se déroule en 3 phases. S'il ne reste plus de dégâts à appliquer à la fin d'une phase, les suivantes n'ont pas lieu.&#xA;"/>
                             <Text text="1. Les dégâts des unités attaquantes sont appliqués aux remparts du joueur ciblé, qui sont détruits tant qu'il reste des dégâts.&#xA;"/>
@@ -85,7 +85,7 @@
                     <VBox>
                         <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
                                     text="Intéractions entre les joueurs :"/>
-                        <TextFlow style="-fx-font-size: 20px;">
+                        <TextFlow styleClass="description-text">
                             <Text text="Les joueurs peuvent interagir entre eux avec un chat en temps réel, leur permettant de discuter de la partie, de former des alliances, ou de se déclarer la guerre.&#xA;"/>
                             <Text text="Il est uniquement possible d'envoyer des messages à un seul joueur à la fois. Il n'y a pas de groupes de discussion, ni de discussions publiques.&#xA;"/>
                         </TextFlow>
@@ -93,7 +93,7 @@
 
                     <VBox>
                         <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font" text="Fin de partie :"/>
-                        <TextFlow style="-fx-font-size: 20px;">
+                        <TextFlow styleClass="description-text">
                             <Text text="Une partie de Rise &amp; Fall peut se terminer de deux manières, en fonction du nombre de joueurs encore en lice à la fin de chaque tour :&#xA;"/>
                             <Text text="• S'il ne reste plus qu'un joueur, il gagne immédiatement tout seul.&#xA;"/>
                             <Text text="• Si plus de 50 tours ont été joués, et qu'il reste moins de 3 joueurs, ces joueurs restants sont déclarés gagnants ensemble.&#xA;"/>
