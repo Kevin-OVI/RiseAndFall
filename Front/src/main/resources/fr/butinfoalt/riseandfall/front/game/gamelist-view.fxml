@@ -34,7 +34,7 @@
 
             <Label fx:id="errorMessage" style="-fx-text-fill: red;" visible="false"/>
 
-            <Button text="Règles du jeu" onAction="#switchToDescriptionPage"/>
+            <Button text="Description &amp; Règles du jeu" onAction="#switchToDescriptionPage"/>
         </VBox>
     </ScrollPane>
 </VBox>

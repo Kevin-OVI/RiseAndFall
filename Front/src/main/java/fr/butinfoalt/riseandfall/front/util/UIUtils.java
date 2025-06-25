@@ -79,8 +79,8 @@ public class UIUtils {
     }
 
     public static String displayOptimisedFloat(float value) {
-        int intValue = (int) value;
-        if (value == intValue) {
+        int intValue = Math.round(value);
+        if (Math.abs(value - intValue) < 0.01) {
             return String.valueOf(intValue);
         } else {
             return String.valueOf(MathUtils.roundToDecimalPlaces(value, 2));

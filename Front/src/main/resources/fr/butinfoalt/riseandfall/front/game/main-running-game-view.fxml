@@ -37,7 +37,7 @@
                     </VBox>
                 </VBox>
                 <HBox fx:id="buttonsContainer" alignment="CENTER" spacing="10">
-                    <Button text="Description" onAction="#switchToDescriptionPage"/>
+                    <Button text="Description &amp; Règles du jeu" onAction="#switchToDescriptionPage"/>
                     <Button text="Modifier les ordres" onAction="#switchToOrders"/>
                     <Button text="Modifier les attaques" onAction="#manageAttacks"/>
                     <Button text="Journal des attaques" onAction="#showAttacksLogs"/>
