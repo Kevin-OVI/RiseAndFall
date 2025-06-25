@@ -435,7 +435,9 @@ public class GameManager {
                     .filter(playerInGame -> playerInGame.getEliminationTurn() != -1)
                     .collect(Collectors.groupingBy(Player::getEliminationTurn, Collectors.toCollection(ArrayList::new)));
 
-            for (int turn = 1; turn < game.getCurrentTurn(); turn++) {
+            int currentTurn = game.getCurrentTurn();
+            int maxTurn = game.getState() == GameState.ENDED ? currentTurn + 1 : currentTurn;
+            for (int turn = 1; turn < maxTurn; turn++) {
                 this.sendTurnResults(connection, new PacketTurnResults(
                         turn,
                         attackResults.getOrDefault(turn, Collections.emptyList()),

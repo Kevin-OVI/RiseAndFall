@@ -7,6 +7,7 @@ import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
+import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
@@ -76,7 +77,8 @@ public class AttackLogsController implements ViewController {
      */
     @FXML
     public void switchBack() {
-        if (RiseAndFall.getPlayer().isEliminated()) {
+        CurrentClientPlayer player = RiseAndFall.getPlayer();
+        if (player.isEliminated()) {
             try {
                 RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.EXIT_GAME));
             } catch (IOException e) {
@@ -85,7 +87,7 @@ public class AttackLogsController implements ViewController {
             }
             RiseAndFallApplication.switchToView(View.LOADING);
         } else {
-            RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
+            RiseAndFallApplication.switchToView(RiseAndFall.getGame().getState() == GameState.ENDED ? View.VICTORY_SCREEN : View.MAIN_RUNNING_GAME);
         }
     }
 
@@ -117,13 +119,14 @@ public class AttackLogsController implements ViewController {
                 .collect(Collectors.groupingBy(Player::getEliminationTurn, Collectors.toList()));
 
         int currentTurn = game.getCurrentTurn();
-        for (int i = 1; i < currentTurn; i++) {
+        int maxTurn = game.getState() == GameState.ENDED ? currentTurn + 1 : currentTurn;
+        for (int i = 1; i < maxTurn; i++) {
             try {
                 FXMLLoader loader = new FXMLLoader(AttackLogsController.class.getResource("/fr/butinfoalt/riseandfall/front/components/attack-log-component.fxml"));
                 Node node = loader.load();
 
                 AttackLogsListItemController controller = loader.getController();
-                controller.init(i, currentPlayer, game.getAttackResults(i), eliminatedPlayers.getOrDefault(i, Collections.emptyList()));
+                controller.init(i, game, currentPlayer, game.getAttackResults(i), eliminatedPlayers.getOrDefault(i, Collections.emptyList()));
 
                 this.listContainer.getChildren().addFirst(node);
             } catch (IOException e) {

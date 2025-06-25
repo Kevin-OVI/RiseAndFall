@@ -82,10 +82,9 @@ public class DescriptionController {
             }
         }
 
-        Map<Race, StringBuilder> textMap = new HashMap<>();
+        Map<Race, List<Map.Entry<String, String>>> textMap = new HashMap<>();
         for (T item : items) {
-            StringBuilder builder = textMap.computeIfAbsent(item.getAccessibleByRace(), k -> new StringBuilder());
-            builder.append(item.getName()).append("\n");
+            List<Map.Entry<String, String>> raceEntries = textMap.computeIfAbsent(item.getAccessibleByRace(), k -> new ArrayList<>());
             List<String> details = new ArrayList<>(Collections.singletonList(
                     item.getDescription()
             ));
@@ -100,10 +99,12 @@ public class DescriptionController {
             }
             details.addAll(detailsAdder.apply(item));
 
+            StringBuilder builder = new StringBuilder();
             for (String detail : details) {
                 builder.append("  • ").append(detail).append("\n");
             }
             builder.append("\n");
+            raceEntries.add(Map.entry(item.getName(), builder.toString()));
         }
 
         textMap.entrySet().stream().sorted((o1, o2) -> {
@@ -117,11 +118,18 @@ public class DescriptionController {
         }).forEach(entry -> {
             String title = (entry.getKey() == null ? universalTitle : String.format(raceTitleTemplate, entry.getKey().getName())) + " :\n";
             Text titleText = new Text(title);
+            titleText.getStyleClass().add("title-label");
             titleText.setStyle("-fx-font-size: 150%");
             textFlow.getChildren().add(titleText);
-            Text contentText = new Text(entry.getValue().toString());
-            contentText.setStyle("-fx-font-size: 20px;");
-            textFlow.getChildren().add(contentText);
+            for (Map.Entry<String, String> itemEntry : entry.getValue()) {
+                Text itemTitleText = new Text(itemEntry.getKey() + " :\n");
+                itemTitleText.getStyleClass().add("title-label");
+                itemTitleText.setStyle("-fx-font-size: 120%");
+                textFlow.getChildren().add(itemTitleText);
+                Text contentText = new Text(itemEntry.getValue());
+                contentText.getStyleClass().add("description-text");
+                textFlow.getChildren().add(contentText);
+            }
         });
     }
 
@@ -182,6 +190,7 @@ public class DescriptionController {
     public void initialize() {
         for (Race race : ServerData.getRaces()) {
             Text titleText = new Text(race.getName() + " :\n");
+            titleText.getStyleClass().add("title-label");
             titleText.setStyle("-fx-font-size: 120%");
             this.racesList.getChildren().add(titleText);
             StringBuilder contentBuilder = new StringBuilder();
@@ -195,7 +204,7 @@ public class DescriptionController {
                 contentBuilder.append("  • ").append(String.join(", ", modifiers)).append("\n");
             }
             Text contentText = new Text(contentBuilder.toString());
-            contentText.setStyle("-fx-font-size: 20px;");
+            contentText.getStyleClass().add("description-text");
             this.racesList.getChildren().add(contentText);
         }
 

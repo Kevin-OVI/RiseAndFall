@@ -1,8 +1,10 @@
 package fr.butinfoalt.riseandfall.front.game.logs;
 
 import fr.butinfoalt.riseandfall.front.components.TitleLabel;
+import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
 import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.OtherClientPlayer;
+import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.AttackResult;
 import fr.butinfoalt.riseandfall.gamelogic.data.NamedItem;
@@ -39,6 +41,12 @@ public class AttackLogsListItemController {
     @FXML
     public VBox eliminatedPlayersLogs;
 
+    /**
+     * Le conteneur pour les journaux des joueurs gagnants.
+     */
+    @FXML
+    public VBox winningPlayersLogs;
+
     private <T extends NamedItem> void displayAttackResultPart(StringBuilder builder, ObjectIntMap<T> map, String messageEmpty, String sectionTitle) {
         if (map.isEmpty()) {
             builder.append(messageEmpty).append("\n");
@@ -61,7 +69,7 @@ public class AttackLogsListItemController {
     private void initAttackResults(CurrentClientPlayer currentPlayer, List<AttackResult> attackResults) {
         ObservableList<Node> attacksLogsChildren = this.attacksLogs.getChildren();
         if (attackResults.isEmpty()) {
-            attacksLogsChildren.add(new Label("Vous n'avez été impliqué dans aucune attaque durant ce tour."));
+            attacksLogsChildren.add(new Label("Vous n'avez été impliqué dans aucune attaque."));
             return;
         }
         for (AttackResult attackResult : attackResults) {
@@ -72,7 +80,7 @@ public class AttackLogsListItemController {
             } else {
                 title = new TitleLabel("Vous avez été attaqué par " + ((OtherClientPlayer) attackResult.getAttacker()).getName());
             }
-            title.setStyle("-fx-font-size: 80%;");
+            title.setStyle("-fx-font-size: 110%;");
             attacksLogsChildren.add(title);
 
             StringBuilder builder = new StringBuilder();
@@ -95,10 +103,12 @@ public class AttackLogsListItemController {
         ObservableList<Node> eliminatedPlayersLogsChildren = this.eliminatedPlayersLogs.getChildren();
 
         if (eliminatedPlayers.isEmpty()) {
-            eliminatedPlayersLogsChildren.add(new Label("Aucun joueur n'a été éliminé durant ce tour."));
+            eliminatedPlayersLogsChildren.add(new Label("Aucun joueur n'a été éliminé."));
             return;
         }
-        eliminatedPlayersLogsChildren.add(new TitleLabel(eliminatedPlayers.size() + " joueur(s) éliminés :"));
+        TitleLabel eliminatedPlayersTitle = new TitleLabel(eliminatedPlayers.size() + " joueur(s) éliminés :");
+        eliminatedPlayersTitle.setStyle("-fx-font-size: 110%;");
+        eliminatedPlayersLogsChildren.add(eliminatedPlayersTitle);
         StringBuilder builder = new StringBuilder();
         for (Player player : eliminatedPlayers) {
             if (player instanceof OtherClientPlayer otherPlayer) {
@@ -112,17 +122,46 @@ public class AttackLogsListItemController {
         eliminatedPlayersLogsChildren.add(new Label(builder.toString()));
     }
 
+    private void initWiningPlayers(ClientGame game, CurrentClientPlayer currentPlayer) {
+        this.winningPlayersLogs.setVisible(true);
+        ObservableList<Node> winningPlayersLogsChildren = this.winningPlayersLogs.getChildren();
+        if (!currentPlayer.isEliminated()) {
+            Label label = new TitleLabel("Félicitations, vous avez gagné !");
+            label.setStyle("-fx-font-size: 100%;");
+            label.setTextFill(Color.GREEN);
+            winningPlayersLogsChildren.add(label);
+        }
+        List<OtherClientPlayer> winningPlayers = game.getOtherPlayers().stream()
+                .filter(player -> !player.isEliminated())
+                .toList();
+        if (!winningPlayers.isEmpty()) {
+            TitleLabel title = new TitleLabel(currentPlayer.isEliminated() ? "Les joueurs suivants ont gagné la partie :" : "Les joueurs suivants ont également gagné la partie :");
+            title.setStyle("-fx-font-size: 110%;");
+            winningPlayersLogsChildren.add(title);
+            for (OtherClientPlayer player : winningPlayers) {
+                winningPlayersLogsChildren.add(new Label("- " + player.getName()));
+            }
+        }
+        if (winningPlayersLogsChildren.isEmpty()) {
+            winningPlayersLogsChildren.add(new Label("Tous les royaumes se sont anéantis mutuellement, c'est une fin tragique."));
+        }
+    }
+
     /**
      * Initialise l'élément de la liste avec les résultats des attaques et les joueurs éliminés pour un tour spécifique.
      *
-     * @param turn              Le numéro du tour.
+     * @param displayTurn       Le numéro du tour à afficher
+     * @param game              L'instance de la partie.
      * @param currentPlayer     Le joueur actuel.
      * @param attackResults     La liste des résultats des attaques impliquant le joueur durant ce tour.
      * @param eliminatedPlayers La liste des joueurs éliminés durant ce tour.
      */
-    public void init(int turn, CurrentClientPlayer currentPlayer, List<AttackResult> attackResults, List<Player> eliminatedPlayers) {
-        this.title.setText("Actions du tour n°" + turn);
+    public void init(int displayTurn, ClientGame game, CurrentClientPlayer currentPlayer, List<AttackResult> attackResults, List<Player> eliminatedPlayers) {
+        this.title.setText("Actions du tour n°" + displayTurn);
         this.initAttackResults(currentPlayer, attackResults);
         this.initEliminatedPlayers(eliminatedPlayers);
+        if (displayTurn == game.getCurrentTurn() && game.getState() == GameState.ENDED) {
+            this.initWiningPlayers(game, currentPlayer);
+        }
     }
 }

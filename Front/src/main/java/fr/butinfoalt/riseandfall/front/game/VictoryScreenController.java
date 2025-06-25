@@ -7,6 +7,7 @@ import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
@@ -23,6 +24,11 @@ public class VictoryScreenController implements ViewController {
             return;
         }
         RiseAndFallApplication.switchToView(View.LOADING);
+    }
+
+    @FXML
+    public void onShowAttackLogs(ActionEvent actionEvent) {
+        RiseAndFallApplication.switchToView(View.ATTACKS_LOGS);
     }
 
     @FXML
