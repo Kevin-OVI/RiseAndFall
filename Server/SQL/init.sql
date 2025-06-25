@@ -209,7 +209,7 @@ VALUES
     (4, 'Elfe', 'Créature Mystique aux grandes oreilles possédant une grande intelligence mais faible', 1, 2, 0.75, 0.75),
     (5, 'Nain', 'Homme de petite taille,robuste et possédant énormément d''or', 1.5, 1, 0.75, 1.25),
     (6, 'Nerlk', 'Mixte entre la force des orcs et l''intelligence des elfes, le problèmes est leur économie', 0.5, 1, 1.25, 1.25),
-    (7, 'Primotaures', 'Premières créatures du monde, les primotaures sont riches mais pacifiques', 1.25, 1, 0.6, 1);
+    (7, 'Primotaure', 'Premières créatures du monde, les primotaures sont riches mais pacifiques', 1.25, 1, 0.6, 1);
 
 INSERT INTO building_type (name, description, price, required_intelligence, gold_production, intelligence_production, resistance, max_units, initial_amount, accessible_race_id, defensive)
 VALUES
@@ -263,4 +263,4 @@ VALUES
     ('Berserker Nerlk', 'Unité de combat Nerlk, très puissante mais coûteuse', 250, 120, 100.0, 250.0, 6),
 
     ('Minotaure', 'Issue du Labyrinthe', 20, 20, 30.0, 50.0, 7),
-    ('Dieu Primotaures', 'Dieu des Primotaures, très puissant', 360, 250, 300.0, 300.0, 7);
+    ('Dieu Primotaure', 'Dieu des Primotaures, très puissant', 360, 250, 300.0, 300.0, 7);
