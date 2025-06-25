@@ -14,6 +14,8 @@ import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Platform;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -266,10 +268,58 @@ public class RiseAndFallClient extends BaseSocketClient {
 
         OtherClientPlayer inChatWith = (OtherClientPlayer) (chatMessage.getSender() == RiseAndFall.getPlayer() ? chatMessage.getReceiver() : chatMessage.getSender());
         inChatWith.addMessage(chatMessage);
+
+        // Envoyer une notification système seulement si je ne suis pas l'expéditeur
+        if (chatMessage.getSender() != RiseAndFall.getPlayer()) {
+            showSystemNotification(inChatWith.getName(), packet.getMessage());
+        }
+
         Platform.runLater(() -> {
             ChatController chatController = View.CHAT.getController();
             chatController.receiveMessage(chatMessage, inChatWith);
         });
+    }
+
+    private void showSystemNotification(String senderName, String message) {
+        if (SystemTray.isSupported()) {
+            try {
+                // Définir le nom de l'application pour les notifications
+                System.setProperty("java.awt.headless", "false");
+                System.setProperty("apple.awt.application.name", "Rise & Fall");
+
+                SystemTray tray = SystemTray.getSystemTray();
+
+                // Créer une image pour l'icône (ou utiliser une image existante)
+                BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
+                Graphics2D g = image.createGraphics();
+                g.setColor(Color.BLUE);
+                g.fillOval(0, 0, 16, 16);
+                g.dispose();
+
+                TrayIcon trayIcon = new TrayIcon(image, "Rise & Fall");
+                trayIcon.setImageAutoSize(true);
+                trayIcon.setToolTip("Rise & Fall Chat");
+
+                // Ajouter l'icône au système (si pas déjà fait)
+                if (tray.getTrayIcons().length == 0) {
+                    tray.add(trayIcon);
+                } else {
+                    trayIcon = tray.getTrayIcons()[0];
+                }
+
+                // Afficher la notification
+                trayIcon.displayMessage(
+                        "Nouveau message de " + senderName,
+                        message,
+                        TrayIcon.MessageType.INFO
+                );
+
+            } catch (AWTException e) {
+                System.err.println("Erreur lors de l'affichage de la notification: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Les notifications système ne sont pas supportées sur ce système");
+        }
     }
 
     /**
