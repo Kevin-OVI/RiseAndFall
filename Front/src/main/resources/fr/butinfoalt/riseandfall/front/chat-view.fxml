@@ -59,7 +59,7 @@
                 <Button style="-fx-background-color: #333333; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;"
                         onAction="#sendMessage">
                     <graphic>
-                        <Label text="➤" style="-fx-font-size: 16px;"/>
+                        <Label text="➤" style="-fx-font-size: 16px; -fx-text-fill: white;"/>
                     </graphic>
                 </Button>
             </HBox>
