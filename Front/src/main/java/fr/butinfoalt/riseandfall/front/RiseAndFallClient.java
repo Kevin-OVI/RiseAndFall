@@ -2,13 +2,9 @@ package fr.butinfoalt.riseandfall.front;
 
 import fr.butinfoalt.riseandfall.front.chat.ChatController;
 import fr.butinfoalt.riseandfall.front.game.gamelist.GameListController;
-import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
-import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
-import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.front.gamelogic.*;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.Player;
-import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
 import fr.butinfoalt.riseandfall.gamelogic.data.ChatMessage;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
 import fr.butinfoalt.riseandfall.network.client.BaseSocketClient;
@@ -70,56 +66,8 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendPacket((byte) 9, PacketRegister.class);
         this.registerReceivePacket((byte) 10, PacketWaitingGames.class, this::onWaitingGames, readHelper -> new PacketWaitingGames<>(readHelper, ClientGame::new));
         this.registerReceivePacket((byte) 11, PacketDiscoverPlayer.class, this::onDiscoverPlayer, PacketDiscoverPlayer::new);
-        this.registerReceivePacket((byte) 12, PacketChats.class, this::onChatsReceived, PacketChats::new);
-        this.registerReceivePacket((byte) 13, PacketMessage.class, this::onMessageReceived, PacketMessage::new);
-        this.registerSendPacket((byte) 14, PacketMessage.class);
-        this.registerReceivePacket((byte) 15, PacketTurnResults.class, this::onTurnResults, readHelper -> new PacketTurnResults(readHelper, ClientDataDeserializer.INSTANCE));
-    }
-
-    private void onMessageReceived(SocketWrapper socketWrapper, PacketMessage packetMessage) {
-        Chat chat = RiseAndFall.getGame().getChatByReceiver(packetMessage.getSenderId());
-
-        if (chat == null)
-            chat = RiseAndFall.getGame().getChatByReceiver(packetMessage.getReceiverId());
-
-        if (chat != null) {
-            ChatMessage chatMessage = new ChatMessage(chat, RiseAndFall.getGame().getOtherPlayer(packetMessage.getSenderId()), RiseAndFall.getGame().getOtherPlayer(packetMessage.getReceiverId()), packetMessage.getMessage(), packetMessage.getTimestamp());
-
-            chat.addMessage(chatMessage);
-
-            Platform.runLater(() -> {
-                ChatController chatController = View.CHAT.getController();
-                if (chatController != null) {
-                    chatController.receiveMessage(chatMessage);
-                } else {
-                    LogManager.logError("ChatController non initialisé pour le message reçu : " + packetMessage.getMessage());
-                }
-            });
-        } else {
-            LogManager.logError("Chat non trouvé pour le message reçu : " + packetMessage.getMessage());
-        }
-    }
-
-    private void onChatsReceived(SocketWrapper socketWrapper, PacketChats packetChats) {
-        System.out.println("Paquet de chats reçu : " + packetChats);
-        System.out.println("Id du paquet : " + packetChats.getId());
-        System.out.println("Id du receveur : " + packetChats.getReceriverId());
-        Player receiver = null;
-        for (Player otherPlayer : RiseAndFall.getGame().getOtherPlayers()) {
-            System.out.println("Vérification du joueur : " + otherPlayer.getId());
-            if (otherPlayer.getId() == packetChats.getReceriverId()) {
-                receiver = otherPlayer;
-                break;
-            }
-        }
-        if (receiver != null)
-        {
-            Chat chat = new Chat(packetChats.getId(), RiseAndFall.getGame().getOtherPlayer(packetChats.getReceriverId()));
-            System.out.println("Player receveur du chat : " + packetChats.getReceriverId() + " (ID: " + chat.getReceiver().getId() + ")");
-            RiseAndFall.getGame().addChat(chat);
-        } else {
-            LogManager.logError("Joueur receveur du chat non trouvé : " + packetChats.getReceriverId());
-        }
+        this.registerSendAndReceivePacket((byte) 12, PacketMessage.class, this::onMessageReceived, PacketMessage::new);
+        this.registerReceivePacket((byte) 13, PacketTurnResults.class, this::onTurnResults, readHelper -> new PacketTurnResults(readHelper, ClientDataDeserializer.INSTANCE));
     }
 
     /**
@@ -302,6 +250,26 @@ public class RiseAndFallClient extends BaseSocketClient {
      */
     private void onDiscoverPlayer(SocketWrapper sender, PacketDiscoverPlayer packet) {
         RiseAndFall.getGame().addOtherPlayer(packet.getPlayerId(), packet.getPlayerRace(), packet.getPlayerName());
+    }
+
+    /**
+     * Méthode appelée lorsque le paquet {@link PacketMessage} est reçu.
+     * Elle traite le message de chat reçu et l'affiche dans l'interface utilisateur.
+     *
+     * @param sender Le socket connecté au serveur.
+     * @param packet Le paquet contenant le message de chat.
+     */
+    private void onMessageReceived(SocketWrapper sender, PacketMessage packet) {
+        ClientPlayer senderPlayer = RiseAndFall.getPlayer(packet.getSenderId());
+        ClientPlayer receiverPlayer = RiseAndFall.getPlayer(packet.getReceiverId());
+        ChatMessage chatMessage = new ChatMessage(senderPlayer, receiverPlayer, packet.getMessage(), packet.getTimestamp());
+
+        OtherClientPlayer inChatWith = (OtherClientPlayer) (chatMessage.getSender() == RiseAndFall.getPlayer() ? chatMessage.getReceiver() : chatMessage.getSender());
+        inChatWith.addMessage(chatMessage);
+        Platform.runLater(() -> {
+            ChatController chatController = View.CHAT.getController();
+            chatController.receiveMessage(chatMessage, inChatWith);
+        });
     }
 
     /**

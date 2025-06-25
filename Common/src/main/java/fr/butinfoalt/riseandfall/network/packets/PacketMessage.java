@@ -1,7 +1,5 @@
 package fr.butinfoalt.riseandfall.network.packets;
 
-import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
-import fr.butinfoalt.riseandfall.gamelogic.data.ChatMessage;
 import fr.butinfoalt.riseandfall.network.common.IPacket;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.WriteHelper;
@@ -13,10 +11,10 @@ import java.io.IOException;
  * Ce paquet pourra être utilisé pour envoyer des messages depuis le joueur
  */
 public class PacketMessage implements IPacket {
-    private int senderId;
-    private int receiverId;
-    private String message;
-    private long timestamp;
+    private final int senderId;
+    private final int receiverId;
+    private final String message;
+    private final long timestamp;
 
 
     /**

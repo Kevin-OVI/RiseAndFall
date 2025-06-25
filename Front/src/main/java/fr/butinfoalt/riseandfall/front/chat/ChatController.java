@@ -3,7 +3,7 @@ package fr.butinfoalt.riseandfall.front.chat;
 import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.OtherClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
+import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.ChatMessage;
 import fr.butinfoalt.riseandfall.network.packets.PacketMessage;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
@@ -19,14 +19,12 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class ChatController implements ViewController {
     @FXML
-    private ListView<Chat> chatListView;
+    private ListView<OtherClientPlayer> chatListView;
 
     @FXML
     private ScrollPane messageScrollPane;
@@ -37,28 +35,27 @@ public class ChatController implements ViewController {
     @FXML
     private TextField messageField;
 
-    private Chat currentChat;
-    private Map<Integer, Chat> chats = new HashMap<>();
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+    private OtherClientPlayer currentlyChattingWith;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
     @FXML
     public void initialize() {
         chatListView.setCellFactory(listView -> new ChatListCell());
-        chatListView.getSelectionModel().selectedItemProperty().addListener((obs, oldChat, newChat) -> {
-            if (newChat != null) {
-                openChat(newChat);
+        chatListView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null) {
+                openChat(newValue);
             }
         });
         chatListView.setStyle("-fx-background-color: #1a1a1a; -fx-background-insets: 0; -fx-padding: 0;");
     }
 
-    private void openChat(Chat chat) {
-        currentChat = chat;
-        ChatStage.setTitleExtra(((OtherClientPlayer) chat.getReceiver()).getName());
+    private void openChat(OtherClientPlayer otherPlayer) {
+        currentlyChattingWith = otherPlayer;
+        ChatStage.setTitleExtra(otherPlayer.getName());
 
         messageContainer.getChildren().clear();
 
-        for (ChatMessage message : chat.getMessages()) {
+        for (ChatMessage message : otherPlayer.getMessages()) {
             addMessageToView(message);
         }
 
@@ -67,23 +64,23 @@ public class ChatController implements ViewController {
 
     @FXML
     private void sendMessage() {
-        if (currentChat == null || messageField.getText().trim().isEmpty()) {
+        if (currentlyChattingWith == null || messageField.getText().trim().isEmpty()) {
             return;
         }
 
         String messageText = messageField.getText().trim();
-        ChatMessage newMessage = new ChatMessage(currentChat, RiseAndFall.getPlayer(), currentChat.getReceiver(), messageText);
+        ChatMessage newMessage = new ChatMessage(RiseAndFall.getPlayer(), currentlyChattingWith, messageText);
 
         try {
             RiseAndFall.getClient().sendPacket(new PacketMessage(RiseAndFall.getPlayer().getId(), newMessage.getReceiver().getId(), messageText, newMessage.getTimestamp()));
-            currentChat.addMessage(newMessage);
-            addMessageToView(newMessage);
-            messageField.clear();
-            Platform.runLater(() -> messageScrollPane.setVvalue(1.0));
         } catch (IOException e) {
             LogManager.logError("Impossible d'envoyer le packet de message", e);
             showErrorMessage("Erreur lors de l'envoi du message.");
+            return;
         }
+        messageField.clear();
+        messageScrollPane.setVvalue(1.0);
+        // Le message est ajouté à la vue après le renvoi du paquet par le serveur pour éviter les doublons
     }
 
     private void addMessageToView(ChatMessage message) {
@@ -135,12 +132,12 @@ public class ChatController implements ViewController {
         loadData();
     }
 
-    private static class ChatListCell extends ListCell<Chat> {
+    private static class ChatListCell extends ListCell<OtherClientPlayer> {
         @Override
-        protected void updateItem(Chat chat, boolean empty) {
-            super.updateItem(chat, empty);
+        protected void updateItem(OtherClientPlayer otherPlayer, boolean empty) {
+            super.updateItem(otherPlayer, empty);
 
-            if (empty || chat == null) {
+            if (empty || otherPlayer == null) {
                 setText(null);
                 setGraphic(null);
                 setStyle("-fx-background-color: #1a1a1a;");
@@ -148,13 +145,13 @@ public class ChatController implements ViewController {
                 VBox cellContent = new VBox(3);
                 cellContent.setPadding(new Insets(5));
 
-                Label nameLabel = new Label(((OtherClientPlayer) chat.getReceiver()).getName());
+                Label nameLabel = new Label(otherPlayer.getName());
                 nameLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
 
                 String lastMessage = "";
-                if (!chat.isEmpty()) {
-                    ChatMessage[] messages = chat.getMessages();
-                    lastMessage = messages[messages.length - 1].getMessage();
+                List<ChatMessage> messages = otherPlayer.getMessages();
+                if (!messages.isEmpty()) {
+                    lastMessage = messages.getLast().getMessage();
                     if (lastMessage.length() > 30) {
                         lastMessage = lastMessage.substring(0, 30) + "...";
                     }
@@ -173,24 +170,16 @@ public class ChatController implements ViewController {
 
     private void loadData() {
         chatListView.getItems().clear();
-        Collection<Chat> chats = RiseAndFall.getGame().getChats();
-        chatListView.getItems().addAll(chats);
-        for (Chat chat : chats) {
-            this.chats.put(chat.getId(), chat);
+        for (OtherClientPlayer otherPlayer : RiseAndFall.getGame().getOtherPlayers()) {
+            chatListView.getItems().add(otherPlayer);
         }
     }
 
-    public void addChat(Chat chat) {
-        chats.put(chat.getId(), chat);
-        chatListView.getItems().add(chat);
-    }
-
-    public void receiveMessage(ChatMessage message) {
+    public void receiveMessage(ChatMessage message, Player inChatWith) {
         // Cette méthode est maintenant appelée depuis Platform.runLater() dans RiseAndFallClient
-        Chat chat = message.getChat();
-        if (chat.equals(currentChat)) {
+        if (inChatWith.equals(currentlyChattingWith)) {
             addMessageToView(message);
-            Platform.runLater(() -> messageScrollPane.setVvalue(1.0));
+            messageScrollPane.setVvalue(1.0);
         }
         chatListView.refresh();
     }
