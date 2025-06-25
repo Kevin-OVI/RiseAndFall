@@ -4,6 +4,7 @@ import fr.butinfoalt.riseandfall.front.Environment;
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
+import fr.butinfoalt.riseandfall.front.chat.ChatStage;
 import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.game.SimpleTable.SimpleTableRow;
 import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
@@ -113,7 +114,7 @@ public class MainRunningGameController implements ViewController {
      */
     @FXML
     public void switchToChat() {
-        RiseAndFallApplication.switchToView(View.CHAT);
+        ChatStage.openWindow();
     }
 
     /**

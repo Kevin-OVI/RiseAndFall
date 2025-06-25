@@ -36,19 +36,6 @@
     <!-- Zone principale du chat -->
     <center>
         <VBox style="-fx-background-color: #b0b0b0;">
-            <!-- En-tête avec le nom du destinataire -->
-            <HBox alignment="CENTER_RIGHT" style="-fx-background-color: #b0b0b0; -fx-padding: 10;">
-                <Label fx:id="receiverLabel" style="-fx-text-fill: #333333; -fx-font-size: 14px; -fx-font-weight: bold;">
-                    <HBox.margin>
-                        <Insets right="10"/>
-                    </HBox.margin>
-                </Label>
-
-                <!-- Bouton fermer -->
-                <Button text="✕" style="-fx-background-color: transparent; -fx-text-fill: #333333; -fx-font-size: 18px; -fx-cursor: hand;"
-                        onAction="#closeChat"/>
-            </HBox>
-
             <!-- Zone des messages -->
             <ScrollPane fx:id="messageScrollPane" fitToWidth="true" style="-fx-background: #b0b0b0; -fx-background-color: #b0b0b0;">
                 <VBox.vgrow>

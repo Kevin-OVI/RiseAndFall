@@ -1,14 +1,10 @@
 package fr.butinfoalt.riseandfall.front.chat;
 
-import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
-import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.OtherClientPlayer;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
-import fr.butinfoalt.riseandfall.gamelogic.Player;
 import fr.butinfoalt.riseandfall.gamelogic.data.Chat;
 import fr.butinfoalt.riseandfall.gamelogic.data.ChatMessage;
-import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
 import fr.butinfoalt.riseandfall.network.packets.PacketMessage;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Platform;
@@ -20,9 +16,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -32,12 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChatController implements ViewController {
-
     @FXML
     private ListView<Chat> chatListView;
-
-    @FXML
-    private Label receiverLabel;
 
     @FXML
     private ScrollPane messageScrollPane;
@@ -65,7 +54,7 @@ public class ChatController implements ViewController {
 
     private void openChat(Chat chat) {
         currentChat = chat;
-        receiverLabel.setText(((OtherClientPlayer)chat.getReceiver()).getName());
+        ChatStage.setTitleExtra(((OtherClientPlayer) chat.getReceiver()).getName());
 
         messageContainer.getChildren().clear();
 
@@ -111,7 +100,7 @@ public class ChatController implements ViewController {
                 "-fx-background-color: #e0e0e0; -fx-background-radius: 15;");
 
         if (!isOwnMessage) {
-            Label senderLabel = new Label(((OtherClientPlayer)message.getSender()).getName());
+            Label senderLabel = new Label(((OtherClientPlayer) message.getSender()).getName());
             senderLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #666;");
             bubble.getChildren().add(senderLabel);
         }
@@ -139,11 +128,6 @@ public class ChatController implements ViewController {
         messageContainer.getChildren().add(messageBox);
     }
 
-    @FXML
-    private void closeChat() {
-        RiseAndFallApplication.switchToView(View.MAIN_RUNNING_GAME);
-    }
-
     @Override
     public void onDisplayed(String errorMessage) {
         ViewController.super.onDisplayed(errorMessage);
@@ -151,7 +135,7 @@ public class ChatController implements ViewController {
         loadData();
     }
 
-    private class ChatListCell extends ListCell<Chat> {
+    private static class ChatListCell extends ListCell<Chat> {
         @Override
         protected void updateItem(Chat chat, boolean empty) {
             super.updateItem(chat, empty);
@@ -164,7 +148,7 @@ public class ChatController implements ViewController {
                 VBox cellContent = new VBox(3);
                 cellContent.setPadding(new Insets(5));
 
-                Label nameLabel = new Label(((OtherClientPlayer)chat.getReceiver()).getName());
+                Label nameLabel = new Label(((OtherClientPlayer) chat.getReceiver()).getName());
                 nameLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
 
                 String lastMessage = "";
