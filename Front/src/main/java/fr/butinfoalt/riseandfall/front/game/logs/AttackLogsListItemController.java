@@ -164,4 +164,15 @@ public class AttackLogsListItemController {
             this.initWiningPlayers(game, currentPlayer);
         }
     }
+
+    /**
+     * Réinitialise l'élément de la liste en vidant tous les composants dynamiques.
+     */
+    public void clear() {
+        this.title.setText("");
+        this.attacksLogs.getChildren().clear();
+        this.eliminatedPlayersLogs.getChildren().clear();
+        this.winningPlayersLogs.getChildren().clear();
+        this.winningPlayersLogs.setVisible(false);
+    }
 }

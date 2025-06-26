@@ -3,12 +3,11 @@ package fr.butinfoalt.riseandfall.front.game.logs;
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
-import fr.butinfoalt.riseandfall.front.gamelogic.ClientGame;
-import fr.butinfoalt.riseandfall.front.gamelogic.CurrentClientPlayer;
-import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
+import fr.butinfoalt.riseandfall.front.gamelogic.*;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
+import fr.butinfoalt.riseandfall.gamelogic.data.AttackResult;
 import fr.butinfoalt.riseandfall.network.packets.PacketGameAction;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
@@ -22,6 +21,7 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
  * Affiche les résultats des attaques et les joueurs éliminés pour chaque tour.
  */
 public class AttackLogsController implements ViewController {
+    private final HashMap<Integer, AttackLogsListItemController> itemControllers = new HashMap<>();
+
     /**
      * Le conteneur racine de la vue.
      */
@@ -113,7 +115,6 @@ public class AttackLogsController implements ViewController {
             this.eliminatedLabel.setVisible(false);
         }
 
-        this.listContainer.getChildren().clear();
         Map<Integer, List<Player>> eliminatedPlayers = game.getAllPlayers().stream()
                 .filter(clientPlayer -> clientPlayer.getEliminationTurn() != -1)
                 .collect(Collectors.groupingBy(Player::getEliminationTurn, Collectors.toList()));
@@ -129,9 +130,37 @@ public class AttackLogsController implements ViewController {
                 controller.init(i, game, currentPlayer, game.getAttackResults(i), eliminatedPlayers.getOrDefault(i, Collections.emptyList()));
 
                 this.listContainer.getChildren().addFirst(node);
+                this.itemControllers.put(i, controller);
             } catch (IOException e) {
                 LogManager.logError("Erreur lors du chargement du composant de jeu :", e);
             }
+        }
+    }
+
+    /**
+     * Appelée lorsque la vue est masquée.
+     * Nettoie le conteneur de la liste et les contrôleurs d'éléments pour libérer les ressources.
+     */
+    @Override
+    public void onHidden() {
+        ViewController.super.onHidden();
+
+        this.listContainer.getChildren().clear();
+        this.itemControllers.clear();
+    }
+
+    /**
+     * Met à jour l'élément de la liste pour un tour spécifique avec les résultats des attaques et les joueurs éliminés.
+     *
+     * @param turn              Le numéro du tour à mettre à jour
+     * @param attackResults     La liste des résultats des attaques impliquant le joueur durant ce tour
+     * @param eliminatedPlayers La liste des joueurs éliminés durant ce tour
+     */
+    public void updateDisplayedItem(int turn, List<AttackResult> attackResults, List<Player> eliminatedPlayers) {
+        AttackLogsListItemController controller = this.itemControllers.get(turn);
+        if (controller != null) {
+            controller.clear();
+            controller.init(turn, RiseAndFall.getGame(), RiseAndFall.getPlayer(), attackResults, eliminatedPlayers);
         }
     }
 }

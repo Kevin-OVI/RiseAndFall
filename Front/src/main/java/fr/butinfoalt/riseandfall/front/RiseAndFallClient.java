@@ -2,6 +2,7 @@ package fr.butinfoalt.riseandfall.front;
 
 import fr.butinfoalt.riseandfall.front.chat.ChatController;
 import fr.butinfoalt.riseandfall.front.game.gamelist.GameListController;
+import fr.butinfoalt.riseandfall.front.game.logs.AttackLogsController;
 import fr.butinfoalt.riseandfall.front.gamelogic.*;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.Player;
@@ -287,8 +288,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         for (Player player : packet.getEliminatedPlayers()) {
             player.setEliminationTurn(packet.getTurn());
         }
-        System.out.println("Turn results received for turn " + packet.getTurn() + ": " + packet.getAttackResults());
-        System.out.println("Eliminated players: " + packet.getEliminatedPlayers());
+        Platform.runLater(() -> ((AttackLogsController) View.ATTACKS_LOGS.getController()).updateDisplayedItem(packet.getTurn(), packet.getAttackResults(), packet.getEliminatedPlayers()));
     }
 
     /**
