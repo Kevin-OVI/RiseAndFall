@@ -44,7 +44,7 @@ nécessaires au bon fonctionnement du serveur. Un exemple de fichier .env est fo
 Pour lancer le serveur, vous pouvez utiliser la commande suivante :
 
 ```bash
-mvn -pl Server exec:java -Dexec.mainClass="fr.butinfoalt.riseandfall.server.RiseAndFallServer"
+mvn clean package -pl Server exec:java -Dexec.mainClass="fr.butinfoalt.riseandfall.server.RiseAndFallServer"
 ```
 
 Ou depuis un IDE, en lançant la classe `fr.butinfoalt.riseandfall.server.RiseAndFallServer`.
