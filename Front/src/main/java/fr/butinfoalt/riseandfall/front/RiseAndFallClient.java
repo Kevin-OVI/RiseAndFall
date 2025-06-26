@@ -1,6 +1,5 @@
 package fr.butinfoalt.riseandfall.front;
 
-import fr.butinfoalt.riseandfall.front.chat.ChatController;
 import fr.butinfoalt.riseandfall.front.game.gamelist.GameListController;
 import fr.butinfoalt.riseandfall.front.gamelogic.*;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
@@ -14,8 +13,6 @@ import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Platform;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -209,9 +206,11 @@ public class RiseAndFallClient extends BaseSocketClient {
             switch (errorType) {
                 case LOGIN_GENERIC_ERROR, LOGIN_INVALID_CREDENTIALS, LOGIN_INVALID_SESSION -> {
                     RiseAndFallApplication.switchToView(View.LOGIN, errorType.getMessage());
+                    RiseAndFall.resetGame();
                 }
                 case REGISTER_GENERIC_ERROR, REGISTER_USERNAME_TAKEN -> {
                     RiseAndFallApplication.switchToView(View.REGISTER, errorType.getMessage());
+                    RiseAndFall.resetGame();
                 }
                 case JOINING_GAME_FAILED, JOINING_GAME_NOT_FOUND, JOINING_NON_WAITING, JOINING_GAME_FULL -> {
                     GameListController controller = View.GAME_LIST.getController();
@@ -239,6 +238,7 @@ public class RiseAndFallClient extends BaseSocketClient {
             GameListController controller = View.GAME_LIST.getController();
             controller.refreshGameList(packet.getWaitingGames());
             RiseAndFallApplication.switchToView(View.GAME_LIST);
+            RiseAndFall.resetGame();
         });
     }
 
@@ -263,62 +263,10 @@ public class RiseAndFallClient extends BaseSocketClient {
     private void onMessageReceived(SocketWrapper sender, PacketMessage packet) {
         ClientPlayer senderPlayer = RiseAndFall.getPlayer(packet.getSenderId());
         ClientPlayer receiverPlayer = RiseAndFall.getPlayer(packet.getReceiverId());
-        ChatMessage chatMessage = new ChatMessage(senderPlayer, receiverPlayer, packet.getMessage(), packet.getTimestamp());
+        ChatMessage chatMessage = new ChatMessage(senderPlayer, receiverPlayer, packet.getMessage(), packet.getNonce(), packet.getTimestamp());
 
         OtherClientPlayer inChatWith = (OtherClientPlayer) (chatMessage.getSender() == RiseAndFall.getPlayer() ? chatMessage.getReceiver() : chatMessage.getSender());
-        inChatWith.addMessage(chatMessage);
-
-        // Envoyer une notification système seulement si je ne suis pas l'expéditeur
-        if (chatMessage.getSender() != RiseAndFall.getPlayer()) {
-            showSystemNotification(inChatWith.getName(), packet.getMessage());
-        }
-
-        Platform.runLater(() -> {
-            ChatController chatController = View.CHAT.getController();
-            chatController.receiveMessage(chatMessage, inChatWith);
-        });
-    }
-
-    private void showSystemNotification(String senderName, String message) {
-        if (SystemTray.isSupported()) {
-            try {
-                // Définir le nom de l'application pour les notifications
-                System.setProperty("java.awt.headless", "false");
-                System.setProperty("apple.awt.application.name", "Rise & Fall");
-
-                SystemTray tray = SystemTray.getSystemTray();
-
-                // Créer une image pour l'icône (ou utiliser une image existante)
-                BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
-                Graphics2D g = image.createGraphics();
-                g.setColor(Color.BLUE);
-                g.fillOval(0, 0, 16, 16);
-                g.dispose();
-
-                TrayIcon trayIcon = new TrayIcon(image, "Rise & Fall");
-                trayIcon.setImageAutoSize(true);
-                trayIcon.setToolTip("Rise & Fall Chat");
-
-                // Ajouter l'icône au système (si pas déjà fait)
-                if (tray.getTrayIcons().length == 0) {
-                    tray.add(trayIcon);
-                } else {
-                    trayIcon = tray.getTrayIcons()[0];
-                }
-
-                // Afficher la notification
-                trayIcon.displayMessage(
-                        "Nouveau message de " + senderName,
-                        message,
-                        TrayIcon.MessageType.INFO
-                );
-
-            } catch (AWTException e) {
-                System.err.println("Erreur lors de l'affichage de la notification: " + e.getMessage());
-            }
-        } else {
-            System.out.println("Les notifications système ne sont pas supportées sur ce système");
-        }
+        inChatWith.addReceivedMessage(chatMessage);
     }
 
     /**

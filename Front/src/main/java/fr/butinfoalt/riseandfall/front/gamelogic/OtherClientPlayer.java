@@ -1,13 +1,14 @@
 package fr.butinfoalt.riseandfall.front.gamelogic;
 
+import fr.butinfoalt.riseandfall.front.View;
+import fr.butinfoalt.riseandfall.front.chat.ChatController;
 import fr.butinfoalt.riseandfall.gamelogic.data.ChatMessage;
 import fr.butinfoalt.riseandfall.gamelogic.data.NamedItem;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.util.ToStringFormatter;
+import javafx.application.Platform;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class OtherClientPlayer extends ClientPlayer implements NamedItem {
     /**
@@ -18,7 +19,8 @@ public class OtherClientPlayer extends ClientPlayer implements NamedItem {
     /**
      * Liste des messages de chat dans le chat avec ce joueur.
      */
-    private final ArrayList<ChatMessage> messages = new ArrayList<>();
+    private final SortedSet<ChatMessage> messages = new TreeSet<>(Comparator.comparing(ChatMessage::getTimestamp));
+    private final HashMap<Long, ChatMessage> sendingMessages = new HashMap<>();
 
     /**
      * Constructeur de la classe OtherClientPlayer.
@@ -56,13 +58,43 @@ public class OtherClientPlayer extends ClientPlayer implements NamedItem {
         this.name = name;
     }
 
-    /**
-     * Ajoute un message de chat à la liste des messages de ce joueur.
-     *
-     * @param message Le message de chat à ajouter.
-     */
-    public void addMessage(ChatMessage message) {
+    private synchronized void addMessage(ChatMessage message) {
         this.messages.add(message);
+        ChatController chatController = View.CHAT.getController();
+        Platform.runLater(() -> chatController.onAddMessage(this, message));
+    }
+
+    /**
+     * Ajoute un message en cours d'envoi à la liste des messages de ce joueur.
+     *
+     * @param message Le message à ajouter.
+     */
+    public synchronized void addSendingMessage(ChatMessage message) {
+        this.addMessage(message);
+        this.sendingMessages.put(message.getNonce(), message);
+    }
+
+    /**
+     * Ajoute un message reçu à la liste des messages de ce joueur.
+     * Si le message a un nonce, il est traité différemment selon qu'il a été envoyé par le joueur ou reçu d'un autre joueur.
+     *
+     * @param message Le message de chat reçu.
+     */
+    public synchronized void addReceivedMessage(ChatMessage message) {
+        if (message.getNonce() != -1) {
+            ChatController chatController = View.CHAT.getController();
+            if (message.getSender() == RiseAndFall.getPlayer()) {
+                ChatMessage sendingMessage = this.sendingMessages.remove(message.getNonce());
+                if (sendingMessage != null) {
+                    this.messages.remove(sendingMessage);
+                    Platform.runLater(() -> chatController.onRemoveMessage(this, sendingMessage));
+                }
+            } else {
+                Platform.runLater(() -> chatController.triggerMessageNotification(this, message));
+            }
+            message.resetNonce();
+        }
+        this.addMessage(message);
     }
 
     /**
@@ -70,8 +102,8 @@ public class OtherClientPlayer extends ClientPlayer implements NamedItem {
      *
      * @return Une liste non modifiable des messages de chat.
      */
-    public List<ChatMessage> getMessages() {
-        return Collections.unmodifiableList(messages);
+    public SortedSet<ChatMessage> getMessages() {
+        return Collections.unmodifiableSortedSet(this.messages);
     }
 
     @Override

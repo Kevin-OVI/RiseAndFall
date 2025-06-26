@@ -14,6 +14,7 @@ public class PacketMessage implements IPacket {
     private final int senderId;
     private final int receiverId;
     private final String message;
+    private final long nonce;
     private final long timestamp;
 
 
@@ -22,10 +23,11 @@ public class PacketMessage implements IPacket {
      *
      * @param message Le message à envoyer
      */
-    public PacketMessage(int senderId, int receiverId, String message, long timestamp) {
+    public PacketMessage(int senderId, int receiverId, String message, long nonce, long timestamp) {
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.message = message;
+        this.nonce = nonce;
         this.timestamp = timestamp;
     }
 
@@ -39,6 +41,7 @@ public class PacketMessage implements IPacket {
         this.senderId = readHelper.readInt();
         this.receiverId = readHelper.readInt();
         this.message = readHelper.readString();
+        this.nonce = readHelper.readLong();
         this.timestamp = readHelper.readLong();
     }
 
@@ -53,6 +56,7 @@ public class PacketMessage implements IPacket {
         writeHelper.writeInt(this.senderId);
         writeHelper.writeInt(this.receiverId);
         writeHelper.writeString(this.message);
+        writeHelper.writeLong(this.nonce);
         writeHelper.writeLong(this.timestamp);
     }
 
@@ -63,6 +67,10 @@ public class PacketMessage implements IPacket {
      */
     public String getMessage() {
         return this.message;
+    }
+
+    public long getNonce() {
+        return this.nonce;
     }
 
     public int getSenderId() {

@@ -31,7 +31,13 @@ public class ChatStage extends Stage {
         INSTANCE.show();
         INSTANCE.toFront();
         ChatController controller = View.CHAT.getController();
-        controller.onDisplayed(null);
+        controller.loadData();
+    }
+
+    public static void closeWindow() {
+        INSTANCE.close();
+        ChatController controller = View.CHAT.getController();
+        controller.clearState();
     }
 
     /**

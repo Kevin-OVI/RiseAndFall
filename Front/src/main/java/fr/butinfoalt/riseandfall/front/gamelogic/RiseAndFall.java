@@ -2,6 +2,8 @@ package fr.butinfoalt.riseandfall.front.gamelogic;
 
 import fr.butinfoalt.riseandfall.front.RiseAndFallApplication;
 import fr.butinfoalt.riseandfall.front.RiseAndFallClient;
+import fr.butinfoalt.riseandfall.front.chat.ChatStage;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 import java.util.Timer;
@@ -60,6 +62,7 @@ public class RiseAndFall {
     public static void resetGame() {
         player = null;
         game = null;
+        Platform.runLater(ChatStage::closeWindow);
     }
 
     /**

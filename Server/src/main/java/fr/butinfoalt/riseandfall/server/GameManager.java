@@ -293,7 +293,7 @@ public class GameManager {
                 long timestamp = resultSet.getTimestamp("sent_at").getTime();
                 ServerPlayer sender = userManager.getPlayer(senderId);
                 ServerPlayer receiver = userManager.getPlayer(receiverId);
-                messages.add(new ChatMessage(sender, receiver, message, timestamp));
+                messages.add(new ChatMessage(sender, receiver, message, -1, timestamp));
             }
         } catch (SQLException e) {
             LogManager.logError("Erreur lors de la récupération des messages de chat du joueur " + player.getUser().getUsername() + " dans la base de données.", e);
@@ -313,6 +313,7 @@ public class GameManager {
                         message.getSender().getId(),
                         message.getReceiver().getId(),
                         message.getMessage(),
+                        message.getNonce(),
                         message.getTimestamp()
                 );
                 connection.sendPacket(packetMessage);
@@ -351,7 +352,7 @@ public class GameManager {
             return;
         }
 
-        PacketMessage packetMessage = new PacketMessage(senderPlayer.getId(), receiverPlayer.getId(), packet.getMessage(), sentAtTimestamp);
+        PacketMessage packetMessage = new PacketMessage(senderPlayer.getId(), receiverPlayer.getId(), packet.getMessage(), packet.getNonce(), sentAtTimestamp);
         for (SocketWrapper connection : Iterables.concat(this.getConnectionsFor(senderPlayer), this.getConnectionsFor(receiverPlayer))) {
             try {
                 connection.sendPacket(packetMessage);
