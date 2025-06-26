@@ -229,6 +229,7 @@ public class ChatController {
      */
     public void loadData() {
         this.clearState();
+        this.setPlayerEliminated(RiseAndFall.getPlayer().isEliminated());
 
         for (OtherClientPlayer otherPlayer : RiseAndFall.getGame().getOtherPlayers()) {
             this.chatListView.getItems().add(otherPlayer);
@@ -296,6 +297,10 @@ public class ChatController {
      * @param eliminated Indique si le joueur est éliminé ou non.
      */
     public void setPlayerEliminated(boolean eliminated) {
+        // Les éléments peuvent ne pas être initialisés si la fenêtre n'est pas encore affichée
+        if (this.messageField == null || this.sendButton == null) {
+            return;
+        }
         if (eliminated) {
             this.messageField.clear();
             this.messageField.setDisable(true);
