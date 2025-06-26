@@ -283,7 +283,7 @@ public abstract class Player implements Identifiable, ISerializable {
      * @return true si le joueur est éliminé, false sinon.
      */
     public boolean isEliminated() {
-        return this.unitMap.isEmpty() && this.buildingMap.isEmpty();
+        return this.buildingMap.isEmpty();
     }
 
     /**
