@@ -108,7 +108,7 @@ public class ChatController {
         }
         this.updateDisplayedMessages();
 
-        Platform.runLater(() -> this.messageScrollPane.setVvalue(1.0));
+        this.scrollToEnd();
     }
 
     /**
@@ -134,6 +134,16 @@ public class ChatController {
             LogManager.logError("Impossible d'envoyer le packet de message", e);
             showErrorMessage("Erreur lors de l'envoi du message.");
         }
+    }
+
+    private void scrollToEnd() {
+        Platform.runLater(() -> this.messageScrollPane.setVvalue(1.0));
+        RiseAndFall.TIMER.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> ChatController.this.messageScrollPane.setVvalue(1.0));
+            }
+        }, 10);
     }
 
     /**
@@ -199,7 +209,7 @@ public class ChatController {
     private void updateDisplayedMessages() {
         this.messageContainer.getChildren().setAll(this.messageViews.sequencedValues());
         this.chatListView.refresh();
-        Platform.runLater(() -> this.messageScrollPane.setVvalue(1.0));
+        this.scrollToEnd();
     }
 
     /**
