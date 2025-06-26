@@ -1,6 +1,8 @@
 package fr.butinfoalt.riseandfall.front;
 
 import fr.butinfoalt.riseandfall.front.authentification.LoadingController;
+import fr.butinfoalt.riseandfall.front.chat.ChatStage;
+import fr.butinfoalt.riseandfall.front.description.DescriptionStage;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Application;
@@ -134,6 +136,8 @@ public class RiseAndFallApplication extends Application {
             } catch (IOException e) {
                 LogManager.logError("Erreur lors de la fermeture du client", e);
             }
+            DescriptionStage.INSTANCE.close();
+            ChatStage.closeWindow();
             RiseAndFall.TIMER.cancel();
         }
     }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="fr.butinfoalt.riseandfall.front.game.logs.AttackLogsController">
+    <ImageView fx:id="backgroundImageView" managed="false"/>
+
+    <VBox fx:id="root" alignment="CENTER" spacing="20">
+        <TitleLabel style="-fx-font-size: 130%">Historique des attaques</TitleLabel>
+
+        <Label fx:id="eliminatedLabel" textFill="red" style="-fx-font-size: 120%"/>
+        <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent">
+            <VBox fx:id="listContainer" alignment="CENTER" spacing="20"/>
+        </ScrollPane>
+
+        <Button onAction="#switchBack" fx:id="backButton"/>
+    </VBox>
+</VBox>

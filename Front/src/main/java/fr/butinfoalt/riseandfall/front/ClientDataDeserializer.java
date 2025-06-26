@@ -23,10 +23,6 @@ public class ClientDataDeserializer implements DataDeserializer {
 
     @Override
     public ClientPlayer getPlayerById(int playerId) {
-        ClientPlayer player = RiseAndFall.getPlayer();
-        if (player != null && player.getId() == playerId) {
-            return player;
-        }
-        return RiseAndFall.getGame().getOtherPlayer(playerId);
+        return RiseAndFall.getPlayer(playerId);
     }
 }

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" xmlns="http://javafx.com/javafx"
+            fx:controller="fr.butinfoalt.riseandfall.front.chat.ChatController"
+            prefHeight="600.0" prefWidth="900.0">
+
+    <!-- Barre latérale gauche avec la liste des chats -->
+    <left>
+        <VBox style="-fx-background-color: #1a1a1a;" prefWidth="200.0" spacing="5.0">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <!-- Titre CHAT -->
+            <Label text="CHAT" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;">
+                <VBox.margin>
+                    <Insets bottom="10"/>
+                </VBox.margin>
+            </Label>
+
+            <!-- Liste des conversations -->
+            <ListView fx:id="chatListView" style="-fx-background-color: #1a1a1a;">
+                <VBox.vgrow>
+                    <Priority fx:value="ALWAYS"/>
+                </VBox.vgrow>
+            </ListView>
+        </VBox>
+    </left>
+
+    <!-- Zone principale du chat -->
+    <center>
+        <VBox style="-fx-background-color: #b0b0b0;">
+            <!-- Zone des messages -->
+            <ScrollPane fx:id="messageScrollPane" fitToWidth="true" style="-fx-background: #b0b0b0; -fx-background-color: #b0b0b0;">
+                <VBox.vgrow>
+                    <Priority fx:value="ALWAYS"/>
+                </VBox.vgrow>
+                <content>
+                    <VBox fx:id="messageContainer" spacing="10" style="-fx-background-color: #b0b0b0;">
+                        <padding>
+                            <Insets top="10" right="20" bottom="10" left="20"/>
+                        </padding>
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <!-- Zone de saisie du message -->
+            <HBox alignment="CENTER" spacing="10" style="-fx-background-color: #b0b0b0; -fx-padding: 10;">
+                <TextField fx:id="messageField" HBox.hgrow="ALWAYS"
+                           style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 10;"
+                           onAction="#sendMessage"/>
+
+                <Button style="-fx-background-color: #333333; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;"
+                        onAction="#sendMessage" fx:id="sendButton">
+                    <graphic>
+                        <Label text="➤" style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+                    </graphic>
+                </Button>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

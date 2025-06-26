@@ -1,0 +1,14 @@
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="fr.butinfoalt.riseandfall.front.game.logs.AttackLogsListItemController"
+      alignment="CENTER_LEFT"
+      spacing="10"
+      style="-fx-padding: 10; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-background-color: white;">
+    <TitleLabel fx:id="title" style="-fx-font-size: 120%"/>
+
+    <VBox fx:id="attacksLogs"/>
+    <VBox fx:id="eliminatedPlayersLogs"/>
+    <VBox fx:id="winningPlayersLogs" visible="false"/>
+</VBox>

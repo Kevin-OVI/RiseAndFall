@@ -53,11 +53,17 @@ public abstract class Player implements Identifiable, ISerializable {
      * Quantité d'or que possède le joueur.
      * Initialisé à 50 pièces d'or au début de la partie.
      */
-    protected float goldAmount = 50;
+    private float goldAmount = 50;
     /**
      * Quantité d'intelligence que possède le joueur.
      */
     private float intelligence = 0;
+
+    /**
+     * Tour d'élimination du joueur.
+     * -1 si le joueur n'est pas éliminé, sinon le tour où il a été éliminé.
+     */
+    private int eliminationTurn = -1;
 
     /**
      * Constructeur de la classe Player.
@@ -164,6 +170,26 @@ public abstract class Player implements Identifiable, ISerializable {
     }
 
     /**
+     * Méthode pour obtenir le tour d'élimination du joueur.
+     * Si le joueur n'est pas éliminé, retourne -1.
+     *
+     * @return Le tour d'élimination du joueur, ou -1 s'il n'est pas éliminé.
+     */
+    public int getEliminationTurn() {
+        return eliminationTurn;
+    }
+
+    /**
+     * Méthode pour définir le tour d'élimination du joueur.
+     * Utilisé pour marquer le tour où le joueur a été éliminé.
+     *
+     * @param eliminationTurn Le tour d'élimination à définir, ou -1 si le joueur n'est pas éliminé.
+     */
+    public void setEliminationTurn(int eliminationTurn) {
+        this.eliminationTurn = eliminationTurn;
+    }
+
+    /**
      * Méthode pour obtenir le nombre maximum d'unités que le joueur peut avoir.
      * On additionne le nombre maximum d'unités de chaque type d'unité multiplié par le nombre d'unités de ce type.
      *
@@ -257,7 +283,7 @@ public abstract class Player implements Identifiable, ISerializable {
      * @return true si le joueur est éliminé, false sinon.
      */
     public boolean isEliminated() {
-        return this.unitMap.isEmpty() && this.buildingMap.isEmpty();
+        return this.buildingMap.isEmpty();
     }
 
     /**
@@ -272,6 +298,7 @@ public abstract class Player implements Identifiable, ISerializable {
     public void serializeModifiableData(WriteHelper writeHelper) throws IOException {
         writeHelper.writeFloat(this.goldAmount);
         writeHelper.writeFloat(this.intelligence);
+        writeHelper.writeInt(this.eliminationTurn);
         ObjectIntMap.serialize(this.buildingMap, writeHelper);
         ObjectIntMap.serialize(this.unitMap, writeHelper);
         ObjectIntMap.serialize(this.pendingUnitsCreation, writeHelper);
@@ -301,6 +328,7 @@ public abstract class Player implements Identifiable, ISerializable {
                 .add("race", this.race)
                 .add("goldAmount", this.goldAmount)
                 .add("intelligence", this.intelligence)
+                .add("eliminationTurn", this.eliminationTurn)
                 .add("buildingMap", this.buildingMap)
                 .add("unitMap", this.unitMap)
                 .add("pendingUnitsCreation", this.pendingUnitsCreation)

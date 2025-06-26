@@ -1,17 +1,27 @@
 .root {
-    -fx-font-family: "IM FELL ENGLISH SC", Times, serif;
     -fx-font-size: 12pt;
 }
 
-.title-label {
-    -fx-font-family: "Arial Black", sans-serif;
-    -fx-font-size: 110%;
+.force-default-font {
+    -fx-font-family: "Arial", sans-serif;
 }
 
-.purchasable-table-column {
+.title-label {
+    -fx-font-size: 130%;
+}
+
+.title-label, .force-custom-font {
+    -fx-font-family: "IM FELL ENGLISH SC", Times, serif;
+}
+
+.table-column {
     -fx-alignment: CENTER;
 }
 
 .scrollpane-transparent, .scrollpane-transparent > .viewport {
     -fx-background-color: transparent;
+}
+
+.description-text {
+    -fx-font-size: 17px;
 }

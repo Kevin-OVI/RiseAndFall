@@ -137,6 +137,15 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
     }
 
     /**
+     * Permet d'obtenir une collection contenant toutes les valeurs de l'association.
+     *
+     * @return Une collection contenant toutes les valeurs de l'association.
+     */
+    public SequencedCollection<Integer> getValues() {
+        return this.map.sequencedValues();
+    }
+
+    /**
      * Permet d'obtenir le nombre d'entrées dans l'association.
      *
      * @return Le nombre d'entrées dans l'association.
@@ -198,17 +207,27 @@ public class ObjectIntMap<T> implements Iterable<ObjectIntMap.Entry<T>>, Cloneab
     }
 
     /**
+     * Permet de cloner l'association en utilisant un sous-univers de clés spécifique.
+     *
+     * @param keyUniverse Un ensemble de clés à utiliser pour le clonage. Seules les clés présentes dans cet ensemble seront inclues dans la copie.
+     * @return Une nouvelle instance d'ObjectIntMap contenant les mêmes clés et valeurs que l'instance actuelle, mais limitée aux clés du keyUniverse.
+     */
+    public ObjectIntMap<T> clone(Collection<T> keyUniverse) {
+        ObjectIntMap<T> cloned = new ObjectIntMap<>(keyUniverse);
+        for (T key : keyUniverse) {
+            cloned.set(key, this.get(key));
+        }
+        return cloned;
+    }
+
+    /**
      * Permet de cloner l'association.
      *
      * @return Une nouvelle instance d'ObjectIntMap contenant les mêmes clés et valeurs que l'instance actuelle.
      */
     @Override
     public ObjectIntMap<T> clone() {
-        ObjectIntMap<T> cloned = this.createEmptyClone();
-        for (Map.Entry<T, Integer> entry : this.map.entrySet()) {
-            cloned.set(entry.getKey(), entry.getValue());
-        }
-        return cloned;
+        return this.clone(this.getKeys());
     }
 
     /**

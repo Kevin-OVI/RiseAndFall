@@ -1,54 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<?import fr.butinfoalt.riseandfall.front.game.SimpleTable?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
       fx:controller="fr.butinfoalt.riseandfall.front.game.MainRunningGameController">
+
     <ImageView fx:id="backgroundImageView" managed="false"/>
 
     <ScrollPane fitToWidth="true" styleClass="scrollpane-transparent" fx:id="root">
-        <VBox alignment="CENTER" spacing="20.0">
+        <StackPane alignment="TOP_RIGHT">
+            <VBox alignment="CENTER" spacing="20.0">
+                <VBox alignment="CENTER" spacing="20">
+                    <HBox alignment="TOP_CENTER" spacing="30">
+                        <VBox alignment="TOP_CENTER" spacing="10">
+                            <TitleLabel>Information de la partie</TitleLabel>
+                            <SimpleTable fx:id="gameInfoTable" prefWidth="300"/>
+                        </VBox>
 
-            <VBox alignment="CENTER" spacing="20">
-                <HBox alignment="TOP_CENTER" spacing="30">
-                    <VBox alignment="TOP_CENTER" spacing="10">
-                        <TitleLabel>Information de la partie</TitleLabel>
-                        <Label fx:id="turnNumberField"/>
-                        <Label fx:id="nextTurnInField" prefWidth="300"/>
+                        <VBox alignment="TOP_CENTER" spacing="10">
+                            <TitleLabel>Votre royaume</TitleLabel>
+                            <SimpleTable fx:id="playerInfoTable" prefWidth="300"/>
+                        </VBox>
+                    </HBox>
+
+                    <VBox alignment="CENTER" spacing="10">
+                        <TitleLabel>Vos unités</TitleLabel>
+                        <SimpleTable fx:id="unitsTable" prefWidth="630"/>
                     </VBox>
 
-                    <VBox alignment="TOP_CENTER" spacing="10">
-                        <TitleLabel>Votre royaume</TitleLabel>
-
-                        <Label fx:id="goldField"/>
-                        <Label fx:id="intelligenceField"/>
-                        <Label fx:id="raceField"/>
+                    <VBox alignment="CENTER" spacing="10">
+                        <TitleLabel>Vos bâtiments</TitleLabel>
+                        <SimpleTable fx:id="buildingsTable" prefWidth="630"/>
                     </VBox>
+                </VBox>
+                <HBox fx:id="buttonsContainer" alignment="CENTER" spacing="10">
+                    <Button text="Description &amp; Règles du jeu" onAction="#switchToDescriptionPage"/>
+                    <Button text="Modifier les ordres" onAction="#switchToOrders"/>
+                    <Button text="Modifier les attaques" onAction="#manageAttacks"/>
+                    <Button text="Journal des attaques" onAction="#showAttacksLogs"/>
+
+                    <!-- Bouton pour passer au tour suivant -->
+                    <Button fx:id="nextTurnButton" text="Tour suivant" onAction="#handleEndTurn"/>
                 </HBox>
-
-                <VBox alignment="CENTER" spacing="10">
-                    <TitleLabel>Vos unités</TitleLabel>
-                    <!--Ce composant est rempli dynamiquement avec les types d'unités-->
-                    <VBox fx:id="unitVBox" alignment="CENTER" spacing="10"/>
-                </VBox>
-
-                <VBox alignment="CENTER" spacing="10">
-                    <TitleLabel>Vos bâtiments</TitleLabel>
-                    <!--Ce composant est rempli dynamiquement avec les types de bâtiments-->
-                    <VBox fx:id="buildingsVBox" alignment="CENTER" spacing="10"/>
-                </VBox>
             </VBox>
-            <HBox fx:id="buttonsContainer" alignment="CENTER" spacing="10">
-                <Button text="Description" onAction="#switchToDescriptionPage"/>
-                <Button text="Modifier les ordres" onAction="#switchToOrders"/>
-                <Button text="Modifier les attaques" onAction="#manageAttacks"/>
 
-                <!-- Bouton pour passer au tour suivant -->
-                <Button fx:id="nextTurnButton" text="Tour suivant" onAction="#handleEndTurn"/>
-            </HBox>
-
-        </VBox>
+            <Button onAction="#switchToChat"
+                    AnchorPane.topAnchor="10.0"
+                    AnchorPane.rightAnchor="10.0"
+                    style="-fx-background-color: #007bff; -fx-background-radius: 20; -fx-border-radius: 20; -fx-border-width: 0; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 8 12 8 12;">
+                <graphic>
+                    <!-- Icône de bulle de chat -->
+                    <Label text="💬" style="-fx-text-fill: white; -fx-font-size: 16px;"/>
+                </graphic>
+            </Button>
+        </StackPane>
     </ScrollPane>
 </VBox>

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="fr.butinfoalt.riseandfall.front.description.DescriptionController" alignment="CENTER">
@@ -16,8 +18,107 @@
             <padding>
                 <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
-            <VBox alignment="CENTER" maxWidth="1000">
-                <TextFlow fx:id="textFlow" style="-fx-font-size: 20px;"/>
+            <VBox alignment="CENTER">
+                <VBox maxWidth="1000" spacing="20">
+                    <VBox alignment="CENTER">
+                        <TitleLabel style="-fx-font-size: 250%;" styleClass="force-custom-font" text="Rise &amp; Fall"/>
+                    </VBox>
+
+                    <TextFlow styleClass="description-text">
+                        <Text text="Rise &amp; Fall est un jeu développé par une équipe de choc.&#xA;"/>
+                        <Text text="Le but est de créer un jeu tour par tour dans un monde fantasy.&#xA;"/>
+                        <Text text="On a présenté le projet, maintenant passons aux règles du jeu."/>
+                    </TextFlow>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
+                                    text="Objectif du jeu :"/>
+                        <TextFlow styleClass="description-text">
+                            <Text text="Dans Rise &amp; Fall, chaque joueur incarne une civilisation dans un monde fantasy. Le but est de faire prospérer sa civilisation en gérant ses ressources, en développant son économie, et en étendant son territoire tout en survivant jusqu'à la fin de la partie."/>
+                        </TextFlow>
+                    </VBox>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
+                                    text="Début de la partie :"/>
+                        <TextFlow styleClass="description-text">
+                            <Text text="• Au début de chaque partie, chaque joueur doit choisir une race parmi les 7 disponibles. Chaque race a des caractéristiques, des bâtiments et des unités différents. Elles influencent donc la stratégie du joueur au fil de la partie. Leurs caractéristiques sont détaillées plus bas.&#xA;"/>
+                            <Text text="• Au moins 3 joueurs doivent rejoindre une partie afin qu'elle puisse démarrer."/>
+                        </TextFlow>
+                    </VBox>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font" text="Ressources :"/>
+                        <TextFlow styleClass="description-text">
+                            <Text text="Chaque joueur dispose de ressources pour développer sa civilisation. Les ressources sont l'or et l'intelligence :&#xA;"/>
+                            <Text text="• L'or est utilisé pour construire des bâtiments et recruter des unités.&#xA;"/>
+                            <Text text="• L'intelligence est utilisée pour débloquer des bâtiments et unités plus puissants.&#xA;"/>
+                            <Text text="• Les bâtiments peuvent produire de l'or et de l'intelligence, et ont une résistance aux dégâts et une capacité d'entrainement d'unités.&#xA;"/>
+                            <Text text="• Les unités ont des points de vie, des dégâts d'attaque, et peuvent attaquer les bâtiments et les unités adverses.&#xA;"/>
+                        </TextFlow>
+                    </VBox>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
+                                    text="Déroulement des tours :"/>
+                        <TextFlow styleClass="description-text">
+                            <Text text="À chaque tour, les joueurs disposent d'un temps pour définir des ordres afin de :&#xA;"/>
+                            <Text text="• Construire des bâtiments&#xA;• Recruter des unités&#xA;• Attaquer ou interagir avec d'autres joueurs"/>
+                            <Text text="Tous les ordres sont ensuite exécutés simultanément, et la partie passe au tour suivant."/>
+                        </TextFlow>
+                    </VBox>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
+                                    text="Déroulement des combats :"/>
+                        <TextFlow styleClass="description-text">
+                            <Text text="Chaque joueur peut décider d'attaquer un autre royaume en choisissant quelles unités seront utilisées. Les unités qui ne sont pas impliquées peuvent défendre leur royaume des autres attaques le ciblant.&#xA;"/>
+                            <Text text="Chaque attaque se déroule en 3 phases. S'il ne reste plus de dégâts à appliquer à la fin d'une phase, les suivantes n'ont pas lieu.&#xA;"/>
+                            <Text text="1. Les dégâts des unités attaquantes sont appliqués aux remparts du joueur ciblé, qui sont détruits tant qu'il reste des dégâts.&#xA;"/>
+                            <Text text="2. Si tous les remparts sont détruits, les dégâts restants sont appliqués aux unités défensives du joueur ciblé, qui sont détruites tant qu'il reste des dégâts.&#xA;"/>
+                            <Text text="3. Si toutes les unités défensives sont détruites, les dégâts restants sont appliqués aux bâtiments du joueur ciblé, qui sont détruits tant qu'il reste des dégâts.&#xA;"/>
+                            <Text text="Si toutes les unités et bâtiments du joueur ciblé sont détruits, celui ci est éliminé.&#xA;"/>
+                            <Text text="Les unités attaquantes peuvent également être détruites par les unités défensives du joueur ciblé."/>
+                        </TextFlow>
+                    </VBox>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
+                                    text="Intéractions entre les joueurs :"/>
+                        <TextFlow styleClass="description-text">
+                            <Text text="Les joueurs peuvent interagir entre eux avec un chat en temps réel, leur permettant de discuter de la partie, de former des alliances, ou de se déclarer la guerre.&#xA;"/>
+                            <Text text="Il est uniquement possible d'envoyer des messages à un seul joueur à la fois. Il n'y a pas de groupes de discussion, ni de discussions publiques.&#xA;"/>
+                        </TextFlow>
+                    </VBox>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font" text="Fin de partie :"/>
+                        <TextFlow styleClass="description-text">
+                            <Text text="Une partie de Rise &amp; Fall peut se terminer de deux manières, en fonction du nombre de joueurs encore en lice à la fin de chaque tour :&#xA;"/>
+                            <Text text="• S'il ne reste plus qu'un joueur, il gagne immédiatement tout seul.&#xA;"/>
+                            <Text text="• Si plus de 50 tours ont été joués, et qu'il reste moins de 3 joueurs, ces joueurs restants sont déclarés gagnants ensemble.&#xA;"/>
+                            <Text text="Un joueur perd lorsqu'il n'a plus de bâtiments, ni d'unités."/>
+                        </TextFlow>
+                    </VBox>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
+                                    text="Liste des races et leurs caractéristiques :"/>
+                        <TextFlow fx:id="racesList"/>
+                    </VBox>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
+                                    text="Liste des bâtiments :"/>
+                        <TextFlow fx:id="buildingsList"/>
+                    </VBox>
+
+                    <VBox>
+                        <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
+                                    text="Liste des unités :"/>
+                        <TextFlow fx:id="unitsList"/>
+                    </VBox>
+                </VBox>
             </VBox>
         </ScrollPane>
     </StackPane>

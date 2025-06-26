@@ -12,10 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Classe responsable de la gestion de l'authentification des clients.
@@ -286,6 +283,7 @@ public class AuthenticationManager {
         GameManager gameManager = this.server.getGameManager();
         gameManager.sendJoinGamePacket(sender, user);
         gameManager.sendDiscoverPlayerPacket(sender, user);
+        gameManager.sendTurnsResults(sender, user);
     }
 
     /**
