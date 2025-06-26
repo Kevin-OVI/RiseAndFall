@@ -1,5 +1,6 @@
 package fr.butinfoalt.riseandfall.front;
 
+import fr.butinfoalt.riseandfall.front.chat.ChatController;
 import fr.butinfoalt.riseandfall.front.game.gamelist.GameListController;
 import fr.butinfoalt.riseandfall.front.gamelogic.*;
 import fr.butinfoalt.riseandfall.gamelogic.GameState;
@@ -142,10 +143,13 @@ public class RiseAndFallClient extends BaseSocketClient {
      * Change la vue de l'application pour afficher l'écran principal du jeu.
      * Cette méthode est une surcharge de {@link #switchToGameView(GameState, String)} sans message d'erreur.
      *
-     * @param gameState L'état du jeu (WAITING, RUNNING, ENDED).
+     * @param game   L'état du jeu (WAITING, RUNNING, ENDED).
+     * @param player Le joueur actuel.
      */
-    private void switchToGameView(GameState gameState) {
-        this.switchToGameView(gameState, null);
+    private void switchToGameView(ClientGame game, ClientPlayer player) {
+        this.switchToGameView(game.getState(), null);
+        ChatController chatController = View.CHAT.getController();
+        chatController.setPlayerEliminated(player.isEliminated());
     }
 
     /**
@@ -157,9 +161,10 @@ public class RiseAndFallClient extends BaseSocketClient {
      */
     private void onJoinedGame(SocketWrapper client, ReadHelper readHelper) throws IOException {
         ClientGame game = new ClientGame(readHelper);
+        CurrentClientPlayer player = new CurrentClientPlayer(readHelper);
         RiseAndFall.setGame(game);
-        RiseAndFall.setPlayer(new CurrentClientPlayer(readHelper));
-        Platform.runLater(() -> this.switchToGameView(game.getState()));
+        RiseAndFall.setPlayer(player);
+        Platform.runLater(() -> this.switchToGameView(game, player));
     }
 
     /**
@@ -171,9 +176,11 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
     private void onUpdateGameData(SocketWrapper sender, ReadHelper readHelper) throws IOException {
-        RiseAndFall.getGame().updateModifiableData(readHelper);
-        RiseAndFall.getPlayer().updateModifiableData(readHelper);
-        Platform.runLater(() -> this.switchToGameView(RiseAndFall.getGame().getState()));
+        ClientGame game = RiseAndFall.getGame();
+        CurrentClientPlayer player = RiseAndFall.getPlayer();
+        game.updateModifiableData(readHelper);
+        player.updateModifiableData(readHelper);
+        Platform.runLater(() -> this.switchToGameView(game, player));
     }
 
     /**

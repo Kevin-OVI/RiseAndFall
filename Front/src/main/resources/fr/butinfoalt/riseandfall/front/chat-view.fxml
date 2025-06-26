@@ -52,12 +52,12 @@
 
             <!-- Zone de saisie du message -->
             <HBox alignment="CENTER" spacing="10" style="-fx-background-color: #b0b0b0; -fx-padding: 10;">
-                <TextField fx:id="messageField" promptText="Enter a message" HBox.hgrow="ALWAYS"
+                <TextField fx:id="messageField" HBox.hgrow="ALWAYS"
                            style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 10;"
                            onAction="#sendMessage"/>
 
                 <Button style="-fx-background-color: #333333; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;"
-                        onAction="#sendMessage">
+                        onAction="#sendMessage" fx:id="sendButton">
                     <graphic>
                         <Label text="➤" style="-fx-font-size: 16px; -fx-text-fill: white;"/>
                     </graphic>

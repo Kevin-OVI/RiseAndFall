@@ -278,6 +278,12 @@ public class GameManager {
         sendChats(connection, player);
     }
 
+    /**
+     * Récupère les messages de chat pour un joueur spécifique à partir de la base de données.
+     *
+     * @param player Le joueur pour lequel on veut récupérer les messages de chat.
+     * @return Une liste de messages de chat pour le joueur spécifié.
+     */
     private List<ChatMessage> getMessagesForPlayer(ServerPlayer player) {
         ArrayList<ChatMessage> messages = new ArrayList<>();
         UserManager userManager = this.server.getUserManager();
@@ -302,6 +308,13 @@ public class GameManager {
         return messages;
     }
 
+    /**
+     * Envoie les messages de chat à un joueur spécifique lors de sa connexion.
+     * Cette méthode est appelée pour envoyer les messages de chat précédents au joueur lorsqu'il se connecte.
+     *
+     * @param connection La connexion du joueur qui reçoit les messages de chat.
+     * @param player     Le joueur qui reçoit les messages de chat.
+     */
     private void sendChats(SocketWrapper connection, ServerPlayer player) {
         List<ChatMessage> allMessages = getMessagesForPlayer(player);
         if (allMessages.isEmpty()) {
@@ -309,56 +322,11 @@ public class GameManager {
         }
         try {
             for (ChatMessage message : allMessages) {
-                PacketMessage packetMessage = new PacketMessage(
-                        message.getSender().getId(),
-                        message.getReceiver().getId(),
-                        message.getMessage(),
-                        message.getNonce(),
-                        message.getTimestamp()
-                );
+                PacketMessage packetMessage = new PacketMessage(message);
                 connection.sendPacket(packetMessage);
             }
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du paquet de chat au joueur " + player.getUser().getUsername() + " à la connexion " + connection.getName(), e);
-        }
-    }
-
-    public void onChatMessage(SocketWrapper sender, PacketMessage packet) {
-        // Le sender du paquet n'est pas pris en compte pour éviter les usurpations d'identité.
-        ServerPlayer senderPlayer = this.getPlayerInRunningGame(sender);
-        if (senderPlayer == null) {
-            LogManager.logError("La connexion %s n'est pas dans une partie en cours.".formatted(sender.getName()));
-            return;
-        }
-        ServerPlayer receiverPlayer = this.server.getUserManager().getPlayer(packet.getReceiverId());
-        if (receiverPlayer.getGame() != senderPlayer.getGame()) {
-            LogManager.logError("Le joueur %s a tenté d'envoyer un message à %s, mais il n'est pas dans la même partie.".formatted(senderPlayer.getUser().getUsername(), receiverPlayer.getUser().getUsername()));
-        }
-        long sentAtTimestamp;
-        try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO chat_message (sender_player_id, receiver_player_id, message) VALUES (?, ?, ?) RETURNING sent_at")) {
-            statement.setInt(1, senderPlayer.getId());
-            statement.setInt(2, receiverPlayer.getId());
-            statement.setString(3, packet.getMessage());
-            statement.execute();
-            ResultSet resultSet = statement.getResultSet();
-            if (resultSet.next()) {
-                sentAtTimestamp = resultSet.getTimestamp("sent_at").getTime();
-            } else {
-                LogManager.logError("Erreur lors de l'enregistrement du message en base de données : aucune ligne retournée.");
-                return;
-            }
-        } catch (Exception e) {
-            LogManager.logError("Erreur lors de l'enregistrement du message en base de données", e);
-            return;
-        }
-
-        PacketMessage packetMessage = new PacketMessage(senderPlayer.getId(), receiverPlayer.getId(), packet.getMessage(), packet.getNonce(), sentAtTimestamp);
-        for (SocketWrapper connection : Iterables.concat(this.getConnectionsFor(senderPlayer), this.getConnectionsFor(receiverPlayer))) {
-            try {
-                connection.sendPacket(packetMessage);
-            } catch (IOException e) {
-                LogManager.logError("Erreur lors de l'envoi du message au joueur " + senderPlayer.getUser().getUsername() + " à la connexion " + connection.getName(), e);
-            }
         }
     }
 
@@ -1037,6 +1005,51 @@ public class GameManager {
                 LogManager.logError("Erreur lors de l'envoi du paquet de déconnexion au client " + sender.getName(), e);
             }
             this.sendWaitingGames(connection);
+        }
+    }
+
+    /**
+     * Appelée lorsqu'un message de chat est reçu d'un joueur.
+     *
+     * @param sender La connexion du joueur qui envoie le message.
+     * @param packet Le paquet de message de chat reçu, contenant l'ID du joueur récepteur, le message et un nonce.
+     */
+    public void onChatMessage(SocketWrapper sender, PacketMessage packet) {
+        // Le sender du paquet n'est pas pris en compte pour éviter les usurpations d'identité.
+        ServerPlayer senderPlayer = this.getPlayerInRunningGame(sender);
+        if (senderPlayer == null) {
+            LogManager.logError("La connexion %s n'est pas dans une partie en cours.".formatted(sender.getName()));
+            return;
+        }
+        ServerPlayer receiverPlayer = this.server.getUserManager().getPlayer(packet.getReceiverId());
+        if (receiverPlayer.getGame() != senderPlayer.getGame()) {
+            LogManager.logError("Le joueur %s a tenté d'envoyer un message à %s, mais il n'est pas dans la même partie.".formatted(senderPlayer.getUser().getUsername(), receiverPlayer.getUser().getUsername()));
+        }
+        long sentAtTimestamp;
+        try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO chat_message (sender_player_id, receiver_player_id, message) VALUES (?, ?, ?) RETURNING sent_at")) {
+            statement.setInt(1, senderPlayer.getId());
+            statement.setInt(2, receiverPlayer.getId());
+            statement.setString(3, packet.getMessage());
+            statement.execute();
+            ResultSet resultSet = statement.getResultSet();
+            if (resultSet.next()) {
+                sentAtTimestamp = resultSet.getTimestamp("sent_at").getTime();
+            } else {
+                LogManager.logError("Erreur lors de l'enregistrement du message en base de données : aucune ligne retournée.");
+                return;
+            }
+        } catch (Exception e) {
+            LogManager.logError("Erreur lors de l'enregistrement du message en base de données", e);
+            return;
+        }
+
+        PacketMessage packetMessage = new PacketMessage(senderPlayer.getId(), receiverPlayer.getId(), packet.getMessage(), packet.getNonce(), sentAtTimestamp);
+        for (SocketWrapper connection : Iterables.concat(this.getConnectionsFor(senderPlayer), this.getConnectionsFor(receiverPlayer))) {
+            try {
+                connection.sendPacket(packetMessage);
+            } catch (IOException e) {
+                LogManager.logError("Erreur lors de l'envoi du message au joueur " + senderPlayer.getUser().getUsername() + " à la connexion " + connection.getName(), e);
+            }
         }
     }
 }
