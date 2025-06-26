@@ -18,7 +18,7 @@ public class VictoryScreenController implements ViewController {
     @FXML
     private void onReturnToGameList() {
         try {
-            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.EXIT_GAME));
+            RiseAndFall.getClient().sendPacket(new PacketGameAction(PacketGameAction.Action.QUIT_GAME));
         } catch (IOException e) {
             LogManager.logError("Failed to send exit game packet", e);
             return;

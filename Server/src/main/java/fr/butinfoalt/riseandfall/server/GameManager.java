@@ -999,28 +999,36 @@ public class GameManager {
             return;
         }
         ServerGame serverGame = player.getGame();
-        if (serverGame.getState() != GameState.WAITING) {
-            LogManager.logError("Le joueur " + player.getUser().getUsername() + " a quitté la partie " + serverGame.getName() + " alors qu'elle était déjà en cours.");
-            try {
-                sender.sendPacket(new PacketError(ErrorType.QUIT_NON_WAITING));
-            } catch (IOException e) {
-                LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
+        switch (serverGame.getState()) {
+            case WAITING -> {
+                try (PreparedStatement statement = server.getDb().prepareStatement("DELETE FROM player WHERE id = ?")) {
+                    statement.setInt(1, player.getId());
+                    statement.executeUpdate();
+                } catch (SQLException e) {
+                    LogManager.logError("Erreur lors de la suppression du joueur " + player.getUser().getUsername() + " de la base de données.", e);
+                    try {
+                        sender.sendPacket(new PacketError(ErrorType.QUIT_GAME_FAILED));
+                    } catch (IOException ioException) {
+                        LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), ioException);
+                    }
+                    return;
+                }
+                serverGame.removePlayer(player.getUser());
             }
-            return;
-        }
-        try (PreparedStatement statement = server.getDb().prepareStatement("DELETE FROM player WHERE id = ?")) {
-            statement.setInt(1, player.getId());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            LogManager.logError("Erreur lors de la suppression du joueur " + player.getUser().getUsername() + " de la base de données.", e);
-            try {
-                sender.sendPacket(new PacketError(ErrorType.QUIT_GAME_FAILED));
-            } catch (IOException ioException) {
-                LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), ioException);
+            case RUNNING -> {
+                LogManager.logError("Le joueur " + player.getUser().getUsername() + " a quitté la partie " + serverGame.getName() + " alors qu'elle était déjà en cours.");
+                try {
+                    sender.sendPacket(new PacketError(ErrorType.QUIT_NON_WAITING));
+                } catch (IOException e) {
+                    LogManager.logError("Erreur lors de l'envoi du paquet d'erreur au client " + sender.getName(), e);
+                }
+                return;
             }
-            return;
+            case ENDED -> {
+                player.setExitedGame(true);
+                this.savePlayer(player);
+            }
         }
-        serverGame.removePlayer(player.getUser());
 
         for (SocketWrapper connection : this.server.getAuthManager().getConnectionsFor(player.getUser())) {
             try {
@@ -1030,25 +1038,5 @@ public class GameManager {
             }
             this.sendWaitingGames(connection);
         }
-    }
-
-    /**
-     * Méthode appelée lorsqu'un joueur quitte une partie.
-     * Elle marque le joueur comme ayant quitté la partie et envoie les mises à jour de la liste des parties en attente.
-     *
-     * @param sender Le socket du client qui a envoyé la demande de quitter la partie.
-     */
-    public synchronized void onExitGame(SocketWrapper sender) {
-        ServerPlayer player = this.getPlayerInRunningGame(sender);
-        if (player != null) {
-            ServerGame game = player.getGame();
-            if (game.getState() != GameState.ENDED && !player.isEliminated()) {
-                this.sendJoinGamePacket(new PacketJoinedGame<>(game, player), sender);
-                return;
-            }
-            player.setExitedGame(true);
-            this.savePlayer(player);
-        }
-        this.sendWaitingGames(sender);
     }
 }
