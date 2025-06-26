@@ -135,6 +135,7 @@ public class ChatController {
 
     private void updateDisplayedMessages() {
         this.messageContainer.getChildren().setAll(this.messageViews.sequencedValues());
+        this.chatListView.refresh();
         Platform.runLater(() -> this.messageScrollPane.setVvalue(1.0));
     }
 
