@@ -1,5 +1,4 @@
 module fr.butinfoalt.riseandfall {
-    requires io.github.cdimascio.dotenv.java;
     requires java.sql;
     exports fr.butinfoalt.riseandfall.util.counter;
     exports fr.butinfoalt.riseandfall.util.function;

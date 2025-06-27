@@ -15,10 +15,9 @@ import fr.butinfoalt.riseandfall.network.packets.*;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Platform;
 
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Set;
 import java.util.TimerTask;
 
@@ -78,8 +77,8 @@ public class RiseAndFallClient extends BaseSocketClient {
      * @param packet Le paquet reçu.
      */
     private void onToken(SocketWrapper sender, PacketToken packet) {
-        try (FileWriter writer = new FileWriter(Environment.authTokenFile)) {
-            writer.write(packet.getToken());
+        try {
+            Files.writeString(Environment.AUTH_TOKEN_FILE, packet.getToken(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'écriture du token d'authentification dans le fichier", e);
         }
@@ -96,7 +95,7 @@ public class RiseAndFallClient extends BaseSocketClient {
     private void onServerData(SocketWrapper sender, PacketServerData packet) {
         ServerData.init(packet.getRaces(), packet.getBuildingTypes(), packet.getUnitTypes());
         try {
-            String token = new String(Files.readAllBytes(Paths.get(Environment.authTokenFile)));
+            String token = Files.readString(Environment.AUTH_TOKEN_FILE, StandardCharsets.UTF_8);
             LogManager.logMessage("Envoi du token d'authentification...");
             sender.sendPacket(new PacketToken(token));
             return;
