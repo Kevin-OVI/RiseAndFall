@@ -11,7 +11,7 @@ public class ChatStage extends Stage {
      * Instance unique de la fenêtre de chat.
      * Utilisée pour garantir qu'il n'y a qu'une seule fenêtre de ce type ouverte à la fois.
      */
-    private static final ChatStage INSTANCE = new ChatStage();
+    private static ChatStage INSTANCE;
 
     /**
      * Constructeur privé pour initialiser la fenêtre de chat.
@@ -24,20 +24,30 @@ public class ChatStage extends Stage {
         this.setScene(View.CHAT.getScene(800, 600));
     }
 
+    private static ChatStage getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ChatStage();
+        }
+        return INSTANCE;
+    }
+
     /**
      * Méthode statique pour ouvrir la fenêtre de chat et la mettre au premier plan.
      */
     public static void openWindow() {
-        INSTANCE.show();
-        INSTANCE.toFront();
+        ChatStage window = getInstance();
+        window.show();
+        window.toFront();
         ChatController controller = View.CHAT.getController();
         controller.loadData();
     }
 
     public static void closeWindow() {
-        INSTANCE.close();
-        ChatController controller = View.CHAT.getController();
-        controller.clearState();
+        if (INSTANCE != null) {
+            INSTANCE.close();
+            ChatController controller = View.CHAT.getController();
+            controller.clearState();
+        }
     }
 
     /**
@@ -46,6 +56,6 @@ public class ChatStage extends Stage {
      * @param extra Le texte supplémentaire à ajouter au titre de la fenêtre.
      */
     public static void setTitleExtra(String extra) {
-        INSTANCE.setTitle(extra == null || extra.isEmpty() ? View.CHAT.getWindowTitle() : View.CHAT.getWindowTitle() + " - " + extra);
+        getInstance().setTitle(extra == null || extra.isEmpty() ? View.CHAT.getWindowTitle() : View.CHAT.getWindowTitle() + " - " + extra);
     }
 }

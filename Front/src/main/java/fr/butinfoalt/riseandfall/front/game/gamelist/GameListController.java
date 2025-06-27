@@ -125,8 +125,7 @@ public class GameListController implements ViewController {
      */
     @FXML
     public void switchToDescriptionPage() {
-        DescriptionStage.INSTANCE.show();
-        DescriptionStage.INSTANCE.toFront();
+        DescriptionStage.showWindow();
     }
 
     @Override

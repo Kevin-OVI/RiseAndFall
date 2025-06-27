@@ -136,7 +136,7 @@ public class RiseAndFallApplication extends Application {
             } catch (IOException e) {
                 LogManager.logError("Erreur lors de la fermeture du client", e);
             }
-            DescriptionStage.INSTANCE.close();
+            DescriptionStage.closeWindow();
             ChatStage.closeWindow();
             RiseAndFall.TIMER.cancel();
         }
