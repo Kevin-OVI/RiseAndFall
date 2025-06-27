@@ -191,12 +191,10 @@ CREATE TABLE chat_message (
     sender_player_id BIGINT UNSIGNED NOT NULL,
     receiver_player_id BIGINT UNSIGNED NOT NULL,
     message TEXT NOT NULL,
-    sent_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
-    is_read BOOLEAN DEFAULT FALSE,
+    sent_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (sender_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (receiver_player_id) REFERENCES player(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    INDEX idx_receiver_sent_at (receiver_player_id, sent_at),
-    INDEX idx_sender_sent_at (sender_player_id, sent_at)
+    INDEX idx_sent_at (sent_at)
 );
 
 
