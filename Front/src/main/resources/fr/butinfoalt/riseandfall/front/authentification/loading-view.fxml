@@ -4,10 +4,11 @@
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20" prefWidth="400" prefHeight="300" style="-fx-background-color: #f4f4f4;"
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20" prefWidth="400" prefHeight="300"
+      style="-fx-background-color: #f4f4f4;"
       fx:controller="fr.butinfoalt.riseandfall.front.authentification.LoadingController">
     <ImageView fx:id="backgroundImageView" managed="false"/>
     <ProgressIndicator/>
-    <Label text="Chargement en cours..." style="-fx-font-size: 16px; -fx-text-fill: #555;"/>
+    <TitleLabel text="Chargement en cours..."/>
 </VBox>
-
