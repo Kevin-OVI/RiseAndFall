@@ -24,12 +24,6 @@
                         <TitleLabel style="-fx-font-size: 250%;" styleClass="force-custom-font" text="Rise &amp; Fall"/>
                     </VBox>
 
-                    <TextFlow styleClass="description-text">
-                        <Text text="Rise &amp; Fall est un jeu développé par une équipe de choc.&#xA;"/>
-                        <Text text="Le but est de créer un jeu tour par tour dans un monde fantasy.&#xA;"/>
-                        <Text text="On a présenté le projet, maintenant passons aux règles du jeu."/>
-                    </TextFlow>
-
                     <VBox>
                         <TitleLabel style="-fx-font-size: 175%" styleClass="force-custom-font"
                                     text="Objectif du jeu :"/>
@@ -77,7 +71,7 @@
                             <Text text="1. Les dégâts des unités attaquantes sont appliqués aux remparts du joueur ciblé, qui sont détruits tant qu'il reste des dégâts.&#xA;"/>
                             <Text text="2. Si tous les remparts sont détruits, les dégâts restants sont appliqués aux unités défensives du joueur ciblé, qui sont détruites tant qu'il reste des dégâts.&#xA;"/>
                             <Text text="3. Si toutes les unités défensives sont détruites, les dégâts restants sont appliqués aux bâtiments du joueur ciblé, qui sont détruits tant qu'il reste des dégâts.&#xA;"/>
-                            <Text text="Si toutes les unités et bâtiments du joueur ciblé sont détruits, celui ci est éliminé.&#xA;"/>
+                            <Text text="Si tous les bâtiments du joueur ciblé sont détruits, celui ci est éliminé.&#xA;"/>
                             <Text text="Les unités attaquantes peuvent également être détruites par les unités défensives du joueur ciblé."/>
                         </TextFlow>
                     </VBox>
