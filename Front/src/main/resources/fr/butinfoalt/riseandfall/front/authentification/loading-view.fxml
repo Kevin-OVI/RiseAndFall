@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
+<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
-<?import fr.butinfoalt.riseandfall.front.components.TitleLabel?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" spacing="20" prefWidth="400" prefHeight="300"
       style="-fx-background-color: #f4f4f4;"
       fx:controller="fr.butinfoalt.riseandfall.front.authentification.LoadingController">
