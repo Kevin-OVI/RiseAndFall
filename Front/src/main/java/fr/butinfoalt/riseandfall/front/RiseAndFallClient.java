@@ -161,8 +161,8 @@ public class RiseAndFallClient extends BaseSocketClient {
      */
     private void onJoinedGame(SocketWrapper client, ReadHelper readHelper) throws IOException {
         ClientGame game = new ClientGame(readHelper);
-        CurrentClientPlayer player = new CurrentClientPlayer(readHelper);
         RiseAndFall.setGame(game);
+        CurrentClientPlayer player = new CurrentClientPlayer(readHelper);
         RiseAndFall.setPlayer(player);
         Platform.runLater(() -> this.switchToGameView(game, player));
     }
