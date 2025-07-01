@@ -7,10 +7,10 @@ import fr.butinfoalt.riseandfall.network.common.WriteHelper;
 import java.io.IOException;
 
 /**
- * Paquet envoyé au serveur pour s'authentifier.
+ * Paquet d'authentification envoyé au serveur pour s'authentifier (login ou register).
  * Il contient le nom d'utilisateur et le mot de passe haché.
  */
-public class PacketRegister implements IPacket {
+public abstract class PacketCredentials implements IPacket {
     /**
      * Nom d'utilisateur du client
      */
@@ -18,7 +18,7 @@ public class PacketRegister implements IPacket {
     /**
      * Mot de passe haché du client
      */
-    private final String passwordHash;
+    private final byte[] passwordHash;
 
     /**
      * Constructeur du paquet d'authentification
@@ -26,7 +26,7 @@ public class PacketRegister implements IPacket {
      * @param username     Le nom d'utilisateur du client
      * @param passwordHash Le mot de passe haché du client
      */
-    public PacketRegister(String username, String passwordHash) {
+    public PacketCredentials(String username, byte[] passwordHash) {
         this.username = username;
         this.passwordHash = passwordHash;
     }
@@ -37,9 +37,9 @@ public class PacketRegister implements IPacket {
      * @param readHelper Le helper de lecture pour lire les données du paquet
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation
      */
-    public PacketRegister(ReadHelper readHelper) throws IOException {
+    public PacketCredentials(ReadHelper readHelper) throws IOException {
         this.username = readHelper.readString();
-        this.passwordHash = readHelper.readString();
+        this.passwordHash = readHelper.readSizedByteArray();
     }
 
     /**
@@ -51,7 +51,7 @@ public class PacketRegister implements IPacket {
     @Override
     public void toBytes(WriteHelper writeHelper) throws IOException {
         writeHelper.writeString(this.username);
-        writeHelper.writeString(this.passwordHash);
+        writeHelper.writeSizedByteArray(this.passwordHash);
     }
 
     /**
@@ -68,7 +68,33 @@ public class PacketRegister implements IPacket {
      *
      * @return Le mot de passe haché du client
      */
-    public String getPasswordHash() {
+    public byte[] getPasswordHash() {
         return this.passwordHash;
+    }
+
+    /**
+     * Classe représentant un paquet de connexion.
+     */
+    public static class PacketLogin extends PacketCredentials {
+        public PacketLogin(String username, byte[] passwordHash) {
+            super(username, passwordHash);
+        }
+
+        public PacketLogin(ReadHelper readHelper) throws IOException {
+            super(readHelper);
+        }
+    }
+
+    /**
+     * Classe représentant un paquet d'enregistrement.
+     */
+    public static class PacketRegister extends PacketCredentials {
+        public PacketRegister(String username, byte[] passwordHash) {
+            super(username, passwordHash);
+        }
+
+        public PacketRegister(ReadHelper readHelper) throws IOException {
+            super(readHelper);
+        }
     }
 }

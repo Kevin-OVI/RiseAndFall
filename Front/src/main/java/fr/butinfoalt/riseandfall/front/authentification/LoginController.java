@@ -5,7 +5,7 @@ import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
-import fr.butinfoalt.riseandfall.network.packets.PacketAuthentification;
+import fr.butinfoalt.riseandfall.network.packets.PacketCredentials.PacketLogin;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -18,6 +18,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 import java.io.IOException;
+
+import static fr.butinfoalt.riseandfall.util.Hashing.hashString;
 
 /**
  * Contrôleur de la vue de chargement.
@@ -72,7 +74,7 @@ public class LoginController implements ViewController {
         }
 
         try {
-            RiseAndFall.getClient().sendPacket(new PacketAuthentification(username, password));
+            RiseAndFall.getClient().sendPacket(new PacketLogin(username, hashString(password)));
         } catch (IOException e) {
             showError("Erreur de connexion au serveur.");
             LogManager.logError("Impossible d'envoyer le packet d'authentification", e);

@@ -12,6 +12,8 @@ import fr.butinfoalt.riseandfall.network.client.BaseSocketClient;
 import fr.butinfoalt.riseandfall.network.common.ReadHelper;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
+import fr.butinfoalt.riseandfall.network.packets.PacketCredentials.PacketLogin;
+import fr.butinfoalt.riseandfall.network.packets.PacketCredentials.PacketRegister;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.application.Platform;
 
@@ -53,7 +55,7 @@ public class RiseAndFallClient extends BaseSocketClient {
     public RiseAndFallClient() {
         super(Environment.SERVER_HOST, Environment.SERVER_PORT);
 
-        this.registerSendPacket((byte) 0, PacketAuthentification.class);
+        this.registerSendPacket((byte) 0, PacketLogin.class);
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this::onToken, PacketToken::new);
         this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, PacketServerData::new);
         this.registerSendPacket((byte) 3, PacketJoinGame.class);

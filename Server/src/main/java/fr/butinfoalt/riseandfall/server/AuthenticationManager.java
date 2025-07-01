@@ -1,18 +1,24 @@
 package fr.butinfoalt.riseandfall.server;
 
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
-import fr.butinfoalt.riseandfall.network.packets.*;
+import fr.butinfoalt.riseandfall.network.packets.PacketCredentials.PacketLogin;
+import fr.butinfoalt.riseandfall.network.packets.PacketCredentials.PacketRegister;
+import fr.butinfoalt.riseandfall.network.packets.PacketError;
 import fr.butinfoalt.riseandfall.network.packets.PacketError.ErrorType;
+import fr.butinfoalt.riseandfall.network.packets.PacketToken;
 import fr.butinfoalt.riseandfall.server.data.User;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static fr.butinfoalt.riseandfall.util.Hashing.hashToString;
 
 /**
  * Classe responsable de la gestion de l'authentification des clients.
@@ -51,30 +57,6 @@ public class AuthenticationManager {
     }
 
     /**
-     * Fonction pour hacher un mot de passe.
-     *
-     * @param password Mot de passe à hacher.
-     * @return Le mot de passe haché.
-     */
-    private static String hashPassword(String password) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(password.getBytes());
-            StringBuilder hexString = new StringBuilder();
-
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
      * Génère un token d'authentification pour un utilisateur et l'enregistre dans la base de données.
      *
      * @param user L'utilisateur pour lequel le token est généré.
@@ -103,8 +85,8 @@ public class AuthenticationManager {
      * @param password Le mot de passe.
      * @return L'utilisateur associé, ou null si aucun utilisateur n'est trouvé.
      */
-    private User getUserFromCredentials(String username, String password) {
-        String hashedPassword = hashPassword(password);
+    private User getUserFromCredentials(String username, byte[] password) {
+        String hashedPassword = hashToString(password);
         try {
             try (PreparedStatement statement = this.server.getDb().prepareStatement("SELECT id FROM user WHERE username = ? AND password_hash = ?")) {
                 statement.setString(1, username);
@@ -165,8 +147,8 @@ public class AuthenticationManager {
      * @param password Mot de passe.
      * @return L'utilisateur créé, ou null si une erreur survient.
      */
-    private User createUser(String username, String password) {
-        String hashedPassword = hashPassword(password);
+    private User createUser(String username, byte[] password) {
+        String hashedPassword = hashToString(password);
         try (PreparedStatement statement = this.server.getDb().prepareStatement("INSERT INTO user(username, password_hash) VALUES (?, ?) RETURNING id")) {
             statement.setString(1, username);
             statement.setString(2, hashedPassword);
@@ -190,7 +172,7 @@ public class AuthenticationManager {
      * @param sender Le socket du client qui a envoyé le paquet.
      * @param packet Le paquet d'authentification reçu.
      */
-    public synchronized void onAuthentification(SocketWrapper sender, PacketAuthentification packet) {
+    public synchronized void onLogin(SocketWrapper sender, PacketLogin packet) {
         if (this.userConnections.containsKey(sender)) {
             try {
                 sender.sendPacket(new PacketError(ErrorType.LOGIN_GENERIC_ERROR));
@@ -200,7 +182,7 @@ public class AuthenticationManager {
             return;
         }
         String username = packet.getUsername();
-        String password = packet.getPasswordHash();
+        byte[] password = packet.getPasswordHash();
         User user = getUserFromCredentials(username, password);
         if (user == null) {
             try {
@@ -241,7 +223,7 @@ public class AuthenticationManager {
      */
     public void onRegister(SocketWrapper sender, PacketRegister packet) {
         String username = packet.getUsername();
-        String password = packet.getPasswordHash();
+        byte[] password = packet.getPasswordHash();
 
         if (isUsernameInUse(username)) {
             try {

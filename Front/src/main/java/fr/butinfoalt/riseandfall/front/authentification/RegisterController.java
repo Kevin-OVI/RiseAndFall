@@ -5,7 +5,7 @@ import fr.butinfoalt.riseandfall.front.View;
 import fr.butinfoalt.riseandfall.front.ViewController;
 import fr.butinfoalt.riseandfall.front.gamelogic.RiseAndFall;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
-import fr.butinfoalt.riseandfall.network.packets.PacketRegister;
+import fr.butinfoalt.riseandfall.network.packets.PacketCredentials.PacketRegister;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -18,6 +18,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 import java.io.IOException;
+
+import static fr.butinfoalt.riseandfall.util.Hashing.hashString;
 
 /**
  * Contrôleur de la vue d'inscription.
@@ -117,7 +119,7 @@ public class RegisterController implements ViewController {
         }
 
         try {
-            RiseAndFall.getClient().sendPacket(new PacketRegister(username, password));
+            RiseAndFall.getClient().sendPacket(new PacketRegister(username, hashString(password)));
         } catch (IOException e) {
             showError("Erreur lors de la connexion au serveur");
             LogManager.logError("Impossible d'envoyer le packet d'enregistrement", e);

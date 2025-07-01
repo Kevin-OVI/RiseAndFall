@@ -4,6 +4,8 @@ import fr.butinfoalt.riseandfall.gamelogic.GameState;
 import fr.butinfoalt.riseandfall.gamelogic.data.*;
 import fr.butinfoalt.riseandfall.network.common.SocketWrapper;
 import fr.butinfoalt.riseandfall.network.packets.*;
+import fr.butinfoalt.riseandfall.network.packets.PacketCredentials.PacketLogin;
+import fr.butinfoalt.riseandfall.network.packets.PacketCredentials.PacketRegister;
 import fr.butinfoalt.riseandfall.network.server.BaseSocketServer;
 import fr.butinfoalt.riseandfall.server.data.ServerGame;
 import fr.butinfoalt.riseandfall.server.data.User;
@@ -70,7 +72,7 @@ public class RiseAndFallServer extends BaseSocketServer {
         this.authManager = new AuthenticationManager(this);
         this.loadServerData();
 
-        this.registerReceivePacket((byte) 0, PacketAuthentification.class, this.authManager::onAuthentification, PacketAuthentification::new);
+        this.registerReceivePacket((byte) 0, PacketLogin.class, this.authManager::onLogin, PacketLogin::new);
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this.authManager::onTokenAuthentification, PacketToken::new);
         this.registerSendPacket((byte) 2, PacketServerData.class);
         this.registerReceivePacket((byte) 3, PacketJoinGame.class, this.gameManager::onJoinGame, PacketJoinGame::new);
