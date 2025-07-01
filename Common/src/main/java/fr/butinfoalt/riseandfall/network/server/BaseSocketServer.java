@@ -132,13 +132,22 @@ public class BaseSocketServer extends Thread implements Closeable {
     @Override
     public void close() throws IOException {
         this.server.close();
-        for (SocketWrapper socketWrapper : this.connectedClients) {
-            socketWrapper.close();
+        synchronized (this) {
+            for (SocketWrapper socketWrapper : this.connectedClients) {
+                socketWrapper.close();
+            }
         }
         try {
             // Impossible d'utiliser forEach car une ConcurrentModificationException sera levée quand un client se déconnectera
-            while (!this.connectedClients.isEmpty()) {
-                this.connectedClients.iterator().next().waitForSocketClose();
+            while (true) {
+                SocketWrapper socketWrapper;
+                synchronized (this) {
+                    if (this.connectedClients.isEmpty()) {
+                        break; // Sort de la boucle si aucun client n'est connecté
+                    }
+                    socketWrapper = this.connectedClients.iterator().next();
+                }
+                socketWrapper.waitForSocketClose();
             }
             this.join();
         } catch (InterruptedException e) {
@@ -169,7 +178,7 @@ public class BaseSocketServer extends Thread implements Closeable {
      *
      * @return Un ensemble non modifiable contenant les clients connectés.
      */
-    public Set<SocketWrapper> getConnectedClients() {
+    public synchronized Set<SocketWrapper> getConnectedClients() {
         return Collections.unmodifiableSet(this.connectedClients);
     }
 }
