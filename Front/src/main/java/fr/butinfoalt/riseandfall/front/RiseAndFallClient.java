@@ -56,7 +56,7 @@ public class RiseAndFallClient extends BaseSocketClient {
         this.registerSendPacket((byte) 0, PacketAuthentification.class);
         this.registerSendAndReceivePacket((byte) 1, PacketToken.class, this::onToken, PacketToken::new);
         this.registerReceivePacket((byte) 2, PacketServerData.class, this::onServerData, PacketServerData::new);
-        this.registerSendPacket((byte) 3, PacketCreateOrJoinGame.class);
+        this.registerSendPacket((byte) 3, PacketJoinGame.class);
         this.registerReceivePacket((byte) 4, PacketJoinedGame.class, this::onJoinedGame);
         this.registerSendPacket((byte) 5, PacketUpdateOrders.class);
         this.registerReceivePacket((byte) 6, PacketUpdateGameData.class, this::onUpdateGameData);

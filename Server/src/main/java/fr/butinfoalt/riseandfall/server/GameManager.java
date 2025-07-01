@@ -702,9 +702,9 @@ public class GameManager {
      * Ensuite, elle envoie les données initiales de la partie au client.
      *
      * @param sender Le socket du client qui a envoyé le paquet.
-     * @param packet Le paquet de création ou de jointure de partie reçu.
+     * @param packet Le paquet pour rejoindre une partie reçu.
      */
-    public synchronized void onCreateOrJoinGame(SocketWrapper sender, PacketCreateOrJoinGame packet) {
+    public synchronized void onJoinGame(SocketWrapper sender, PacketJoinGame packet) {
         User user = this.server.getAuthManager().getUser(sender);
         if (user == null) {
             LogManager.logError("La connexion " + sender.getName() + " n'est pas authentifiée. Impossible de créer une partie.");

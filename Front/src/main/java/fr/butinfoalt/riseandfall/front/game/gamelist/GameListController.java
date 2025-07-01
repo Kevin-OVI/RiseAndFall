@@ -10,7 +10,7 @@ import fr.butinfoalt.riseandfall.front.util.NamedItemStringConverter;
 import fr.butinfoalt.riseandfall.front.util.UIUtils;
 import fr.butinfoalt.riseandfall.gamelogic.data.Race;
 import fr.butinfoalt.riseandfall.gamelogic.data.ServerData;
-import fr.butinfoalt.riseandfall.network.packets.PacketCreateOrJoinGame;
+import fr.butinfoalt.riseandfall.network.packets.PacketJoinGame;
 import fr.butinfoalt.riseandfall.util.logging.LogManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -111,7 +111,7 @@ public class GameListController implements ViewController {
 
         this.showError(null);
         try {
-            RiseAndFall.getClient().sendPacket(new PacketCreateOrJoinGame(this.raceChoiceBox.getValue(), gameId));
+            RiseAndFall.getClient().sendPacket(new PacketJoinGame(this.raceChoiceBox.getValue(), gameId));
         } catch (IOException e) {
             LogManager.logError("Erreur lors de l'envoi du paquet de création ou de jointure de partie : ", e);
             return;

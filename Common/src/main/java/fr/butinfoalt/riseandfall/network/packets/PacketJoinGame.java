@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * Paquet envoyé au serveur pour créer ou rejoindre une partie. Il contient la race que choisi le joueur pour cette partie.
  */
-public class PacketCreateOrJoinGame implements IPacket {
+public class PacketJoinGame implements IPacket {
     /**
      * La race choisie par le joueur pour cette partie
      */
@@ -28,7 +28,7 @@ public class PacketCreateOrJoinGame implements IPacket {
      *
      * @param chosenRace La race choisie par le joueur pour cette partie.
      */
-    public PacketCreateOrJoinGame(Race chosenRace, int gameId) {
+    public PacketJoinGame(Race chosenRace, int gameId) {
         this.chosenRace = chosenRace;
         this.gameId = gameId;
     }
@@ -40,7 +40,7 @@ public class PacketCreateOrJoinGame implements IPacket {
      * @param readHelper L'outil de lecture pour désérialiser le paquet.
      * @throws IOException Si une erreur d'entrée/sortie se produit lors de la désérialisation.
      */
-    public PacketCreateOrJoinGame(ReadHelper readHelper) throws IOException {
+    public PacketJoinGame(ReadHelper readHelper) throws IOException {
         this.chosenRace = Identifiable.getById(ServerData.getRaces(), readHelper.readInt());
         this.gameId = readHelper.readInt();
     }
