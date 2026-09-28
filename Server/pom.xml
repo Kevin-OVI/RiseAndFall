@@ -18,7 +18,7 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.5.3</version>
+            <version>3.5.9</version>
         </dependency>
         <!-- Partie commune du code -->
         <dependency>
